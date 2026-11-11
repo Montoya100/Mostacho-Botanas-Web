@@ -41,52 +41,8 @@ if "dark_mode" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# ==========================================
-# GESTIÓN DEL CARRUSEL (3 IMÁGENES FIJAS: PISTACHES, CACAHUATES, SEMILLAS)
-# ==========================================
-DEFAULT_SLIDER = [
-    {
-        "url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200", 
-        "caption": "Pistaches Seleccionados • Calidad Premium"
-    },
-    {
-        "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200", 
-        "caption": "Cahuates y Frituras de Alta Calidad"
-    },
-    {
-        "url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200", 
-        "caption": "Semillas y Mix Botanero para Reuniones"
-    }
-]
-
-def load_saved_slider():
-    if os.path.exists(SLIDER_FILE):
-        try:
-            with open(SLIDER_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, list) and len(data) > 0:
-                    cleaned = []
-                    for item in data:
-                        if isinstance(item, dict):
-                            u = str(item.get("url", "")).strip()
-                            c = str(item.get("caption", "")).strip()
-                            if u and u.lower() != "nan" and u != "":
-                                cleaned.append({"url": u, "caption": c if c and c.lower() != "nan" else "Mostacho Botanas"})
-                    if cleaned:
-                        return cleaned[:6]
-        except:
-            pass
-    return DEFAULT_SLIDER
-
-def save_slider_to_file(slider_list):
-    try:
-        with open(SLIDER_FILE, "w", encoding="utf-8") as f:
-            json.dump(slider_list, f, ensure_ascii=False, indent=4)
-    except:
-        pass
-
-if "slider_items" not in st.session_state or not st.session_state.slider_items:
-    st.session_state.slider_items = load_saved_slider()
+# Imagen promocional fija (banner superior de alta calidad)
+DEFAULT_BANNER_URL = "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200"
 
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
@@ -275,7 +231,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB ABSOLUTO FLOTANTE REAL EN HTML CON TEXTO BLANCO Y POSICIÓN FIJA */
+    /* FAB ABSOLUTO FLOTANTE REAL EN HTML CON TEXTO BLANCO Y FIJO EN ESQUINA INFERIOR DERECHA */
     .true-floating-fab-container {{
         position: fixed !important;
         bottom: 25px !important;
@@ -450,55 +406,8 @@ st.markdown(f"""
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
-
-    /* CARRUSEL ANIMADO DE 12 SEGUNDOS (4s por imagen) */
-    .slideshow-container {{
-        position: relative;
-        max-width: 100%;
-        height: 280px;
-        margin-bottom: 18px;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid {border_color};
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-        background-color: #000000;
-    }}
-    .slide {{
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        opacity: 0;
-        animation: slideAnimation12s 12s infinite;
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        align-items: flex-end;
-        padding: 16px;
-    }}
-    .slide:nth-child(1) {{ animation-delay: 0s; }}
-    .slide:nth-child(2) {{ animation-delay: 4s; }}
-    .slide:nth-child(3) {{ animation-delay: 8s; }}
-
-    @keyframes slideAnimation12s {{
-        0% {{ opacity: 0; }}
-        8% {{ opacity: 1; }}
-        33% {{ opacity: 1; }}
-        41% {{ opacity: 0; }}
-        100% {{ opacity: 0; }}
-    }}
-
-    .slide-text {{
-        background: rgba(255, 82, 0, 0.88);
-        color: white;
-        padding: 6px 14px;
-        border-radius: 12px;
-        font-size: 0.9rem;
-        font-weight: 700;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }}
 </style>
 """, unsafe_allow_html=True)
-
-slider_items_safe = st.session_state.slider_items if st.session_state.slider_items and len(st.session_state.slider_items) > 0 else DEFAULT_SLIDER
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
@@ -518,12 +427,10 @@ for k in keys_to_delete:
 
 total_items = sum(st.session_state.cart.values())
 
-# Capturar señal de navegación mediante parámetros de URL para el FAB flotante
-query_params = st.query_params
-if query_params.get("goto") == "cart":
+# Manejar clic en el FAB flotante mediante botón nativo de Streamlit invisible o callback
+if "go_to_cart_click" in st.session_state and st.session_state.go_to_cart_click:
     st.session_state.nav_tab = "Carrito"
-    st.query_params.clear()
-    st.rerun()
+    st.session_state.go_to_cart_click = False
 
 tab = st.session_state.nav_tab
 
@@ -559,16 +466,9 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL RENDERIZADO COMO HTML PURO CON IMÁGENES
-    slides_html = '<div class="slideshow-container">'
-    for slide_item in slider_items_safe[:3]:
-        slides_html += f'''
-        <div class="slide" style="background-image: url('{slide_item.get("url", "https://via.placeholder.com/1200")}');">
-            <div class="slide-text">{slide_item.get("caption", "Mostacho Botanas")}</div>
-        </div>
-        '''
-    slides_html += '</div>'
-    st.markdown(slides_html, unsafe_allow_html=True)
+    # IMAGEN PROMOCIONAL FIJA DE ALTA CALIDAD (CARRUSEL REEMPLAZADO PARA CERO ERRORES DE RENDERIZADO)
+    st.image(DEFAULT_BANNER_URL, use_container_width=True)
+    st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 18px; font-size: 0.95rem;">Pistaches, Cacahuates y Mix Botanero • Calidad Premium</div>', unsafe_allow_html=True)
 
     # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
@@ -634,7 +534,7 @@ if tab == "Inicio":
 
     st.write("---")
 
-    # 4. LISTADO DE PRODUCTOS GENERALES FILTRADOS (CON SINTAXIS CORREGIDA)
+    # 4. LISTADO DE PRODUCTOS GENERALES FILTRADOS
     try:
         current_products_list = st.session_state.products
         
@@ -758,17 +658,14 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE (FAB) REAL FIJO EN HTML PURO
+# BOTÓN FLOTANTE (FAB) REAL CON ESTADO PERSISTENTE EN SESSION_STATE
 # ==========================================
 if total_items > 0 and tab != "Carrito":
-    st.markdown(f"""
-    <div class="true-floating-fab-container">
-        <a href="?goto=cart" target="_self" class="true-fab-btn">
-            <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
-            Ver Carrito ({total_items})
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="true-floating-fab-container">', unsafe_allow_html=True)
+    if st.button(f":material/shopping_cart: Ver Carrito ({total_items})", key="real_fixed_fab_btn"):
+        st.session_state.nav_tab = "Carrito"
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # 6. Panel de Administración y Configuración en POP-UP (Modal)
 st.write("---")
@@ -794,7 +691,7 @@ def admin_modal():
     else:
         st.success("¡Acceso concedido!")
         
-        tab_prod, tab_pop, tab_slider, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "🖼️ Carrusel (Banner)", "📤 Subir Imágenes"])
+        tab_prod, tab_pop, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "📤 Subir Imágenes"])
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
@@ -872,59 +769,9 @@ def admin_modal():
                 else:
                     st.warning("Debes seleccionar al menos un producto popular.")
 
-        with tab_slider:
-            st.markdown("### Configuración del Carrusel (Hasta 6 Imágenes)")
-            st.caption("Administra las imágenes y textos que rotan en la parte superior de tu tienda (recomendado: 1200x600 px).")
-            
-            raw_slider_items = st.session_state.slider_items if st.session_state.slider_items else DEFAULT_SLIDER
-            cleaned_slider_for_df = []
-            for item in raw_slider_items:
-                if isinstance(item, dict):
-                    cleaned_slider_for_df.append({
-                        "url": str(item.get("url", "")).strip(),
-                        "caption": str(item.get("caption", "")).strip()
-                    })
-            if not cleaned_slider_for_df:
-                cleaned_slider_for_df = [{"url": DEFAULT_SLIDER[0]["url"], "caption": DEFAULT_SLIDER[0]["caption"]}]
-                
-            df_slider = pd.DataFrame(cleaned_slider_for_df)
-            
-            slider_column_config = {
-                "url": st.column_config.TextColumn("URL de la Imagen", required=True, help="Enlace directo o ruta en assets/"),
-                "caption": st.column_config.TextColumn("Texto / Leyenda del Banner", required=True)
-            }
-            
-            edited_slider_df = st.data_editor(
-                df_slider,
-                num_rows="dynamic",
-                max_rows=6,
-                key="editor_slider_table",
-                column_config=slider_column_config,
-                hide_index=True,
-                use_container_width=True
-            )
-            
-            if st.button("Guardar Carrusel"):
-                new_slider_list = []
-                for _, row in edited_slider_df.iterrows():
-                    u = str(row.get("url", "")).strip()
-                    c = str(row.get("caption", "")).strip()
-                    if u and u.lower() != "nan" and u != "":
-                        new_slider_list.append({
-                            "url": u,
-                            "caption": c if c and c.lower() != "nan" and c != "" else "Mostacho Botanas"
-                        })
-                if new_slider_list:
-                    st.session_state.slider_items = new_slider_list[:6]
-                    save_slider_to_file(st.session_state.slider_items)
-                    st.success("¡Carrusel actualizado con éxito!")
-                    st.rerun()
-                else:
-                    st.warning("Debes conservar al menos una imagen válida en el carrusel.")
-
         with tab_upload:
             st.markdown("### Subir Imagen Directamente")
-            st.caption("Sube una imagen desde tu dispositivo para obtener su enlace y usarla en tus productos o carrusel:")
+            st.caption("Sube una imagen desde tu dispositivo para obtener su enlace y usarla en tus productos:")
             
             uploaded_file = st.file_uploader("Elige una imagen (PNG, JPG, WEBP)", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
@@ -936,8 +783,8 @@ def admin_modal():
                 st.image(file_path, width=200)
                 
                 local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
-                st.text_input("Copia esta ruta/enlace para usarla en tus productos o carrusel:", value=local_url)
-                st.info("💡 *Nota: Si usas tu app en la nube de Streamlit, te recomendamos subir tus imágenes directamente a tu repositorio de GitHub (en tu carpeta) o usar un enlace directo para que estén siempre disponibles.*")
+                st.text_input("Copia esta ruta/enlace para usarla en tus productos:", value=local_url)
+                st.info("💡 *Nota: Si usas tu app en la nube de Streamlit, te recomendamos subir tus imágenes directamente a tu repositorio de GitHub.*")
         
         st.write("---")
         if st.button("Cerrar Sesión de Admin"):
