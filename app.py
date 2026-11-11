@@ -190,10 +190,10 @@ st.markdown(f"""
     footer {{ visibility: hidden !important; }}
     .stDeployButton {{ display: none !important; }}
     
-    /* POP-UP DEL EDITOR MÁS ANCHO */
+    /* MODAL / DIALOG AMPLIADO AL MÁXIMO (95vw / hasta 1400px) */
     div[data-baseweb="modal"] > div {{
-        width: 85vw !important;
-        max-width: 1200px !important;
+        width: 95vw !important;
+        max-width: 1400px !important;
     }}
     
     .block-container {{
@@ -672,7 +672,7 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Configuración en POP-UP (Modal) con IDs ocultos por defecto
+# 6. Panel de Administración y Configuración en POP-UP (Modal) Súper Ancho y IDs ocultos
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
