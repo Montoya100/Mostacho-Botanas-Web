@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import urllib.parse
 
 # 1. Configuración de la página
@@ -9,8 +10,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Estilos CSS personalizados (Modo Claro con acento Naranja y Modo Oscuro)
+# 2. Estilos CSS e Iconos Material Symbols (Estilo Outline / Minimalista tipo Samsung One UI)
 st.markdown("""
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 <style>
     .stApp {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -40,13 +42,14 @@ st.markdown("""
         font-size: 1.2rem;
         margin-bottom: 20px;
     }
-    .stButton>button {
-        border-radius: 8px;
+    .material-symbols-outlined {
+        vertical-align: middle;
+        font-size: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. Inicializar el Carrito y la Lista de Productos en Session State (para que se guarden al editar)
+# 3. Inicializar Estado
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
@@ -60,10 +63,8 @@ if "products" not in st.session_state:
         {"id": 6, "name": "Frasco Regalo Pistache & Nuez", "category": "Detalles", "price": 150.0, "description": "Frasco de cristal decorado con combinación premium de semillas.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
     ]
 
-# Número de WhatsApp (modifica con tu número a 10 dígitos con código de país, ej: 52...)
 WHATSAPP_PHONE = "522380000000"
 
-# Funciones de carrito
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
 
@@ -74,7 +75,7 @@ def remove_from_cart(product_id):
         else:
             del st.session_state.cart[product_id]
 
-# 4. Encabezado (Logo y Título)
+# 4. Encabezado
 col_logo, col_title = st.columns([1, 4])
 with col_logo:
     st.image("https://via.placeholder.com/100x100.png?text=Mostacho", width=100)
@@ -82,117 +83,83 @@ with col_title:
     st.title("Mostacho Botanas Web")
     st.caption("Catálogo Virtual y Pedidos en Línea")
 
-# 5. Banner de Promociones (Estilo Historias/Anuncio)
+# 5. Banner de Promociones
 st.markdown(
-    '<div class="promo-banner">🔥 ¡Envíos locales o entrega rápida en ruta! Haz tu pedido directo por WhatsApp 🔥</div>', 
+    '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: sub; font-size: 24px;">local_fire_department</span> ¡Envíos locales o entrega rápida en ruta! Haz tu pedido directo por WhatsApp <span class="material-symbols-outlined" style="vertical-align: sub; font-size: 24px;">local_fire_department</span></div>', 
     unsafe_allow_html=True
 )
 
-# --- PANEL DE ADMINISTRACIÓN BÁSICO (OCULTO EN UN EXPANDER) ---
-with st.expander("⚙️ Panel de Administración de Productos (Editar / Agregar)"):
-    st.subheader("Modificar productos existentes")
+# --- PANEL DE ADMINISTRACIÓN DIRECTO (TIPO HOJA DE CÁLCULO) ---
+with st.expander("⚙️ Administrar Productos (Editor Directo)"):
+    st.write("Modifica los datos directamente en la tabla (puedes cambiar precios, nombres, descripciones, agregar o borrar filas):")
+    df_current = pd.DataFrame(st.session_state.products)
     
-    # Selector de producto a editar
-    prod_names = [p["name"] for p in st.session_state.products]
-    selected_to_edit = st.selectbox("Selecciona un producto para editar", prod_names)
+    edited_df = st.data_editor(
+        df_current,
+        num_rows="dynamic",
+        use_container_width=True,
+        key="product_table_editor"
+    )
     
-    # Encontrar el producto seleccionado
-    p_idx = next(i for i, p in enumerate(st.session_state.products) if p["name"] == selected_to_edit)
-    current_p = st.session_state.products[p_idx]
-    
-    with st.form(key="edit_form"):
-        new_name = st.text_input("Nombre del producto", value=current_p["name"])
-        new_cat = st.selectbox("Categoría", ["Chicos", "Para compartir", "Detalles"], index=["Chicos", "Para compartir", "Detalles"].index(current_p["category"]))
-        new_price = st.number_input("Precio ($ MXN)", value=float(current_p["price"]), min_value=0.0)
-        new_desc = st.text_area("Descripción", value=current_p["description"])
-        new_img = st.text_input("URL de la Imagen", value=current_p["image"])
-        
-        save_btn = st.form_submit_button("Guardar Cambios")
-        if save_btn:
-            st.session_state.products[p_idx] = {
-                "id": current_p["id"],
-                "name": new_name,
-                "category": new_cat,
-                "price": new_price,
-                "description": new_desc,
-                "image": new_img
-            }
-            st.success("¡Producto actualizado correctamente!")
-            st.rerun()
+    if st.button("💾 Guardar Cambios en el Catálogo"):
+        st.session_state.products = edited_df.to_dict(orient="records")
+        st.success("¡Catálogo actualizado correctamente!")
+        st.rerun()
 
-    st.markdown("---")
-    st.subheader("Agregar nuevo producto")
-    with st.form(key="add_form"):
-        add_name = st.text_input("Nombre del nuevo producto")
-        add_cat = st.selectbox("Categoría del nuevo", ["Chicos", "Para compartir", "Detalles"], key="add_cat")
-        add_price = st.number_input("Precio ($ MXN)", min_value=0.0, key="add_price")
-        add_desc = st.text_area("Descripción del nuevo", key="add_desc")
-        add_img = st.text_input("URL de la Imagen", key="add_img", placeholder="https://...")
-        
-        add_btn = st.form_submit_button("Agregar al Catálogo")
-        if add_btn and add_name:
-            new_id = max([p["id"] for p in st.session_state.products]) + 1 if st.session_state.products else 1
-            st.session_state.products.append({
-                "id": new_id,
-                "name": add_name,
-                "category": add_cat,
-                "price": add_price,
-                "description": add_desc,
-                "image": add_img if add_img else "https://via.placeholder.com/300"
-            })
-            st.success("¡Producto agregado con éxito!")
-            st.rerun()
+# 6. Barra de Búsqueda Minimalista
+search_query = st.text_input("🔍 Buscar productos...", placeholder="Escribe el nombre o ingrediente de la botana...", label_visibility="collapsed")
 
-# 6. Barra de Búsqueda
-search_query = st.text_input("🔍 Buscar productos...", placeholder="Escribe el nombre o ingrediente de la botana...")
-
-# 7. Categorías (Tipo pestañas horizontales)
+# 7. Categorías
 categories = ["Chicos", "Para compartir", "Detalles"]
 selected_category = st.radio("Categorías", categories, horizontal=True)
 
 st.write("---")
 
-# 8. Listado de Productos Filtrados
-filtered_products = [
-    p for p in st.session_state.products 
-    if p["category"] == selected_category and (search_query.lower() in p["name"].lower() or search_query.lower() in p["description"].lower())
-]
+# 8. Listado de Productos
+try:
+    current_products_list = st.session_state.products
+    filtered_products = [
+        p for p in current_products_list 
+        if isinstance(p, dict) and p.get("category") == selected_category and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
+    ]
+except Exception:
+    filtered_products = []
 
 if not filtered_products:
     st.info("No se encontraron productos en esta categoría con el filtro actual.")
 else:
     for product in filtered_products:
-        pid = product["id"]
+        pid = product.get("id")
         col_img, col_info, col_action = st.columns([1, 3, 1])
         
         with col_img:
-            st.image(product["image"], use_container_width=True)
+            st.image(product.get("image", "https://via.placeholder.com/300"), use_container_width=True)
             
         with col_info:
-            st.markdown(f'<div class="product-title">{product["name"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="product-desc">{product["description"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="product-price">${product["price"]:.2f} MXN</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="product-title">{product.get("name")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="product-desc">{product.get("description")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="product-price">${float(product.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
             
         with col_action:
             qty_in_cart = st.session_state.cart.get(pid, 0)
             if qty_in_cart == 0:
-                if st.button("➕ Agregar", key=f"add_{pid}"):
+                if st.button("Agregar", key=f"add_{pid}"):
                     add_to_cart(pid)
                     st.rerun()
             else:
                 c1, c2, c3 = st.columns([1, 1, 1])
                 with c1:
-                    if st.button("➖", key=f"minus_{pid}"):
+                    if st.button("-", key=f"minus_{pid}"):
                         remove_from_cart(pid)
                         st.rerun()
                 with c2:
                     st.markdown(f"**{qty_in_cart}**")
                 with c3:
-                    if st.button("➕", key=f"plus_{pid}"):
+                    if st.button("+", key=f"plus_{pid}"):
                         add_to_cart(pid)
                         st.rerun()
 
-# 9. Barra Lateral (Carrito / Ticket de Compra y Datos de Envío)
+# 9. Carrito y Checkout en Barra Lateral
 with st.sidebar:
     st.header("🛒 Mi Carrito / Ticket")
     
@@ -207,16 +174,16 @@ with st.sidebar:
         
         st.write("---")
         for item_id, qty in list(st.session_state.cart.items()):
-            p = next((item for item in st.session_state.products if item["id"] == item_id), None)
+            p = next((item for item in st.session_state.products if item.get("id") == item_id), None)
             if p:
-                subtotal = p["price"] * qty
+                subtotal = float(p.get("price", 0)) * qty
                 total_price += subtotal
-                order_summary.append(f"• {qty}x {p['name']} - ${subtotal:.2f}")
+                order_summary.append(f"• {qty}x {p.get('name')} - ${subtotal:.2f}")
                 
                 col_c1, col_c2 = st.columns([3, 1])
                 with col_c1:
-                    st.write(f"**{p['name']}**")
-                    st.caption(f"{qty} x ${p['price']:.2f} = ${subtotal:.2f}")
+                    st.write(f"**{p.get('name')}**")
+                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
                     if st.button("🗑️", key=f"del_cart_{item_id}"):
                         del st.session_state.cart[item_id]
@@ -225,13 +192,11 @@ with st.sidebar:
         st.write("---")
         st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
         
-        # Datos del cliente para el pedido por WhatsApp
         st.subheader("Datos de Entrega")
         customer_name = st.text_input("Nombre del cliente", placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias", placeholder="Calle, número, colonia...")
         customer_notes = st.text_input("Notas adicionales", placeholder="Ej. Cambio de $500")
         
-        # Generar mensaje automático de WhatsApp
         msg_header = "📌 *NUEVO PEDIDO - MOSTACHO BOTANAS*\n\n"
         msg_items = "*Detalle:*\n" + "\n".join(order_summary) + "\n\n"
         msg_total = f"*Total:* ${total_price:.2f} MXN\n\n"
