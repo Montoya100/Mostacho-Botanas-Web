@@ -375,7 +375,7 @@ elif tab == "Carrito":
                 col_c1, col_c2 = st.columns([3, 1])
                 with col_c1:
                     st.markdown(f"**{p.get('name')}**")
-                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} =${subtotal:.2f}")
+                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
                     if st.button(":material/delete:", key=f"del_cart_{item_id}"):
                         del st.session_state.cart[item_id]
@@ -411,4 +411,51 @@ elif tab == "Carrito":
 
 elif tab == "Pedidos":
     st.markdown("### <span class='material-symbols-outlined'>receipt_long</span> Mis Pedidos", unsafe_allow_html=True)
-    st.info("Consulta aquí el estado de tus entregas en ruta
+    st.info("Consulta aquí el estado de tus entregas en ruta o envíos locales.")
+    st.write("Haz tus compras desde el catálogo y las enviamos hasta donde estés.")
+
+elif tab == "Admin":
+    st.markdown("### <span class='material-symbols-outlined'>settings</span> Panel de Administración", unsafe_allow_html=True)
+    admin_pass = st.text_input("Contraseña de Administrador", type="password", placeholder="Ingresa clave...")
+    if admin_pass == "1234":
+        st.success("¡Acceso concedido!")
+        st.write("Modifica los datos directamente en la tabla:")
+        df_current = pd.DataFrame(st.session_state.products)
+        
+        edited_df = st.data_editor(
+            df_current,
+            num_rows="dynamic",
+            use_container_width=True,
+            key="product_table_editor"
+        )
+        
+        if st.button("Guardar Cambios"):
+            st.session_state.products = edited_df.to_dict(orient="records")
+            st.success("¡Catálogo actualizado!")
+            st.rerun()
+    elif admin_pass:
+        st.error("Contraseña incorrecta.")
+
+# 6. ISLA FLOTANTE INFERIOR (Menú Fijo Todo el Tiempo)
+nav_cols = st.columns(4)
+
+with nav_cols[0]:
+    if st.button(":material/home:\n\nInicio", key="nav_home", use_container_width=True):
+        st.session_state.nav_tab = "Inicio"
+        st.rerun()
+
+with nav_cols[1]:
+    cart_label = f":material/shopping_cart:\n\nCarrito ({total_items})" if total_items > 0 else ":material/shopping_cart:\n\nCarrito"
+    if st.button(cart_label, key="nav_cart", use_container_width=True):
+        st.session_state.nav_tab = "Carrito"
+        st.rerun()
+
+with nav_cols[2]:
+    if st.button(":material/receipt_long:\n\nPedidos", key="nav_orders", use_container_width=True):
+        st.session_state.nav_tab = "Pedidos"
+        st.rerun()
+
+with nav_cols[3]:
+    if st.button(":material/settings:\n\nAdmin", key="nav_admin", use_container_width=True):
+        st.session_state.nav_tab = "Admin"
+        st.rerun()
