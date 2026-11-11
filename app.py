@@ -22,7 +22,7 @@ if "nav_tab" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Enlace de tu logo en GitHub (Asegúrate de cambiarlo por el enlace "Raw" de tu imagen subida a tu repo)
+# Enlace de tu logo en GitHub (Asegúrate de que coincida exactamente con el archivo .png de tu repo)
 LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
 @st.cache_data(ttl=60)
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Blindaje definitivo de colores, iconos outline y eliminación de recuadros negros
+# 3. Estilos CSS: Corrección definitiva de bordes negros en barra de búsqueda web y blindaje claro
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -125,13 +125,17 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* BARRA DE BÚSQUEDA Y CAMPOS: Estilo Píldora Limpio y sin bordes oscuros */
+    /* BARRA DE BÚSQUEDA Y CAMPOS: Eliminar bordes negros/sombras al enfocar en versión web */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
         border-color: #cbd5e0 !important;
         border-radius: 30px !important;
+    }
+    input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
+        border-color: #ff5200 !important;
+        box-shadow: 0 0 0 2px rgba(255,82,0,0.2) !important;
     }
     input::placeholder, textarea::placeholder {
         color: #718096 !important;
@@ -240,7 +244,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo y Carrito con Icono Outline Nativo de Streamlit
+# 4. Header Superior con Logo y Carrito con Icono Outline
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -343,11 +347,11 @@ if tab == "Inicio":
             st.markdown('</div>', unsafe_allow_html=True)
 
 elif tab == "Carrito":
-    if st.button("Volver al Catálogo", use_container_width=False):
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False):
         st.session_state.nav_tab = "Inicio"
         st.rerun()
         
-    st.markdown("### Carrito de Compras")
+    st.markdown("### :material/shopping_cart: Carrito de Compras")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -369,14 +373,14 @@ elif tab == "Carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button("Quitar", key=f"del_cart_{item_id}"):
+                    if st.button(":material/delete:", key=f"del_cart_{item_id}"):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
+        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
         
-        st.subheader("Datos de Entrega")
+        st.subheader(":material/local_shipping: Datos de Entrega")
         customer_name = st.text_input("Nombre del cliente", placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias", placeholder="Calle, número, colonia...")
         customer_notes = st.text_input("Notas adicionales", placeholder="Ej. Cambio de $500")
@@ -404,7 +408,7 @@ elif tab == "Carrito":
 st.write("---")
 col_space, col_admin_btn = st.columns([5, 1])
 with col_admin_btn:
-    if st.button("Admin", use_container_width=True):
+    if st.button(":material/settings: Admin", use_container_width=True):
         st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
 
 if st.session_state.get("show_admin_login", False):
