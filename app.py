@@ -31,6 +31,16 @@ if "dark_mode" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
+# ==========================================
+# CONFIGURACIÓN DE IMÁGENES DEL CARRUSEL (DIAPOSITIVAS)
+# Puedes cambiar o agregar aquí las URLs de las imágenes que gustes mostrar en el banner superior:
+SLIDER_IMAGES = [
+    "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800",
+    "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
+    "https://images.unsplash.com/photo-1508061252966-173859db501d?w=800"
+]
+# ==========================================
+
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
     headers = {
@@ -148,6 +158,13 @@ st.markdown(f"""
         font-weight: 700 !important;
         margin-top: 2px !important;
         display: block;
+    }}
+
+    /* BOTÓN DE CARRITO MÁS ALTO Y LLAMATIVO EN WEB */
+    .cart-cta-container button {{
+        min-height: 75px !important;
+        font-size: 1.1rem !important;
+        font-weight: 800 !important;
     }}
 
     .whatsapp-btn-disabled {{
@@ -297,10 +314,11 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
+    /* CARRUSEL / BANNER MÁS ALTO */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
-        height: 230px;
+        height: 280px;
         margin-bottom: 18px;
         border-radius: 16px;
         overflow: hidden;
@@ -354,7 +372,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo limpio
+# 4. Header Superior con Logo limpio y Botón de Carrito más alto
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -369,54 +387,92 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
+    st.write("") # Sutil separación para alinear con elegancia en versión móvil
     cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
+    # Contenedor con clase especial para hacer el botón del carrito más alto en web
+    st.markdown('<div class="cart-cta-container">', unsafe_allow_html=True)
     if st.button(":material/shopping_cart: " + cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.write("---")
 
 # 5. Vistas
 if tab == "Inicio":
-    col_sh1, col_sh2 = st.columns([3, 1])
-    with col_sh2:
-        if st.button(":material/share: Compartir", use_container_width=True):
-            st.toast("Enlace listo para enviar por WhatsApp")
-
     st.markdown(
         '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
-    st.markdown("""
-    <div class="slideshow-container">
-        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
-            <div class="slide-text">Pistaches y Garbanzos • Calidad Premium</div>
+    # Renderizado dinámico del Carrusel de Diapositivas con las imágenes configuradas arriba
+    slides_html = '<div class="slideshow-container">'
+    captions = ["Pistaches y Garbanzos • Calidad Premium", "Snacks y Semillas Seleccionadas", "Distribución Directa en Ruta"]
+    for idx, img_url in enumerate(SLIDER_IMAGES):
+        cap = captions[idx] if idx < len(captions) else "Productos Exclusivos Mostacho Botanas"
+        slides_html += f'''
+        <div class="slide" style="background-image: url('{img_url}');">
+            <div class="slide-text">{cap}</div>
         </div>
-        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800');">
-            <div class="slide-text">Snacks y Semillas Seleccionadas</div>
-        </div>
-        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1508061252966-173859db501d?w=800');">
-            <div class="slide-text">Distribución Directa en Ruta</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        '''
+    slides_html += '</div>'
+    st.markdown(slides_html, unsafe_allow_html=True)
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Selector de Categorías con Distintivo Visual (●) en la categoría activa
+    # Selector de Categorías
     category_options = ["Todo", "Individual", "Para compartir"]
     
     cat_cols = st.columns(len(category_options))
     for i, cat in enumerate(category_options):
         with cat_cols[i]:
             is_active = (st.session_state.selected_cat == cat)
-            
-            # Etiqueta con puntito indicador si está activa para que el cliente sepa exactamente dónde está
             display_label = f"● {cat}" if is_active else cat
             
             if st.button(display_label, use_container_width=True):
                 st.session_state.selected_cat = cat
+                st.rerun()
+
+    # Botón de compartir reubicado abajo de las categorías para no competir con el carrito
+    st.write("")
+    col_space_sh, col_share_btn = st.columns([3, 1])
+    with col_share_btn:
+        if st.button(":material/share: Compartir", use_container_width=True):
+            st.toast("Enlace listo para enviar por WhatsApp")
+
+    # SECCIÓN DE PRODUCTOS POPULARES (Clic para agregar instantáneamente al carrito)
+    st.write("")
+    st.markdown("### Productos Populares")
+    st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
+    
+    popular_products = [
+        {"id": "pop_1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+        {"id": "pop_2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+        {"id": "pop_3", "name": "Cahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+    ]
+    
+    pop_cols = st.columns(len(popular_products))
+    for idx, pop_p in enumerate(popular_products):
+        with pop_cols[idx]:
+            st.markdown(f"""
+            <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                <img src="{pop_p['image']}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
+                <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p['name']}</div>
+                <div style="color: #ff5200; font-weight: bold; font-size: 0.95rem;">${pop_p['price']:.2f} MXN</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Agregar +", key=f"quick_add_{pop_p['id']}", use_container_width=True):
+                # Verificar si el producto ya existe en session_state, si no, registrarlo temporalmente
+                if not any(p.get("id") == pop_p['id'] for p in st.session_state.products):
+                    st.session_state.products.append({
+                        "id": pop_p['id'],
+                        "name": pop_p['name'],
+                        "category": "Individual",
+                        "price": pop_p['price'],
+                        "description": "Producto popular seleccionado.",
+                        "image": pop_p['image']
+                    })
+                add_to_cart(pop_p['id'])
                 st.rerun()
 
     st.write("---")
@@ -537,20 +593,19 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Botón de Tema Oscuro (Lunita Outline) Aislado hasta Abajo
+# 6. Panel de Administración y Botones Inferiores (Tema Oscuro a la Izquierda, Admin a la Derecha)
 st.write("---")
-col_admin, col_spacer, col_theme = st.columns([1, 3, 1])
-
-with col_admin:
-    if st.button(":material/settings: Admin", use_container_width=True):
-        st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
+col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
 with col_theme:
-    # Botón de un solo toque con icono de lunita outline para alternar el tema oscuro
     theme_icon = ":material/light_mode:" if is_dark else ":material/dark_mode:"
     if st.button(theme_icon, use_container_width=True, help="Cambiar tema"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
+
+with col_admin:
+    if st.button(":material/settings: Admin", use_container_width=True):
+        st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
 
 if st.session_state.get("show_admin_login", False):
     admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contraseña...")
