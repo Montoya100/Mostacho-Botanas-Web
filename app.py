@@ -22,7 +22,7 @@ if "nav_tab" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Función para cargar productos de Loyverse y permitir respaldo editable
+# Función para cargar productos de Loyverse con categorías editables
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
     headers = {
@@ -31,75 +31,63 @@ def fetch_loyverse_products():
     }
     products_list = []
     try:
-        # Obtener categorías para filtrar "Plataforma"
-        cat_res = requests.get("https://api.loyverse.com/v1.0/categories", headers=headers, timeout=5)
-        platform_cat_id = None
-        if cat_res.status_code == 200:
-            for cat in cat_res.json().get("categories", []):
-                if "plataforma" in cat.get("name", "").lower():
-                    platform_cat_id = cat.get("id")
-                    break
-
         items_res = requests.get("https://api.loyverse.com/v1.0/items", headers=headers, timeout=5)
         if items_res.status_code == 200:
             for item in items_res.json().get("items", []):
-                cat_id = item.get("category_id")
-                cat_name = item.get("category_name", "").lower()
-                
-                is_platform = False
-                if platform_cat_id and cat_id == platform_cat_id:
-                    is_platform = True
-                elif "plataforma" in cat_name:
-                    is_platform = True
-
-                if is_platform or not platform_cat_id:
-                    variants = item.get("variants", [])
-                    item_name = item.get("item_name", "Producto")
-                    desc = item.get("description", "Producto oficial de la plataforma Mostacho.")
+                cat_name = item.get("category_name", "Chicos")
+                # Si no tiene categoría asignada o viene vacía, por defecto le ponemos "Chicos"
+                if not cat_name:
+                    cat_name = "Chicos"
                     
-                    if variants:
-                        for var in variants:
+                variants = item.get("variants", [])
+                item_name = item.get("item_name", "Producto")
+                desc = item.get("description", "Snack seleccionado de alta calidad.")
+                
+                if variants:
+                    for var in variants:
+                        price = 0.0
+                        price_val = var.get("price")
+                        if price_val is None and "store_prices" in var:
+                            store_prices = var.get("store_prices", {})
+                            if store_prices:
+                                price_val = list(store_prices.values())[0]
+                        try:
+                            price = float(price_val or 0.0)
+                        except:
                             price = 0.0
-                            price_val = var.get("price")
-                            if price_val is None and "store_prices" in var:
-                                store_prices = var.get("store_prices", {})
-                                if store_prices:
-                                    price_val = list(store_prices.values())[0]
-                            try:
-                                price = float(price_val or 0.0)
-                            except:
-                                price = 0.0
 
-                            var_name = var.get("variant_name", "")
-                            display_name = f"{item_name} ({var_name})" if var_name and var_name != "Default" else item_name
+                        var_name = var.get("variant_name", "")
+                        display_name = f"{item_name} ({var_name})" if var_name and var_name != "Default" else item_name
 
-                            products_list.append({
-                                "id": str(var.get("variant_id", item.get("id"))),
-                                "name": display_name,
-                                "category": "Plataforma",
-                                "price": price,
-                                "description": desc,
-                                "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
-                            })
+                        products_list.append({
+                            "id": str(var.get("variant_id", item.get("id"))),
+                            "name": display_name,
+                            "category": cat_name, # Se puede modificar desde Admin (ej: Chicos, Para compartir, Detalles)
+                            "price": price,
+                            "description": desc,
+                            "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
+                        })
     except:
         pass
 
     # Respaldo si falla la red
     if not products_list:
         products_list = [
-            {"id": "p1", "name": "Garbanzo 1k", "category": "Plataforma", "price": 45.0, "description": "Garbanzo seleccionado de alta calidad.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-            {"id": "p2", "name": "Japonés 1k", "category": "Plataforma", "price": 40.0, "description": "Cahuate estilo japonés crujiente.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Chicos", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mezcla ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+            {"id": "p3", "name": "Frasco Regalo Pistache", "category": "Detalles", "price": 150.0, "description": "Frasco de cristal decorado.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
         ]
     return products_list
 
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Forzar Tema Claro Ergonómico (Adiós recuadros negros)
+# 3. Estilos CSS: Blindaje contra recuadros negros y forzar Tema Claro Suave
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
+    /* Ocultar elementos nativos de Streamlit / GitHub */
     header { visibility: hidden !important; height: 0px !important; display: none !important; }
     #MainMenu { visibility: hidden !important; }
     footer { visibility: hidden !important; }
@@ -110,15 +98,15 @@ st.markdown("""
         padding-bottom: 3rem !important;
     }
 
-    /* Forzar fondo marfil suave y bloquear modo oscuro heredado */
+    /* FORZAR TEMA CLARO ABSOLUTO: Bloquear recuadros oscuros o negros del navegador */
     .stApp, body, html {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f8f7f4 !important;
         color: #222222 !important;
     }
 
-    /* Forzar inputs y contenedores blancos limpios */
-    input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
+    /* Forzar fondos blancos limpios en inputs, textos y selectores */
+    input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
@@ -129,6 +117,11 @@ st.markdown("""
         -webkit-text-fill-color: #a0aec0 !important;
     }
 
+    /* Eliminar fondos negros residuales en contenedores genéricos de Streamlit */
+    div[data-testid="stVerticalBlock"] > div {
+        background-color: transparent !important;
+    }
+
     .material-symbols-outlined {
         font-family: 'Material Symbols Outlined' !important;
         font-size: 20px;
@@ -136,6 +129,7 @@ st.markdown("""
         line-height: 1;
     }
 
+    /* Tarjetas de Producto limpias */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -161,6 +155,7 @@ st.markdown("""
         color: #ff5200 !important;
     }
 
+    /* Banner Promocional */
     .promo-banner {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
@@ -172,6 +167,7 @@ st.markdown("""
         margin-bottom: 14px;
     }
 
+    /* Carrusel / Slideshow */
     .slideshow-container {
         position: relative;
         max-width: 100%;
@@ -216,7 +212,7 @@ st.markdown("""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("¡Producto agregado al carrito!", icon="🛒")
+    st.toast("Producto agregado al carrito", icon=None)
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -228,7 +224,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior
+# 4. Header Superior con Icono Outline
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -237,13 +233,13 @@ with col_title:
         <span class="material-symbols-outlined" style="font-size: 34px; color: #ff5200;">storefront</span>
         <div>
             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #1a202c;">Mostacho Botanas</h2>
-            <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Plataforma Oficial</span>
+            <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Catálogo y Pedidos</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
-    cart_label = "🛒 Carrito" if total_items == 0 else f"🛒 Carrito ({total_items})"
+    cart_label = "Carrito" if total_items == 0 else f"Carrito ({total_items})"
     if st.button(cart_label, type="primary" if total_items > 0 else "secondary", use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
@@ -254,14 +250,16 @@ st.write("---")
 if tab == "Inicio":
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
-        if st.button("📤 Compartir", use_container_width=True):
-            st.toast("¡Enlace listo para enviar por WhatsApp!", icon="📤")
+        if st.button("Compartir", use_container_width=True):
+            st.toast("Enlace listo para enviar por WhatsApp", icon=None)
 
+    # Banner con texto comercial alusivo (Sin mencionar "plataforma")
     st.markdown(
-        '<div class="promo-banner"><span class="material-symbols-outlined">local_fire_department</span> Categoría Plataforma • Sincronizado con Loyverse</div>', 
+        '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -3px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
+    # Carrusel Publicitario
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
@@ -276,22 +274,28 @@ if tab == "Inicio":
     </div>
     """, unsafe_allow_html=True)
 
+    # Buscador con icono outline
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    st.markdown("#### Categoría: Plataforma")
+    # Obtener categorías únicas dinámicas desde los productos (configurables desde Admin)
+    all_categories = sorted(list(set([p.get("category", "Chicos") for p in st.session_state.products if isinstance(p, dict)])))
+    if not all_categories:
+        all_categories = ["Chicos", "Para compartir", "Detalles"]
+
+    selected_category = st.radio("Categorías", all_categories, horizontal=True, label_visibility="collapsed")
     st.write("---")
 
     try:
         current_products_list = st.session_state.products
         filtered_products = [
             p for p in current_products_list 
-            if isinstance(p, dict) and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
+            if isinstance(p, dict) and p.get("category") == selected_category and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
         ]
     except:
         filtered_products = []
 
     if not filtered_products:
-        st.info("No se encontraron productos en la categoría Plataforma.")
+        st.info("No se encontraron productos en esta categoría.")
     else:
         for product in filtered_products:
             pid = product.get("id")
@@ -327,11 +331,11 @@ if tab == "Inicio":
             st.markdown('</div>', unsafe_allow_html=True)
 
 elif tab == "Carrito":
-    if st.button("← Volver al Catálogo"):
+    if st.button("Volver al Catálogo"):
         st.session_state.nav_tab = "Inicio"
         st.rerun()
         
-    st.markdown("### 🛒 Carrito de Compras")
+    st.markdown("### Carrito de Compras")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -384,15 +388,21 @@ elif tab == "Carrito":
         else:
             st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
 
-# 6. Panel de Administración Sutil (Oculto discretamente al pie)
+# 6. Panel de Administración Sutil y en Botón Pequeño al Pie
 st.write("---")
-with st.expander("admin"):
-    admin_key = st.text_input("Clave", type="password", key="admin_pass_mini", label_visibility="collapsed", placeholder="Contraseña...")
+col_space, col_admin_btn = st.columns([5, 1])
+with col_admin_btn:
+    # Botón chiquito alineado a la derecha que solo ocupa lo del texto
+    if st.button("Admin", use_container_width=True):
+        st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
+
+if st.session_state.get("show_admin_login", False):
+    admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contraseña...")
     if admin_key == "1234":
         st.success("Acceso concedido")
         df_current = pd.DataFrame(st.session_state.products)
         edited_df = st.data_editor(df_current, num_rows="dynamic", key="editor_admin_table")
-        if st.button("Guardar cambios en precios/títulos"):
+        if st.button("Guardar cambios"):
             st.session_state.products = edited_df.to_dict(orient="records")
             st.success("¡Actualizado con éxito!")
             st.rerun()
