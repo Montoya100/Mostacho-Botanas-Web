@@ -17,7 +17,7 @@ UPLOAD_DIR = "uploaded_images"
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
-# 1. Configuración de la página (Sidebar expandido por defecto para que funcione como cajón de carrito)
+# 1. Configuración de la página
 st.set_page_config(
     page_title="Mostacho Botanas",
     page_icon=LOGO_URL,
@@ -219,7 +219,7 @@ st.markdown(f"""
     
     .block-container {{
         padding-top: 1rem !important;
-        padding-bottom: 3rem !important;
+        padding-bottom: 5rem !important;
         background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
     }}
@@ -252,6 +252,27 @@ st.markdown(f"""
         font-weight: 700 !important;
         margin-top: 2px !important;
         display: block;
+    }}
+
+    /* BOTÓN FLOTANTE (FAB) FIJO PARA MÓVIL Y WEB */
+    .mobile-fab {{
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        z-index: 99999999 !important;
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
+        color: #ffffff !important;
+        padding: 14px 22px !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        border: none !important;
+        cursor: pointer !important;
     }}
 
     .whatsapp-btn-disabled {{
@@ -413,7 +434,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# PANEL LATERAL (DRAWER / CAJÓN FIJO DEL CARRITO Y PEDIDO)
+# PANEL LATERAL (DRAWER / CARRITO PRINCIPAL)
 # ==========================================
 with st.sidebar:
     st.markdown("### 🛒 Tu Carrito de Compras")
@@ -436,7 +457,7 @@ with st.sidebar:
                 col_i1, col_i2 = st.columns([3, 1])
                 with col_i1:
                     st.markdown(f"**{p.get('name')}**")
-                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
+                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} =${subtotal:.2f}")
                 with col_i2:
                     if st.button(":material/delete:", key=f"del_cart_{item_id}", help="Quitar producto"):
                         del st.session_state.cart[item_id]
@@ -481,7 +502,6 @@ with st.sidebar:
             )
 
     st.write("---")
-    # Botón de cambio de tema en el cajón lateral
     theme_icon = "☀️ Cambiar a Modo Claro" if is_dark else "🌙 Cambiar a Modo Oscuro"
     if st.button(theme_icon, use_container_width=True):
         st.session_state.dark_mode = not st.session_state.dark_mode
@@ -498,7 +518,7 @@ with col_title:
         <img src="{LOGO_URL}" style="width: 58px; height: 58px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
-            <span class="app-subtitle">Catálogo y pedidos en línea (Panel lateral abierto para ver tu carrito)</span>
+            <span class="app-subtitle">Catálogo y pedidos en línea</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -631,11 +651,11 @@ st.write("---")
 # 5. CUERPO PRINCIPAL DEL CATÁLOGO
 # ==========================================
 st.markdown(
-    '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Tu carrito está disponible en la barra lateral izquierda</div>', 
+    '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
     unsafe_allow_html=True
 )
 
-# BANNER RECTANGULAR FIJO DE ANCHO COMPLETO (REEMPLAZO LIMPIO DEL CARRUSEL)
+# IMAGEN RECTANGULAR FIJA DE PISTACHES / BOTANAS DE ANCHO COMPLETO
 st.image(st.session_state.banner_url, use_container_width=True)
 st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 20px; font-size: 1rem;">Pistaches y Snacks Seleccionados • Calidad Premium</div>', unsafe_allow_html=True)
 
@@ -703,7 +723,7 @@ try:
     if st.session_state.selected_cat == "Todo":
         cat_filtered = current_products_list
     else:
-        cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
+        cat_filtered = [p for p in current_products_list if p.get("category", "Individual") == st.session_state.selected_cat]
 
     filtered_products = [
         p for p in cat_filtered 
@@ -750,3 +770,14 @@ else:
                         add_to_cart(pid)
                         st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# BOTÓN FLOTANTE MÓVIL (FAB) PARA ABRIR EL CARRITO EN CELULAR
+# ==========================================
+if total_items > 0:
+    st.markdown(f"""
+    <div class="mobile-fab" onclick="alert('Desliza o abre la barra lateral/menú hamburguesa para ver tu carrito y finalizar pedido.')">
+        <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
+        Ver Carrito ({total_items})
+    </div>
+    """, unsafe_allow_html=True)
