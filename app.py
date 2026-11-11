@@ -224,7 +224,6 @@ card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
 input_bg = "#0f172a" if is_dark else "#ffffff"
 
-# ESTILOS CSS GENERALES Y FAB VERDADERO FLOTANTE
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -234,7 +233,6 @@ st.markdown(f"""
     footer {{ visibility: hidden !important; }}
     .stDeployButton {{ display: none !important; }}
     
-    /* MODAL / DIALOG AMPLIADO AL MÁXIMO (95vw / hasta 1400px) */
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
         max-width: 1400px !important;
@@ -277,7 +275,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB ABSOLUTO FLOTANTE REAL EN HTML PURO (SE QUEDA FIJO EN LA ESQUINA INFERIOR DERECHA) */
+    /* FAB ABSOLUTO FLOTANTE REAL EN HTML CON TEXTO BLANCO Y POSICIÓN FIJA */
     .true-floating-fab-container {{
         position: fixed !important;
         bottom: 25px !important;
@@ -453,7 +451,7 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL SEGURO CON ANIMACIÓN DE 12 SEGUNDOS (4s por imagen) */
+    /* CARRUSEL ANIMADO DE 12 SEGUNDOS (4s por imagen) */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -520,7 +518,7 @@ for k in keys_to_delete:
 
 total_items = sum(st.session_state.cart.values())
 
-# Capturar señal de navegación mediante parámetros de URL seguros (para el FAB flotante real)
+# Capturar señal de navegación mediante parámetros de URL para el FAB flotante
 query_params = st.query_params
 if query_params.get("goto") == "cart":
     st.session_state.nav_tab = "Carrito"
@@ -561,7 +559,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL SEGURO RENDERIZADO CORRECTAMENTE CON HTML HTML PURO
+    # CARRUSEL RENDERIZADO COMO HTML PURO CON IMÁGENES
     slides_html = '<div class="slideshow-container">'
     for slide_item in slider_items_safe[:3]:
         slides_html += f'''
@@ -636,14 +634,14 @@ if tab == "Inicio":
 
     st.write("---")
 
-    # 4. LISTADO DE PRODUCTOS GENERALES FILTRADOS
+    # 4. LISTADO DE PRODUCTOS GENERALES FILTRADOS (CON SINTAXIS CORREGIDA)
     try:
         current_products_list = st.session_state.products
         
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category"] == st.session_state.selected_cat]
+            cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
 
         filtered_products = [
             p for p in cat_filtered 
@@ -760,7 +758,7 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE (FAB) ABSOLUTO EN HTML PURO (SE QUEDA FLOTANDO Y SOLO CAMBIA AL CARRITO AL PRESIONARLO)
+# BOTÓN FLOTANTE (FAB) REAL FIJO EN HTML PURO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
     st.markdown(f"""
