@@ -94,7 +94,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Definir colores dinámicos según el modo oscuro aislado (hasta abajo) o claro
+# 3. Colores dinámicos según el modo oscuro aislado
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -104,7 +104,6 @@ card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
 input_bg = "#0f172a" if is_dark else "#ffffff"
 
-# 3. Estilos CSS con Soporte Opcional de Modo Oscuro Aislado y Selector de Categorías Estilo Switch
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -119,7 +118,7 @@ st.markdown(f"""
         padding-bottom: 3rem !important;
         background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
-    }
+    }}
 
     @keyframes fadeIn {{
         from {{ opacity: 0; transform: translateY(6px); }}
@@ -151,7 +150,6 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN DE WHATSAPP INACTIVO (NEGRO ELEGANTE / OSCURO) */
     .whatsapp-btn-disabled {{
         background-color: {"#334155" if is_dark else "#1a202c"} !important;
         color: #ffffff !important;
@@ -166,7 +164,6 @@ st.markdown(f"""
         box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }}
 
-    /* BOTÓN DE WHATSAPP ACTIVO (NARANJA VIBRANTE CON PULSO) */
     .whatsapp-btn-active {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
@@ -199,7 +196,7 @@ st.markdown(f"""
         font-size: 1rem !important;
     }}
 
-    /* BOTONES GENERALES DE LA APP EN NARANJA */
+    /* Botones generales de la app estrictamente en NARANJA */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -219,7 +216,6 @@ st.markdown(f"""
         color: #ffffff !important;
     }}
 
-    /* Botones de cantidad ampliados */
     div[data-testid="column"] button {{
         font-size: 1.6rem !important;
         font-weight: 900 !important;
@@ -358,7 +354,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con tu Logo limpio
+# 4. Header Superior con Logo limpio
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -416,7 +412,6 @@ if tab == "Inicio":
         with cat_cols[i]:
             is_active = (st.session_state.selected_cat == cat)
             
-            # Aplicar color naranja si está activa, o gris elegante si está inactiva (exclusivo para los 3 botones de categoría)
             active_bg = "#ff5200"
             inactive_bg = "#334155" if is_dark else "#e2e8f0"
             inactive_color = "#f8f7f4" if is_dark else "#4a5568"
@@ -430,6 +425,7 @@ if tab == "Inicio":
                     background-color: {btn_bg} !important;
                     color: {btn_fg} !important;
                     border: none !important;
+                    box-shadow: none !important;
                 }}
                 div[data-testid="column"]:nth-of-type({i+1}) button:hover {{
                     background-color: {"#e04800" if is_active else ("#475569" if is_dark else "#cbd5e0")} !important;
@@ -447,13 +443,11 @@ if tab == "Inicio":
     try:
         current_products_list = st.session_state.products
         
-        # Filtrar por categoría seleccionada
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category"] == st.session_state.selected_cat]
+            cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
 
-        # Filtrar por buscador
         filtered_products = [
             p for p in cat_filtered 
             if isinstance(p, dict) and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
@@ -539,7 +533,6 @@ elif tab == "Carrito":
         order_folio = f"MOSTACHO-{datetime.now().strftime('%H%M%S')}"
         order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
         
-        # MENSAJE DE WHATSAPP PROFESIONAL, LIMPIO Y SIN EMOJIS
         msg_header = f"NUEVO PEDIDO [{order_folio}]\nFecha: {order_date}\n\n"
         msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
         msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
@@ -552,7 +545,6 @@ elif tab == "Carrito":
         whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
         
         st.write("")
-        # Validar si nombre y dirección están completos
         if customer_name.strip() and customer_address.strip():
             st.markdown(
                 f'<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">Enviar Pedido por WhatsApp ({order_folio})</a>',
@@ -584,7 +576,6 @@ if st.session_state.get("show_admin_login", False):
     elif admin_key:
         st.error("Contraseña incorrecta.")
 
-# Selector de Tema Oscuro (Aislado hasta el fondo de la página)
 st.write("")
 st.write("")
 with st.expander("Configuración de Apariencia (Tema Oscuro)"):
