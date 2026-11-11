@@ -4,7 +4,7 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# Enlace de tu logo en GitHub (Asegúrate de que el archivo exista en esa ruta exacta de tu repositorio)
+# Enlace de tu logo en GitHub
 LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
 # 1. Configuración de la página
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Título más grande, Botones de cantidad grandes, Alerta Verde Menta WhatsApp y Cajas limpias
+# 3. Estilos CSS: Título grande, subtítulo oscuro, botones de cantidad ampliados y Alerta personalizada Verde Menta WhatsApp
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -108,27 +108,33 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* TÍTULO PRINCIPAL MÁS GRANDE */
+    /* TÍTULO MÁS GRANDE Y SUBTÍTULO OSCURO Y DESTACADO */
     .app-title {
-        font-size: 1.7rem !important;
+        font-size: 1.85rem !important;
         font-weight: 900 !important;
         color: #1a202c !important;
         margin: 0 !important;
-        line-height: 1.2 !important;
+        line-height: 1.1 !important;
+    }
+    .app-subtitle {
+        font-size: 0.9rem !important;
+        color: #2d3748 !important;
+        font-weight: 700 !important;
     }
 
-    /* ALERTA VERDE MENTA BRILLANTE ESTILO WHATSAPP */
-    div[data-testid="stNotification"], .stAlert {
+    /* ALERTA PERSONALIZADA VERDE MENTA WHATSAPP */
+    .whatsapp-alert {
         background-color: #25d366 !important;
         color: #ffffff !important;
-        border-radius: 14px !important;
-        border: none !important;
-        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3) !important;
-    }
-    div[data-testid="stNotification"] p, .stAlert p {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
     }
 
     /* ETIQUETAS DE TEXTO EN TICKET (GRIS FUERTE) */
@@ -155,18 +161,19 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* AMPLIAR TAMAÑO DE LOS BOTONES DE CANTIDAD (+ / -) Y NÚMERO */
+    /* BOTONES DE CANTIDAD (+ / -) MÁS GRANDES Y CLAROS */
     div[data-testid="column"] button {
-        font-size: 1.3rem !important;
-        padding: 6px 0px !important;
-        min-height: 44px !important;
+        font-size: 1.6rem !important;
+        font-weight: 900 !important;
+        padding: 4px 0px !important;
+        min-height: 48px !important;
     }
     .qty-number {
-        font-size: 1.4rem !important;
+        font-size: 1.5rem !important;
         font-weight: 900 !important;
         text-align: center;
         color: #1a202c !important;
-        margin-top: 8px;
+        margin-top: 10px;
     }
 
     /* CAMPOS DE TEXTO LIMPIOS Y CLAROS */
@@ -289,7 +296,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo Ampliado y Título Más Grande
+# 4. Header Superior con Logo y Título Más Grande
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -298,7 +305,7 @@ with col_title:
         <img src="{LOGO_URL}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
-            <span style="font-size: 0.85rem; color: #718096; font-weight: 600;">Catálogo y Pedidos</span>
+            <span class="app-subtitle">Catálogo y Pedidos</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -447,7 +454,11 @@ elif tab == "Carrito":
         if customer_name and customer_address:
             st.link_button(":material/chat: Enviar Pedido por WhatsApp", whatsapp_url, use_container_width=True)
         else:
-            st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
+            # Alerta personalizada en Verde Menta WhatsApp con icono outline corporativo
+            st.markdown(
+                '<div class="whatsapp-alert"><span class="material-symbols-outlined">chat</span> Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.</div>',
+                unsafe_allow_html=True
+            )
 
 # 6. Panel de Administración Discreto
 st.write("---")
