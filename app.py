@@ -95,7 +95,7 @@ def fetch_loyverse_products():
     if not products_list:
         products_list = [
             {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mezcla ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
             {"id": "p3", "name": "Cahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cahuates crujientes tradicionales.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
         ]
     return products_list
@@ -103,7 +103,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Colores dinámicos y Fondo del lado derecho con tu image.png (mostrando la mitad horizontal)
+# 3. Colores dinámicos y Fondo del lado derecho con tu image.png
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -113,7 +113,6 @@ card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
 input_bg = "#0f172a" if is_dark else "#ffffff"
 
-# Enlace Raw real de image.png en tu repositorio de GitHub
 BG_IMAGE_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.png"
 
 st.markdown(f"""
@@ -167,7 +166,6 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN DE CARRITO MÁS ALTO Y LLAMATIVO EN WEB */
     .cart-cta-container button {{
         min-height: 75px !important;
         font-size: 1.1rem !important;
@@ -220,7 +218,6 @@ st.markdown(f"""
         font-size: 1rem !important;
     }}
 
-    /* Botones generales de la app en NARANJA */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -321,7 +318,6 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL / BANNER DE DIAPOSITIVAS */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -411,7 +407,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL / BANNER DE DIAPOSITIVAS RESTAURADO Y FUNCIONANDO
+    # CARRUSEL / BANNER DE DIAPOSITIVAS
     slides_html = '<div class="slideshow-container">'
     captions = ["Pistaches y Garbanzos • Calidad Premium", "Snacks y Semillas Seleccionadas", "Distribución Directa en Ruta"]
     for idx, img_url in enumerate(SLIDER_IMAGES):
@@ -446,7 +442,7 @@ if tab == "Inicio":
         if st.button(":material/share: Compartir", use_container_width=True):
             st.toast("Enlace listo para enviar por WhatsApp")
 
-    # SECCIÓN DE PRODUCTOS POPULARES (Clic para agregar instantáneamente al carrito)
+    # SECCIÓN DE PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -488,7 +484,7 @@ if tab == "Inicio":
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category"] == st.session_state.selected_cat]
+            cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
 
         filtered_products = [
             p for p in cat_filtered 
