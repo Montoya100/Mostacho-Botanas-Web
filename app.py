@@ -321,7 +321,7 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL AUTOMÁTICO (SLIDESHOW FLUIDO Y ADAPTABLE) */
+    /* CARRUSEL AUTOMÁTICO SEGURO (SIN RASTRO DE CÓDIGO) */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -413,7 +413,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL AUTOMÁTICO DE DIAPOSITIVAS (SLIDESHOW PURO SIN BOTONES)
+    # CARRUSEL AUTOMÁTICO SEGURO
     slides_html = '<div class="slideshow-container">'
     for slide_item in SLIDER_ITEMS:
         slides_html += f'''
@@ -424,29 +424,10 @@ if tab == "Inicio":
     slides_html += '</div>'
     st.markdown(slides_html, unsafe_allow_html=True)
 
+    # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Selector de Categorías
-    category_options = ["Todo", "Individual", "Para compartir"]
-    
-    cat_cols = st.columns(len(category_options))
-    for i, cat in enumerate(category_options):
-        with cat_cols[i]:
-            is_active = (st.session_state.selected_cat == cat)
-            display_label = f"● {cat}" if is_active else cat
-            
-            if st.button(display_label, use_container_width=True):
-                st.session_state.selected_cat = cat
-                st.rerun()
-
-    # Botón de compartir abajo de las categorías
-    st.write("")
-    col_space_sh, col_share_btn = st.columns([3, 1])
-    with col_share_btn:
-        if st.button(":material/share: Compartir", use_container_width=True):
-            st.toast("Enlace listo para enviar por WhatsApp")
-
-    # SECCIÓN DE PRODUCTOS POPULARES
+    # 2. PRODUCTOS POPULARES (Justo abajo de la búsqueda)
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -482,6 +463,29 @@ if tab == "Inicio":
 
     st.write("---")
 
+    # 3. FILA DE CATEGORÍAS (Abajo de populares y arriba del catálogo general)
+    category_options = ["Todo", "Individual", "Para compartir"]
+    
+    cat_cols = st.columns(len(category_options))
+    for i, cat in enumerate(category_options):
+        with cat_cols[i]:
+            is_active = (st.session_state.selected_cat == cat)
+            display_label = f"● {cat}" if is_active else cat
+            
+            if st.button(display_label, use_container_width=True):
+                st.session_state.selected_cat = cat
+                st.rerun()
+
+    # Botón de compartir abajo de las categorías
+    st.write("")
+    col_space_sh, col_share_btn = st.columns([3, 1])
+    with col_share_btn:
+        if st.button(":material/share: Compartir", use_container_width=True):
+            st.toast("Enlace listo para enviar por WhatsApp")
+
+    st.write("---")
+
+    # 4. LISTADO DE PRODUCTOS GENERALES FILTRADOS
     try:
         current_products_list = st.session_state.products
         
