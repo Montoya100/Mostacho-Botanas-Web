@@ -4,7 +4,7 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# Enlace de tu logo en GitHub
+# Enlace de tu logo en GitHub (Asegúrate de que el archivo exista en esa ruta exacta de tu repositorio)
 LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
 # 1. Configuración de la página
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Cajas limpias sin efecto píldora y etiquetas de texto en gris fuerte visible
+# 3. Estilos CSS: Título más grande, Botones de cantidad grandes, Alerta Verde Menta WhatsApp y Cajas limpias
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -108,26 +108,37 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* FORZAR UN GRIS FUERTE Y LEGIBLE EN LAS ETIQUETAS DE LOS INPUTS DEL TICKET */
-    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {
-        color: #2d3748 !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
+    /* TÍTULO PRINCIPAL MÁS GRANDE */
+    .app-title {
+        font-size: 1.7rem !important;
+        font-weight: 900 !important;
+        color: #1a202c !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
     }
 
-    /* ALERTA VERDE MENTA */
+    /* ALERTA VERDE MENTA BRILLANTE ESTILO WHATSAPP */
     div[data-testid="stNotification"], .stAlert {
         background-color: #25d366 !important;
         color: #ffffff !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         border: none !important;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3) !important;
     }
     div[data-testid="stNotification"] p, .stAlert p {
         color: #ffffff !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
     }
 
-    /* BOTONES NARANJAS CON TEXTO BLANCO */
+    /* ETIQUETAS DE TEXTO EN TICKET (GRIS FUERTE) */
+    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {
+        color: #1a202c !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+    }
+
+    /* BOTONES GENERALES NARANJAS CON TEXTO BLANCO */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -144,13 +155,27 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* CAMPOS DE TEXTO LIMPIOS (SIN EFECTO PÍLDORA, BORDES RECTOS SUAVES Y FONDO BLANCO PURO) */
+    /* AMPLIAR TAMAÑO DE LOS BOTONES DE CANTIDAD (+ / -) Y NÚMERO */
+    div[data-testid="column"] button {
+        font-size: 1.3rem !important;
+        padding: 6px 0px !important;
+        min-height: 44px !important;
+    }
+    .qty-number {
+        font-size: 1.4rem !important;
+        font-weight: 900 !important;
+        text-align: center;
+        color: #1a202c !important;
+        margin-top: 8px;
+    }
+
+    /* CAMPOS DE TEXTO LIMPIOS Y CLAROS */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
-        border: 1px solid #a0aec0 !important;
-        border-radius: 8px !important;
+        border: 1px solid #cbd5e0 !important;
+        border-radius: 10px !important;
         box-shadow: none !important;
     }
     input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
@@ -158,13 +183,13 @@ st.markdown("""
         box-shadow: 0 0 0 2px rgba(255,82,0,0.15) !important;
     }
     input::placeholder, textarea::placeholder {
-        color: #718096 !important;
-        -webkit-text-fill-color: #718096 !important;
+        color: #a0aec0 !important;
+        -webkit-text-fill-color: #a0aec0 !important;
     }
 
     .material-symbols-outlined {
         font-family: 'Material Symbols Outlined' !important;
-        font-size: 20px !important;
+        font-size: 22px !important;
         vertical-align: middle;
         line-height: 1;
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -179,18 +204,18 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .product-title {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         font-weight: 800;
         margin-bottom: 2px;
         color: #1a202c !important;
     }
     .product-desc {
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         color: #718096 !important;
         margin-bottom: 6px;
     }
     .product-price {
-        font-size: 1.05rem;
+        font-size: 1.15rem;
         font-weight: bold;
         color: #ff5200 !important;
     }
@@ -264,16 +289,16 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo y Nombre
+# 4. Header Superior con Logo Ampliado y Título Más Grande
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="{LOGO_URL}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="{LOGO_URL}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
         <div>
-            <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #1a202c;">Mostacho Botanas</h2>
-            <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Catálogo y Pedidos</span>
+            <h1 class="app-title">Mostacho Botanas</h1>
+            <span style="font-size: 0.85rem; color: #718096; font-weight: 600;">Catálogo y Pedidos</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -359,7 +384,7 @@ if tab == "Inicio":
                             remove_from_cart(pid)
                             st.rerun()
                     with sub_c2:
-                        st.markdown(f"<div style='text-align: center; font-weight: bold;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
                     with sub_c3:
                         if st.button("+", key=f"plus_{pid}", use_container_width=True):
                             add_to_cart(pid)
@@ -393,7 +418,6 @@ elif tab == "Carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    # Botón con icono y la palabra Quitar
                     if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
