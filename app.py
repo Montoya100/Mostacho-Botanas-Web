@@ -28,15 +28,28 @@ if "selected_cat" not in st.session_state:
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
+if "slide_idx" not in st.session_state:
+    st.session_state.slide_idx = 0
+
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# CONFIGURACIÓN DE IMÁGENES DEL CARRUSEL / BANNER
-SLIDER_IMAGES = [
-    "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800",
-    "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
-    "https://images.unsplash.com/photo-1508061252966-173859db501d?w=800"
+# CARRUSEL DE IMÁGENES / DIAPOSITIVAS
+# Puedes agregar, quitar o cambiar las URLs de las imágenes aquí cuando gustes:
+SLIDER_ITEMS = [
+    {
+        "url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800",
+        "caption": "Pistaches y Garbanzos • Calidad Premium"
+    },
+    {
+        "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
+        "caption": "Snacks y Semillas Seleccionadas"
+    },
+    {
+        "url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=800",
+        "caption": "Distribución Directa en Ruta"
+    }
 ]
 # ==========================================
 
@@ -103,7 +116,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Colores dinámicos y Fondo del lado derecho con tu image.png
+# 3. Colores dinámicos limpios (Sin fondo de imagen)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -112,8 +125,6 @@ sub_text_color = "#94a3b8" if is_dark else "#4a5568"
 card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
 input_bg = "#0f172a" if is_dark else "#ffffff"
-
-BG_IMAGE_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.png"
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -128,11 +139,6 @@ st.markdown(f"""
         padding-top: 0.5rem !important;
         padding-bottom: 3rem !important;
         background-color: {bg_color} !important;
-        background-image: linear-gradient(to right, {"rgba(18,24,36,0.95)" if is_dark else "rgba(248,247,244,0.95)"} 50%, {"rgba(18,24,36,0.4)" if is_dark else "rgba(248,247,244,0.4)"} 100%), url('{BG_IMAGE_URL}');
-        background-size: 50% 100%;
-        background-position: right top;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
         animation: fadeIn 0.4s ease-in-out;
     }}
 
@@ -317,47 +323,6 @@ st.markdown(f"""
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
-
-    .slideshow-container {{
-        position: relative;
-        max-width: 100%;
-        height: 260px;
-        margin-bottom: 18px;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid {border_color};
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }}
-    .slide {{
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        opacity: 0;
-        animation: slideAnimation 12s infinite;
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        align-items: flex-end;
-        padding: 16px;
-    }}
-    .slide:nth-child(1) {{ animation-delay: 0s; }}
-    .slide:nth-child(2) {{ animation-delay: 4s; }}
-    .slide:nth-child(3) {{ animation-delay: 8s; }}
-    
-    @keyframes slideAnimation {{
-        0% {{ opacity: 0; }}
-        10% {{ opacity: 1; }}
-        33% {{ opacity: 1; }}
-        43% {{ opacity: 0; }}
-        100% {{ opacity: 0; }}
-    }}
-    .slide-text {{
-        background: rgba(255, 82, 0, 0.85);
-        color: white;
-        padding: 6px 14px;
-        border-radius: 12px;
-        font-size: 0.88rem;
-        font-weight: 600;
-    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -407,18 +372,20 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL / BANNER DE DIAPOSITIVAS
-    slides_html = '<div class="slideshow-container">'
-    captions = ["Pistaches y Garbanzos • Calidad Premium", "Snacks y Semillas Seleccionadas", "Distribución Directa en Ruta"]
-    for idx, img_url in enumerate(SLIDER_IMAGES):
-        cap = captions[idx] if idx < len(captions) else "Productos Exclusivos Mostacho Botanas"
-        slides_html += f'''
-        <div class="slide" style="background-image: url('{img_url}');">
-            <div class="slide-text">{cap}</div>
-        </div>
-        '''
-    slides_html += '</div>'
-    st.markdown(slides_html, unsafe_allow_html=True)
+    # CARRUSEL / DIAPOSITIVAS ESTABLE (Nativo y sin rastro de código)
+    current_slide = SLIDER_ITEMS[st.session_state.slide_idx]
+    st.image(current_slide["url"], use_container_width=True, caption=current_slide["caption"])
+    
+    # Botones de navegación para el carrusel de diapositivas
+    c_prev, c_space, c_next = st.columns([1, 4, 1])
+    with c_prev:
+        if st.button("Anterior", use_container_width=True):
+            st.session_state.slide_idx = (st.session_state.slide_idx - 1) % len(SLIDER_ITEMS)
+            st.rerun()
+    with c_next:
+        if st.button("Siguiente", use_container_width=True):
+            st.session_state.slide_idx = (st.session_state.slide_idx + 1) % len(SLIDER_ITEMS)
+            st.rerun()
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
@@ -435,7 +402,7 @@ if tab == "Inicio":
                 st.session_state.selected_cat = cat
                 st.rerun()
 
-    # Botón de compartir reubicado abajo de las categorías
+    # Botón de compartir abajo de las categorías
     st.write("")
     col_space_sh, col_share_btn = st.columns([3, 1])
     with col_share_btn:
