@@ -10,6 +10,7 @@ from datetime import datetime
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
 DATA_FILE = "productos_mostacho.json"
 POPULAR_FILE = "populares_mostacho.json"
+SLIDER_FILE = "slider_mostacho.json"
 UPLOAD_DIR = "uploaded_images"
 
 # Crear carpeta de subidas si no existe
@@ -41,22 +42,34 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# CONFIGURACIÓN DE IMÁGENES DEL CARRUSEL (DIAPOSITIVAS)
-SLIDER_ITEMS = [
-    {
-        "url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200",
-        "caption": "Pistaches y Garbanzos • Calidad Premium"
-    },
-    {
-        "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200",
-        "caption": "Snacks y Semillas Seleccionadas"
-    },
-    {
-        "url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200",
-        "caption": "Distribución Directa en Ruta"
-    }
-]
+# GESTIÓN DEL CARRUSEL DINÁMICO (HASTA 6 IMÁGENES)
 # ==========================================
+DEFAULT_SLIDER = [
+    {"url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200", "caption": "Pistaches y Garbanzos • Calidad Premium"},
+    {"url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200", "caption": "Snacks y Semillas Seleccionadas"},
+    {"url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200", "caption": "Distribución Directa en Ruta"}
+]
+
+def load_saved_slider():
+    if os.path.exists(SLIDER_FILE):
+        try:
+            with open(SLIDER_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+        except:
+            pass
+    return DEFAULT_SLIDER
+
+def save_slider_to_file(slider_list):
+    try:
+        with open(SLIDER_FILE, "w", encoding="utf-8") as f:
+            json.dump(slider_list, f, ensure_ascii=False, indent=4)
+    except:
+        pass
+
+if "slider_items" not in st.session_state:
+    st.session_state.slider_items = load_saved_slider()
 
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
@@ -203,18 +216,6 @@ st.markdown(f"""
     footer {{ visibility: hidden !important; }}
     .stDeployButton {{ display: none !important; }}
     
-    /* BARRA SUPERIOR FIJA (STICKY HEADER) PARA EL TÍTULO Y CARRITO */
-    .sticky-header-container {{
-        position: sticky;
-        top: 0;
-        z-index: 99999;
-        background-color: {bg_color} !important;
-        padding-top: 10px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid {border_color};
-        margin-top: -10px;
-    }}
-
     /* MODAL / DIALOG AMPLIADO AL MÁXIMO (95vw / hasta 1400px) */
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
@@ -222,8 +223,8 @@ st.markdown(f"""
     }}
     
     .block-container {{
-        padding-top: 0.2rem !important;
-        padding-bottom: 3rem !important;
+        padding-top: 1rem !important;
+        padding-bottom: 4rem !important;
         background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
     }}
@@ -244,24 +245,50 @@ st.markdown(f"""
     }}
 
     .app-title {{
-        font-size: 2.1rem !important;
+        font-size: 2.3rem !important;
         font-weight: 900 !important;
         color: {text_color} !important;
         margin: 0 !important;
         line-height: 1.0 !important;
     }}
     .app-subtitle {{
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
         color: {sub_text_color} !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
         display: block;
     }}
 
-    .cart-cta-container button {{
-        min-height: 52px !important;
-        font-size: 1rem !important;
-        font-weight: 800 !important;
+    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) SIEMPRE A LA MANO PARA EL CARRITO */
+    .floating-cart-btn {{
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 999999;
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
+        color: white;
+        padding: 14px 22px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.05rem;
+        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.5);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        animation: pulseButton 2s infinite;
+    }}
+    .floating-cart-btn:hover {{
+        transform: scale(1.05);
+        color: white !important;
+        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.7);
+    }}
+
+    @keyframes pulseButton {{
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
+        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
     }}
 
     .whatsapp-btn-disabled {{
@@ -291,18 +318,11 @@ st.markdown(f"""
         width: 100%;
         text-decoration: none;
         box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        animation: pulseButton 1.5s infinite;
         transition: transform 0.2s ease;
     }}
     .whatsapp-btn-active:hover {{
         transform: scale(1.02);
         color: #ffffff !important;
-    }}
-
-    @keyframes pulseButton {{
-        0% {{ box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }}
-        70% {{ box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }}
     }}
 
     label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {{
@@ -411,6 +431,7 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
+    /* CARRUSEL DINÁMICO CON LAS HASTA 6 IMÁGENES CONFIGURADAS */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -426,23 +447,12 @@ st.markdown(f"""
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         opacity: 0;
-        animation: slideAnimation 12s infinite;
+        animation: slideAnimationDynamic infinite;
         background-size: cover;
         background-position: center;
         display: flex;
         align-items: flex-end;
         padding: 16px;
-    }}
-    .slide:nth-child(1) {{ animation-delay: 0s; }}
-    .slide:nth-child(2) {{ animation-delay: 4s; }}
-    .slide:nth-child(3) {{ animation-delay: 8s; }}
-    
-    @keyframes slideAnimation {{
-        0% {{ opacity: 0; }}
-        12% {{ opacity: 1; }}
-        33% {{ opacity: 1; }}
-        45% {{ opacity: 0; }}
-        100% {{ opacity: 0; }}
     }}
     .slide-text {{
         background: rgba(255, 82, 0, 0.88);
@@ -455,6 +465,32 @@ st.markdown(f"""
     }}
 </style>
 """, unsafe_allow_html=True)
+
+# Inyectar animación dinámica calculada según cuántas imágenes tenga el carrusel (ej. 4s por imagen)
+total_slides = len(st.session_state.slider_items) if st.session_state.slider_items else 1
+total_duration = total_slides * 4
+animation_css = f"""
+<style>
+@keyframes slideAnimationDynamic {{
+"""
+for idx in range(total_slides):
+    start_pct = (idx / total_slides) * 100
+    show_pct = start_pct + (3.0 / total_duration) * 100
+    hide_pct = ((idx + 1) / total_slides) * 100
+    end_pct = hide_pct + (1.0 / total_duration) * 100
+    
+    if idx == 0:
+        animation_css += f"    0% {{ opacity: 1; }}\n"
+        animation_css += f"    {hide_pct:.1f}% {{ opacity: 1; }}\n"
+        animation_css += f"    {min(end_pct, 100):.1f}% {{ opacity: 0; }}\n"
+    else:
+        animation_css += f"    {max(0, start_pct - 1):.1f}% {{ opacity: 0; }}\n"
+        animation_css += f"    {start_pct:.1f}% {{ opacity: 1; }}\n"
+        animation_css += f"    {hide_pct:.1f}% {{ opacity: 1; }}\n"
+        animation_css += f"    {min(end_pct, 100):.1f}% {{ opacity: 0; }}\n"
+
+animation_css += "}\n</style>"
+st.markdown(animation_css, unsafe_allow_html=True)
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
@@ -476,15 +512,14 @@ total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
 # ==========================================
-# 4. HEADER SUPERIOR FIJO (STICKY HEADER)
+# 4. HEADER SUPERIOR LIMPIO
 # ==========================================
-st.markdown('<div class="sticky-header-container">', unsafe_allow_html=True)
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="{LOGO_URL}" style="width: 48px; height: 48px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="{LOGO_URL}" style="width: 58px; height: 58px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
             <span class="app-subtitle">Catálogo y pedidos en línea</span>
@@ -493,13 +528,11 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
+    st.write("")
     cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
-    st.markdown('<div class="cart-cta-container">', unsafe_allow_html=True)
     if st.button(":material/shopping_cart: " + cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)  # Fin de la barra fija
 
 st.write("---")
 
@@ -510,12 +543,12 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL AUTOMÁTICO SEGURO
+    # CARRUSEL DINÁMICO ROTATIVO (HASTA 6 IMÁGENES)
     slides_html = '<div class="slideshow-container">'
-    for slide_item in SLIDER_ITEMS:
+    for idx, slide_item in enumerate(st.session_state.slider_items):
         slides_html += f'''
-        <div class="slide" style="background-image: url('{slide_item["url"]}');">
-            <div class="slide-text">{slide_item["caption"]}</div>
+        <div class="slide" style="background-image: url('{slide_item.get("url", "https://via.placeholder.com/1200")}'); animation-delay: {idx * 4}s;">
+            <div class="slide-text">{slide_item.get("caption", "Mostacho Botanas")}</div>
         </div>
         '''
     slides_html += '</div>'
@@ -562,7 +595,7 @@ if tab == "Inicio":
 
     st.write("---")
 
-    # 3. SECCIÓN DE CATEGORÍAS (Con Título Legible)
+    # 3. SECCIÓN DE CATEGORÍAS
     st.markdown("### Categorías")
     category_options = ["Todo", "Individual", "Para compartir"]
     
@@ -708,7 +741,18 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Configuración en POP-UP (Modal) con ID automático y manejo de vacíos
+# ==========================================
+# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) PARA ACCESO AL CARRITO
+# ==========================================
+if total_items > 0 and tab != "Carrito":
+    st.markdown(f"""
+    <a href="#carrito" onclick="window.location.reload();" target="_self" class="floating-cart-btn" style="cursor: pointer;">
+        <span class="material-symbols-outlined" style="font-size: 26px; color: white;">shopping_cart</span>
+        Ver Carrito ({total_items})
+    </a>
+    """, unsafe_allow_html=True)
+
+# 6. Panel de Administración y Configuración en POP-UP (Modal) con Gestión de Carrusel (Hasta 6 imágenes)
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
@@ -732,14 +776,8 @@ def admin_modal():
     else:
         st.success("¡Acceso concedido!")
         
-        st.info(
-            "📌 **GUÍA DE TAMAÑOS DE IMAGEN RECOMENDADOS:**\n\n"
-            "• **Imágenes del Carrusel (Banner):** `1200 x 600 px` (Proporción 2:1 horizontal).\n"
-            "• **Imágenes de Productos:** `600 x 600 px` (Proporción 1:1 cuadrada).\n\n"
-            "*Usar estas medidas evita que las imágenes se compriman, estiren o distorsionen al cambiar entre versión web y móvil.*"
-        )
-        
-        tab_prod, tab_pop, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Seleccionar Populares", "📤 Subir Imágenes"])
+        # PESTAÑAS DE ADMINISTRACIÓN (INCLUYENDO GESTIÓN DEL CARRUSEL HASTA 6 IMÁGENES)
+        tab_prod, tab_pop, tab_slider, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "🖼️ Carrusel (Banner)", "📤 Subir Imágenes"])
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
@@ -747,7 +785,7 @@ def admin_modal():
             df_current = pd.DataFrame(st.session_state.products)
             
             column_config = {
-                "id": None,  # Ocultar ID en la interfaz para ahorrar espacio
+                "id": None,
                 "category": st.column_config.SelectboxColumn(
                     "Categoría",
                     help="Selecciona estrictamente Individual o Para compartir",
@@ -785,7 +823,7 @@ def admin_modal():
                     
                 st.session_state.products = updated_list
                 save_products_to_file(updated_list)
-                st.success("¡Productos guardados permanentemente y IDs/imágenes sincronizados!")
+                st.success("¡Productos guardados permanentemente y sincronizados!")
                 st.rerun()
 
         with tab_pop:
@@ -817,9 +855,48 @@ def admin_modal():
                 else:
                     st.warning("Debes seleccionar al menos un producto popular.")
 
+        with tab_slider:
+            st.markdown("### Configuración del Carrusel (Hasta 6 Imágenes)")
+            st.caption("Administra las imágenes y textos que rotan en la parte superior de tu tienda (recomendado: 1200x600 px).")
+            
+            df_slider = pd.DataFrame(st.session_state.slider_items)
+            
+            slider_column_config = {
+                "url": st.column_config.TextColumn("URL de la Imagen", required=True, help="Enlace directo o ruta en assets/"),
+                "caption": st.column_config.TextColumn("Texto / Leyenda del Banner", required=True)
+            }
+            
+            edited_slider_df = st.data_editor(
+                df_slider,
+                num_rows="dynamic",
+                max_rows=6,
+                key="editor_slider_table",
+                column_config=slider_column_config,
+                hide_index=True,
+                use_container_width=True
+            )
+            
+            if st.button("Guardar Carrusel"):
+                new_slider_list = []
+                for _, row in edited_slider_df.iterrows():
+                    u = str(row.get("url", "")).strip()
+                    c = str(row.get("caption", "")).strip()
+                    if u:
+                        new_slider_list.append({
+                            "url": u,
+                            "caption": c if c else "Mostacho Botanas"
+                        })
+                if new_slider_list:
+                    st.session_state.slider_items = new_slider_list[:6]  # Límite estricto de 6 imágenes
+                    save_slider_to_file(st.session_state.slider_items)
+                    st.success("¡Carrusel actualizado con éxito!")
+                    st.rerun()
+                else:
+                    st.warning("Debes conservar al menos una imagen en el carrusel.")
+
         with tab_upload:
             st.markdown("### Subir Imagen Directamente")
-            st.caption("Sube una imagen desde tu dispositivo para obtener su enlace y usarla en tus productos:")
+            st.caption("Sube una imagen desde tu dispositivo para obtener su enlace y usarla en tus productos o carrusel:")
             
             uploaded_file = st.file_uploader("Elige una imagen (PNG, JPG, WEBP)", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
@@ -831,7 +908,7 @@ def admin_modal():
                 st.image(file_path, width=200)
                 
                 local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
-                st.text_input("Copia esta ruta/enlace para usarla en la columna de imagen de tus productos:", value=local_url)
+                st.text_input("Copia esta ruta/enlace para usarla en tus productos o carrusel:", value=local_url)
                 st.info("💡 *Nota: Si usas tu app en la nube de Streamlit, te recomendamos subir tus imágenes directamente a tu repositorio de GitHub (en tu carpeta) o usar un enlace directo para que estén siempre disponibles.*")
         
         st.write("---")
