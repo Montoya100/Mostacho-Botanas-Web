@@ -22,7 +22,9 @@ if "nav_tab" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Función para cargar productos de Loyverse con categorías editables
+# URL de tu logo en GitHub (Sustituye este enlace con el enlace "Raw" de tu imagen en GitHub cuando la subas)
+LOGO_URL = "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=100"
+
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
     headers = {
@@ -80,12 +82,11 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Blindaje Naranja/Blanco Forzado, Cero Recuadros Negros y Carga Forzada de Iconos Outline
+# 3. Estilos CSS: Blindaje definitivo de colores y eliminación de bordes negros en buscador
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* Ocultar elementos de Streamlit/GitHub */
     header { visibility: hidden !important; height: 0px !important; display: none !important; }
     #MainMenu { visibility: hidden !important; }
     footer { visibility: hidden !important; }
@@ -97,7 +98,6 @@ st.markdown("""
         background-color: #f8f7f4 !important;
     }
 
-    /* FORZAR TEMA CLARO INTERNO (Adiós modo oscuro del teléfono/PC) */
     .stApp, body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
         background-color: #f8f7f4 !important;
         color: #222222 !important;
@@ -108,7 +108,7 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* FORZAR TODOS LOS BOTONES A COLOR NARANJA CON TEXTO BLANCO */
+    /* BOTONES NARANJAS CON TEXTO BLANCO INQUEBRANTABLE */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -125,12 +125,12 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* Inputs y Buscador en formato Píldora One UI limpia */
+    /* BARRA DE BÚSQUEDA Y CAMPOS: Estilo Píldora Limpio y sin recuadros negros */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
-        border-color: #e2e8f0 !important;
+        border-color: #cbd5e0 !important;
         border-radius: 30px !important;
     }
     input::placeholder, textarea::placeholder {
@@ -138,25 +138,13 @@ st.markdown("""
         -webkit-text-fill-color: #718096 !important;
     }
 
-    /* FORZAR VISIBILIDAD DE ICONOS OUTLINE DE GOOGLE */
     .material-symbols-outlined {
         font-family: 'Material Symbols Outlined' !important;
-        font-weight: normal !important;
-        font-style: normal !important;
         font-size: 22px !important;
-        line-height: 1 !important;
-        letter-spacing: normal !important;
-        text-transform: none !important;
-        display: inline-block !important;
-        white-space: nowrap !important;
-        word-wrap: normal !important;
-        direction: ltr !important;
-        -webkit-font-smoothing: antialiased !important;
-        vertical-align: middle !important;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+        vertical-align: middle;
+        line-height: 1;
     }
 
-    /* Tarjetas de Producto */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -182,7 +170,6 @@ st.markdown("""
         color: #ff5200 !important;
     }
 
-    /* Banner Promocional con Icono Outline integrado */
     .promo-banner {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
@@ -193,13 +180,8 @@ st.markdown("""
         font-size: 0.95rem;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
     }
 
-    /* Carrusel más alto y estilizado */
     .slideshow-container {
         position: relative;
         max-width: 100%;
@@ -239,9 +221,6 @@ st.markdown("""
         border-radius: 20px;
         font-size: 0.88rem;
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -260,13 +239,13 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Iconos Outline Reales
+# 4. Header Superior con Logo y Nombre
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
-    st.markdown("""
+    st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="material-symbols-outlined" style="font-size: 34px; color: #ff5200;">storefront</span>
+        <img src="{LOGO_URL}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200;" />
         <div>
             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #1a202c;">Mostacho Botanas</h2>
             <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Catálogo y Pedidos</span>
@@ -275,9 +254,8 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
-    # Botón de carrito con icono outline integrado vía HTML
-    cart_html_label = f'<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px; vertical-align: -3px;">shopping_cart</span> Carrito ({total_items})' if total_items > 0 else '<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px; vertical-align: -3px;">shopping_cart</span> Carrito'
-    if st.button(cart_html_label, use_container_width=True):
+    cart_label = "Carrito" if total_items == 0 else f"Carrito ({total_items})"
+    if st.button(cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
 
@@ -287,26 +265,24 @@ st.write("---")
 if tab == "Inicio":
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
-        if st.button('<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px; vertical-align: -3px;">share</span> Compartir', use_container_width=True):
+        if st.button("Compartir", use_container_width=True):
             st.toast("Enlace listo para enviar por WhatsApp")
 
-    # Banner Promocional con Icono Outline Real de Google
     st.markdown(
-        '<div class="promo-banner"><span class="material-symbols-outlined" style="font-size: 22px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        '<div class="promo-banner">¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
-    # Carrusel Publicitario con iconos outline en los textos flotantes
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
-            <div class="slide-text"><span class="material-symbols-outlined" style="font-size: 18px;">bolt</span> Pistaches y Garbanzos • Calidad Premium</div>
+            <div class="slide-text">Pistaches y Garbanzos • Calidad Premium</div>
         </div>
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800');">
-            <div class="slide-text"><span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span> Snacks y Semillas Seleccionadas</div>
+            <div class="slide-text">Snacks y Semillas Seleccionadas</div>
         </div>
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1508061252966-173859db501d?w=800');">
-            <div class="slide-text"><span class="material-symbols-outlined" style="font-size: 18px;">verified</span> Distribución Directa en Ruta</div>
+            <div class="slide-text">Distribución Directa en Ruta</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
