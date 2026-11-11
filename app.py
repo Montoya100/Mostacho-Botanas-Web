@@ -32,8 +32,7 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# CONFIGURACIÓN DE IMÁGENES DEL CARRUSEL (DIAPOSITIVAS)
-# Puedes cambiar o agregar aquí las URLs de las imágenes que gustes mostrar en el banner superior:
+# CONFIGURACIÓN DE IMÁGENES DEL BANNER / CARRUSEL
 SLIDER_IMAGES = [
     "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800",
     "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
@@ -314,53 +313,33 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL / BANNER MÁS ALTO */
-    .slideshow-container {{
-        position: relative;
-        max-width: 100%;
-        height: 280px;
-        margin-bottom: 18px;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid {border_color};
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    /* ANIMACIÓN FLOTANTE / VUELO HACIA EL CARRITO */
+    @keyframes flyToCart {{
+        0% {{ transform: translateY(0px) scale(1); opacity: 1; }}
+        50% {{ transform: translateY(-40px) scale(1.1); opacity: 0.8; }}
+        100% {{ transform: translateY(-80px) scale(0.8); opacity: 0; }}
     }}
-    .slide {{
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        opacity: 0;
-        animation: slideAnimation 12s infinite;
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        align-items: flex-end;
-        padding: 16px;
-    }}
-    .slide:nth-child(1) {{ animation-delay: 0s; }}
-    .slide:nth-child(2) {{ animation-delay: 4s; }}
-    .slide:nth-child(3) {{ animation-delay: 8s; }}
-    
-    @keyframes slideAnimation {{
-        0% {{ opacity: 0; }}
-        10% {{ opacity: 1; }}
-        33% {{ opacity: 1; }}
-        43% {{ opacity: 0; }}
-        100% {{ opacity: 0; }}
-    }}
-    .slide-text {{
-        background: rgba(255, 82, 0, 0.85);
+    .fly-toast {{
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        background-color: #ff5200;
         color: white;
-        padding: 6px 14px;
-        border-radius: 12px;
-        font-size: 0.88rem;
-        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        z-index: 99999;
+        box-shadow: 0 4px 15px rgba(255, 82, 0, 0.4);
+        animation: flyToCart 1.2s ease-in-out forwards;
     }}
 </style>
 """, unsafe_allow_html=True)
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("Producto agregado al carrito")
+    # Animación flotante de producto agregado volando al carrito
+    st.markdown('<div class="fly-toast">¡Producto añadido al carrito!</div>', unsafe_allow_html=True)
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -372,7 +351,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo limpio y Botón de Carrito más alto
+# 4. Header Superior con Logo limpio y Botón de Carrito imponente
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -387,9 +366,8 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
-    st.write("") # Sutil separación para alinear con elegancia en versión móvil
+    st.write("") 
     cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
-    # Contenedor con clase especial para hacer el botón del carrito más alto en web
     st.markdown('<div class="cart-cta-container">', unsafe_allow_html=True)
     if st.button(":material/shopping_cart: " + cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
@@ -405,18 +383,12 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # Renderizado dinámico del Carrusel de Diapositivas con las imágenes configuradas arriba
-    slides_html = '<div class="slideshow-container">'
-    captions = ["Pistaches y Garbanzos • Calidad Premium", "Snacks y Semillas Seleccionadas", "Distribución Directa en Ruta"]
-    for idx, img_url in enumerate(SLIDER_IMAGES):
-        cap = captions[idx] if idx < len(captions) else "Productos Exclusivos Mostacho Botanas"
-        slides_html += f'''
-        <div class="slide" style="background-image: url('{img_url}');">
-            <div class="slide-text">{cap}</div>
-        </div>
-        '''
-    slides_html += '</div>'
-    st.markdown(slides_html, unsafe_allow_html=True)
+    # CARRUSEL / BANNER NATIVO LIMPIO (SIN ERRORES DE CÓDIGO)
+    if SLIDER_IMAGES:
+        st.image(
+            SLIDER_IMAGES[0], 
+            use_container_width=True
+        )
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
@@ -433,7 +405,7 @@ if tab == "Inicio":
                 st.session_state.selected_cat = cat
                 st.rerun()
 
-    # Botón de compartir reubicado abajo de las categorías para no competir con el carrito
+    # Botón de compartir reubicado abajo de las categorías
     st.write("")
     col_space_sh, col_share_btn = st.columns([3, 1])
     with col_share_btn:
@@ -462,7 +434,6 @@ if tab == "Inicio":
             </div>
             """, unsafe_allow_html=True)
             if st.button("Agregar +", key=f"quick_add_{pop_p['id']}", use_container_width=True):
-                # Verificar si el producto ya existe en session_state, si no, registrarlo temporalmente
                 if not any(p.get("id") == pop_p['id'] for p in st.session_state.products):
                     st.session_state.products.append({
                         "id": pop_p['id'],
@@ -593,7 +564,7 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Botones Inferiores (Tema Oscuro a la Izquierda, Admin a la Derecha)
+# 6. Panel de Administración y Botones Inferiores
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
