@@ -91,7 +91,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Logo limpio, Título grande en web, Subtítulo pegado y Categorías dinámicas (Naranja/Gris)
+# 3. Estilos CSS: Todos los botones generales vuelven a ser naranja, y solo las categorías manejan su estado activo/inactivo
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -123,7 +123,6 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* TÍTULO IMOPONENTE Y COMPACTO CON EL SUBTÍTULO */
     .app-title {
         font-size: 2.3rem !important;
         font-weight: 900 !important;
@@ -187,14 +186,7 @@ st.markdown("""
         font-size: 1rem !important;
     }
 
-    /* ESTILO DINÁMICO PARA LAS CATEGORÍAS (ACTIVA = NARANJA, INACTIVAS = GRIS) */
-    div[data-testid="column"] button {
-        border-radius: 12px !important;
-        font-weight: 700 !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-    
-    /* Botones generales naranjas */
+    /* TODOS LOS BOTONES GENERALES DE LA APP VUELVEN A SER NARANJA */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -202,10 +194,12 @@ st.markdown("""
         border-radius: 12px !important;
         font-weight: 700 !important;
         box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
+        transition: all 0.2s ease-in-out !important;
     }
     button:hover, .stButton > button:hover {
         background-color: #e04800 !important;
         transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(255, 82, 0, 0.35) !important;
         color: #ffffff !important;
     }
     button p, .stButton > button p, button span {
@@ -351,7 +345,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con tu Logo limpio (sin círculo naranja)
+# 4. Header Superior con tu Logo limpio
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -401,19 +395,19 @@ if tab == "Inicio":
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Selector de Categorías Dinámicas (Activa = Naranja, Inactivas = Gris limpio)
+    # Selector de Categorías Dinámicas (Activa = Naranja, Inactivas = Gris elegante)
     category_options = ["Todo", "Individual", "Para compartir"]
     
     cat_cols = st.columns(len(category_options))
     for i, cat in enumerate(category_options):
         with cat_cols[i]:
             is_active = (st.session_state.selected_cat == cat)
-            # Inyectar estilo dinámico de color mediante botón primario (naranja) o secundario (gris elegante)
-            btn_type = "primary" if is_active else "secondary"
+            
+            # Inyectar estilos específicos únicamente para los botones de categoría según su estado
             if is_active:
                 st.markdown("""
                 <style>
-                    div.stButton > button[kind="primary"] {
+                    div[data-testid="column"]:nth-of-type(""" + str(i+1) + """) button {
                         background-color: #ff5200 !important;
                         color: #ffffff !important;
                     }
@@ -422,19 +416,21 @@ if tab == "Inicio":
             else:
                 st.markdown("""
                 <style>
-                    div.stButton > button[kind="secondary"] {
+                    div[data-testid="column"]:nth-of-type(""" + str(i+1) + """) button {
                         background-color: #e2e8f0 !important;
                         color: #4a5568 !important;
                         border: 1px solid #cbd5e0 !important;
+                        box-shadow: none !important;
                     }
-                    div.stButton > button[kind="secondary"]:hover {
+                    div[data-testid="column"]:nth-of-type(""" + str(i+1) + """) button:hover {
                         background-color: #cbd5e0 !important;
                         color: #1a202c !important;
+                        transform: translateY(-1px) !important;
                     }
                 </style>
                 """, unsafe_allow_html=True)
 
-            if st.button(cat, use_container_width=True, type=btn_type):
+            if st.button(cat, use_container_width=True):
                 st.session_state.selected_cat = cat
                 st.rerun()
 
