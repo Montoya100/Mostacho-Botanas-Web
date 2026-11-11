@@ -17,6 +17,9 @@ if "theme" not in st.session_state:
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
+if "nav_tab" not in st.session_state:
+    st.session_state.nav_tab = "Inicio"
+
 if "products" not in st.session_state:
     st.session_state.products = [
         {"id": 1, "name": "Pistaches Salados (90g)", "category": "Chicos", "price": 35.0, "description": "Pistaches tostados con sal de mar, empaque individual de 90g.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
@@ -29,13 +32,13 @@ if "products" not in st.session_state:
 
 WHATSAPP_PHONE = "522381174698"
 
-# 3. Estilos CSS adaptativos con Naranja Suave y Contornos Limpios
+# 3. Estilos CSS Estilo App Móvil (Inspiración DiDi / One UI)
 is_dark = st.session_state.theme == "Oscuro"
-bg_color = "#121212" if is_dark else "#ffffff"
+bg_color = "#121212" if is_dark else "#fcfcfc"
 card_bg = "#1e1e1e" if is_dark else "#ffffff"
-text_color = "#e0e0e0" if is_dark else "#2d3748"
-border_color = "#333333" if is_dark else "#e2e8f0"
-accent_color = "#f6ad55" if is_dark else "#dd6b20" # Naranja más sutil y elegante
+text_color = "#e0e0e0" if is_dark else "#222222"
+border_color = "#2c2c2c" if is_dark else "#eaeaea"
+accent_color = "#ff5722" if is_dark else "#ff6600" # Naranja vibrante característico
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -44,20 +47,21 @@ st.markdown(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: {bg_color};
         color: {text_color};
+        padding-bottom: 70px; /* Espacio para la barra inferior */
     }}
     .material-symbols-outlined {{
         font-family: 'Material Symbols Outlined';
-        font-size: 20px;
+        font-size: 22px;
         vertical-align: middle;
     }}
-    /* Tarjetas Minimalistas solo con Contorno Sutil */
+    /* Tarjetas Minimalistas Contorneadas */
     .product-card {{
         background-color: {card_bg};
         border: 1px solid {border_color};
-        border-radius: 14px;
+        border-radius: 16px;
         padding: 14px;
         margin-bottom: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }}
     .product-title {{
         font-size: 1.05rem;
@@ -67,7 +71,7 @@ st.markdown(f"""
     }}
     .product-desc {{
         font-size: 0.85rem;
-        color: #718096;
+        color: #888888;
         margin-bottom: 8px;
     }}
     .product-price {{
@@ -76,14 +80,15 @@ st.markdown(f"""
         color: {accent_color};
     }}
     .promo-banner {{
-        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
         color: white;
         padding: 14px;
-        border-radius: 14px;
+        border-radius: 16px;
         text-align: center;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.95rem;
         margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(255,102,0,0.2);
     }}
     
     /* Carrusel / Slideshow Publicitario */
@@ -92,7 +97,7 @@ st.markdown(f"""
         max-width: 100%;
         height: 160px;
         margin-bottom: 20px;
-        border-radius: 14px;
+        border-radius: 16px;
         overflow: hidden;
         border: 1px solid {border_color};
     }}
@@ -122,7 +127,7 @@ st.markdown(f"""
         background: rgba(0, 0, 0, 0.65);
         color: white;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 0.85rem;
         font-weight: 500;
     }}
@@ -139,15 +144,14 @@ def remove_from_cart(product_id):
         else:
             del st.session_state.cart[product_id]
 
-# 4. Header & Selector de Tema Compacto en la esquina superior derecha
+# 4. Header & Selector de Tema Compacto en Esquina Superior
 col_logo, col_title, col_theme = st.columns([1, 4, 1.2])
 with col_logo:
-    st.image("https://via.placeholder.com/100x100.png?text=Mostacho", width=70)
+    st.image("https://via.placeholder.com/100x100.png?text=Mostacho", width=60)
 with col_title:
-    st.title("Mostacho Botanas")
-    st.caption("Catálogo y Pedidos Directos")
+    st.markdown("### Mostacho Botanas")
+    st.caption("Pedidos en línea")
 with col_theme:
-    # Selector de tema limpio y minimalista en la esquina
     theme_choice = st.selectbox("Modo", ["Claro", "Oscuro"], index=0 if st.session_state.theme == "Claro" else 1, label_visibility="collapsed")
     if theme_choice != st.session_state.theme:
         st.session_state.theme = theme_choice
@@ -155,121 +159,96 @@ with col_theme:
 
 st.write("---")
 
-# 5. Banner de Promociones
-st.markdown(
-    '<div class="promo-banner"><span class="material-symbols-outlined">local_fire_department</span> ¡Envíos locales y entregas en ruta! Pide directo por WhatsApp</div>', 
-    unsafe_allow_html=True
-)
-
-# 6. Carrusel / Slideshow Publicitario
-st.markdown("""
-<div class="slideshow-container">
-    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
-        <div class="slide-text">Pistaches frescos y tostados con sal de mar</div>
-    </div>
-    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800');">
-        <div class="slide-text">Mix botanero ideal para compartir en reuniones</div>
-    </div>
-    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1508061252966-173859db501d?w=800');">
-        <div class="slide-text">Calidad premium garantizada en cada presentación</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# --- PANEL DE ADMINISTRACIÓN PROTEGIDO CON CONTRASEÑA ---
-with st.expander("Panel de Administración (Solo Propietario)"):
-    admin_pass = st.text_input("Contraseña de Administrador", type="password", placeholder="Ingresa tu clave...")
-    if admin_pass == "1234":  # Puedes cambiar la contraseña aquí si gustas
-        st.success("¡Acceso concedido!")
-        st.write("Modifica los datos directamente en la tabla:")
-        df_current = pd.DataFrame(st.session_state.products)
-        
-        edited_df = st.data_editor(
-            df_current,
-            num_rows="dynamic",
-            use_container_width=True,
-            key="product_table_editor"
-        )
-        
-        if st.button("Guardar Cambios en el Catálogo"):
-            st.session_state.products = edited_df.to_dict(orient="records")
-            st.success("¡Catálogo actualizado correctamente!")
-            st.rerun()
-    elif admin_pass:
-        st.error("Contraseña incorrecta.")
-
-# 7. Barra de Búsqueda y Botón de Carrito condicional
 total_items = sum(st.session_state.cart.values())
 
-col_search, col_cart_btn = st.columns([3, 1])
-with col_search:
-    search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre de la botana...", label_visibility="collapsed")
-with col_cart_btn:
-    if total_items > 0:
-        if st.button(f"Ver Carrito ({total_items})", type="primary", use_container_width=True):
-            st.toast("Abre la barra lateral para ver tu ticket y enviar tu pedido", icon="🛒")
+# 5. Contenido según la Pestaña Activa de la Barra Inferior
+tab = st.session_state.nav_tab
 
-# 8. Categorías
-categories = ["Chicos", "Para compartir", "Detalles"]
-selected_category = st.radio("Categorías", categories, horizontal=True)
+if tab == "Inicio":
+    # Banner y Carrusel
+    st.markdown(
+        '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: sub;">local_fire_department</span> ¡Envíos locales y entregas en ruta! Pide directo por WhatsApp</div>', 
+        unsafe_allow_html=True
+    )
+    
+    st.markdown("""
+    <div class="slideshow-container">
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
+            <div class="slide-text">Pistaches frescos y tostados con sal de mar</div>
+        </div>
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800');">
+            <div class="slide-text">Mix botanero ideal para compartir en reuniones</div>
+        </div>
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1508061252966-173859db501d?w=800');">
+            <div class="slide-text">Calidad premium garantizada en cada presentación</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-st.write("---")
+    # Buscador de Productos
+    search_query = st.text_input("Buscar productos...", placeholder="Busca tu botana favorita...", label_visibility="collapsed")
 
-# 9. Listado de Productos con Diseño Outline Limpio
-try:
-    current_products_list = st.session_state.products
-    filtered_products = [
-        p for p in current_products_list 
-        if isinstance(p, dict) and p.get("category") == selected_category and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
-    ]
-except Exception:
-    filtered_products = []
+    # Categorías estilo píldora
+    categories = ["Chicos", "Para compartir", "Detalles"]
+    selected_category = st.radio("Categorías", categories, horizontal=True)
 
-if not filtered_products:
-    st.info("No se encontraron productos en esta categoría con el filtro actual.")
-else:
-    for product in filtered_products:
-        pid = product.get("id")
-        
-        # Estructura limpia de tarjeta tipo outline
-        st.markdown('<div class="product-card">', unsafe_allow_html=True)
-        col_img, col_info, col_action = st.columns([1, 3, 1])
-        
-        with col_img:
-            st.image(product.get("image", "https://via.placeholder.com/300"), use_container_width=True)
+    st.write("---")
+
+    # Listado de Productos
+    try:
+        current_products_list = st.session_state.products
+        filtered_products = [
+            p for p in current_products_list 
+            if isinstance(p, dict) and p.get("category") == selected_category and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
+        ]
+    except Exception:
+        filtered_products = []
+
+    if not filtered_products:
+        st.info("No se encontraron productos con el filtro actual.")
+    else:
+        for product in filtered_products:
+            pid = product.get("id")
+            st.markdown('<div class="product-card">', unsafe_allow_html=True)
+            col_img, col_info, col_action = st.columns([1, 3, 1])
             
-        with col_info:
-            st.markdown(f'<div class="product-title">{product.get("name")}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="product-desc">{product.get("description")}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="product-price">${float(product.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
-            
-        with col_action:
-            qty_in_cart = st.session_state.cart.get(pid, 0)
-            if qty_in_cart == 0:
-                if st.button("Agregar", key=f"add_{pid}"):
-                    add_to_cart(pid)
-                    st.rerun()
-            else:
-                c1, c2, c3 = st.columns([1, 1, 1])
-                with c1:
-                    if st.button("-", key=f"minus_{pid}"):
-                        remove_from_cart(pid)
-                        st.rerun()
-                with c2:
-                    st.markdown(f"**{qty_in_cart}**")
-                with c3:
-                    if st.button("+", key=f"plus_{pid}"):
+            with col_img:
+                st.image(product.get("image", "https://via.placeholder.com/300"), use_container_width=True)
+                
+            with col_info:
+                st.markdown(f'<div class="product-title">{product.get("name")}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="product-desc">{product.get("description")}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="product-price">${float(product.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
+                
+            with col_action:
+                qty_in_cart = st.session_state.cart.get(pid, 0)
+                if qty_in_cart == 0:
+                    if st.button("Agregar", key=f"add_{pid}"):
                         add_to_cart(pid)
                         st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    c1, c2, c3 = st.columns([1, 1, 1])
+                    with c1:
+                        if st.button("-", key=f"minus_{pid}"):
+                            remove_from_cart(pid)
+                            st.rerun()
+                    with c2:
+                        st.markdown(f"**{qty_in_cart}**")
+                    with c3:
+                        if st.button("+", key=f"plus_{pid}"):
+                            add_to_cart(pid)
+                            st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
-# 10. Sidebar / Ticket de Compra (Cerrado por defecto, se abre limpio)
-with st.sidebar:
-    st.markdown('### <span class="material-symbols-outlined">shopping_cart</span> Mi Carrito / Ticket', unsafe_allow_html=True)
+elif tab == "Carrito":
+    st.markdown("### <span class='material-symbols-outlined'>shopping_cart</span> Tu Carrito de Compras", unsafe_allow_html=True)
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
-        st.write("El carrito está vacío. Agrega productos para ver tu ticket aquí.")
+        st.info("Tu carrito está vacío. Explora el inicio para agregar botanas.")
+        if st.button("Ir al Catálogo"):
+            st.session_state.nav_tab = "Inicio"
+            st.rerun()
     else:
         total_price = 0.0
         order_summary = []
@@ -287,7 +266,7 @@ with st.sidebar:
                     st.write(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button("X", key=f"del_cart_{item_id}"):
+                    if st.button("Eliminar", key=f"del_cart_{item_id}"):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
@@ -314,3 +293,76 @@ with st.sidebar:
             st.link_button("Enviar Pedido por WhatsApp", whatsapp_url, use_container_width=True, type="primary")
         else:
             st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
+
+elif tab == "Pedidos":
+    st.markdown("### <span class='material-symbols-outlined'>receipt_long</span> Mis Pedidos y Estado", unsafe_allow_html=True)
+    st.info("Aquí puedes consultar el estatus de tus pedidos recientes en ruta o envíos locales.")
+    st.write("¡Haz tus pedidos directamente desde el catálogo y recíbelos en la puerta de tu casa o negocio!")
+    if st.button("Hacer un nuevo pedido"):
+        st.session_state.nav_tab = "Inicio"
+        st.rerun()
+
+elif tab == "Admin":
+    st.markdown("### <span class='material-symbols-outlined'>settings</span> Panel de Administración", unsafe_allow_html=True)
+    admin_pass = st.text_input("Contraseña de Administrador", type="password", placeholder="Ingresa tu clave...")
+    if admin_pass == "1234":
+        st.success("¡Acceso concedido!")
+        st.write("Modifica los datos de los productos directamente en la tabla:")
+        df_current = pd.DataFrame(st.session_state.products)
+        
+        edited_df = st.data_editor(
+            df_current,
+            num_rows="dynamic",
+            use_container_width=True,
+            key="product_table_editor"
+        )
+        
+        if st.button("Guardar Cambios en el Catálogo"):
+            st.session_state.products = edited_df.to_dict(orient="records")
+            st.success("¡Catálogo actualizado correctamente!")
+            st.rerun()
+    elif admin_pass:
+        st.error("Contraseña incorrecta.")
+
+# 6. Barra de Navegación Inferior Estilo App (DiDi / Móvil)
+st.markdown("""
+<style>
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: """ + ("#1e1e1e" if is_dark else "#ffffff") + """;
+        border-top: 1px solid """ + border_color + """;
+        display: flex;
+        justify-content: space-around;
+        padding: 8px 0;
+        z-index: 99999;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Botones de navegación inferior simulados con columnas de Streamlit en un contenedor fijo inferior
+st.write("")
+st.write("")
+st.write("---")
+cols_nav = st.columns(4)
+
+with cols_nav[0]:
+    if st.button("🏠 Inicio", use_container_width=True):
+        st.session_state.nav_tab = "Inicio"
+        st.rerun()
+with cols_nav[1]:
+    cart_label = f"🛒 Carrito ({total_items})" if total_items > 0 else "🛒 Carrito"
+    if st.button(cart_label, use_container_width=True):
+        st.session_state.nav_tab = "Carrito"
+        st.rerun()
+with cols_nav[2]:
+    if st.button("📦 Pedidos", use_container_width=True):
+        st.session_state.nav_tab = "Pedidos"
+        st.rerun()
+with cols_nav[3]:
+    if st.button("⚙️ Admin", use_container_width=True):
+        st.session_state.nav_tab = "Admin"
+        st.rerun()
