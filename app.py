@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import urllib.parse
 
-# 1. Configuración de la página (sidebar colapsado por defecto)
+# 1. Configuración de la página
 st.set_page_config(
     page_title="Mostacho Botanas Web",
     page_icon=None,
@@ -32,33 +32,31 @@ if "products" not in st.session_state:
 
 WHATSAPP_PHONE = "522381174698"
 
-# 3. Forzar Temas y Ocultar Interfaz de GitHub / Streamlit
+# 3. Estilos CSS adaptados (Diseño tipo App Móvil / Isla Flotante)
 is_dark = st.session_state.theme == "Oscuro"
-bg_color = "#121212" if is_dark else "#f7f7f9"
+bg_color = "#121212" if is_dark else "#f8f9fa"
 card_bg = "#1e1e1e" if is_dark else "#ffffff"
 text_color = "#e0e0e0" if is_dark else "#222222"
 subtext_color = "#aaaaaa" if is_dark else "#666666"
-border_color = "#2c2c2c" if is_dark else "#eaeaea"
+border_color = "#2c2c2c" if is_dark else "#e5e5e5"
 accent_orange = "#ff5200"
 
 st.markdown(f"""
-<!-- Carga de Material Symbols Outlined de Google -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* Ocultar barra superior nativa de Streamlit / GitHub */
+    /* Ocultar elementos nativos de Streamlit / GitHub */
     header {{ visibility: hidden !important; height: 0px !important; }}
     #MainMenu {{ visibility: hidden !important; }}
     footer {{ visibility: hidden !important; }}
     .stDeployButton {{ display: none !important; }}
 
-    /* Forzar fondo y tema del sistema */
     .stApp {{
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: {bg_color} !important;
         color: {text_color} !important;
         padding-top: 10px !important;
-        padding-bottom: 90px !important;
+        padding-bottom: 110px !important; /* Espacio para la isla flotante */
     }}
 
     .material-symbols-outlined {{
@@ -68,7 +66,7 @@ st.markdown(f"""
         line-height: 1;
     }}
 
-    /* Tarjetas estilo App */
+    /* Tarjetas de Producto */
     .product-card {{
         background-color: {card_bg};
         border: 1px solid {border_color};
@@ -78,18 +76,18 @@ st.markdown(f"""
         box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }}
     .product-title {{
-        font-size: 1rem;
-        font-weight: 700;
+        font-size: 1.15rem;
+        font-weight: 800;
         margin-bottom: 4px;
         color: {text_color};
     }}
     .product-desc {{
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         color: {subtext_color};
         margin-bottom: 8px;
     }}
     .product-price {{
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: bold;
         color: {accent_orange};
     }}
@@ -98,20 +96,20 @@ st.markdown(f"""
     .promo-banner {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
-        padding: 12px 16px;
-        border-radius: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
         text-align: center;
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-weight: 700;
+        font-size: 0.95rem;
         margin-bottom: 16px;
     }}
 
-    /* Carrusel Slideshow */
+    /* Carrusel / Slideshow Más Alto y Ancho */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
-        height: 150px;
-        margin-bottom: 18px;
+        height: 200px;
+        margin-bottom: 20px;
         border-radius: 16px;
         overflow: hidden;
         border: 1px solid {border_color};
@@ -125,7 +123,7 @@ st.markdown(f"""
         background-position: center;
         display: flex;
         align-items: flex-end;
-        padding: 12px;
+        padding: 16px;
     }}
     .slide:nth-child(1) {{ animation-delay: 0s; }}
     .slide:nth-child(2) {{ animation-delay: 4s; }}
@@ -139,25 +137,35 @@ st.markdown(f"""
         100% {{ opacity: 0; }}
     }}
     .slide-text {{
-        background: rgba(0, 0, 0, 0.65);
+        background: rgba(0, 0, 0, 0.7);
         color: white;
-        padding: 4px 10px;
+        padding: 6px 12px;
         border-radius: 8px;
-        font-size: 0.8rem;
-        font-weight: 500;
+        font-size: 0.85rem;
+        font-weight: 600;
     }}
 
-    /* Barra Inferior Fija */
+    /* Forzar controles de cantidad en línea horizontal en móviles */
+    div[data-testid="column"] {{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }}
+
+    /* ISLA FLOTANTE INFERIOR (Menú Fijo Todo el Tiempo) */
     div[data-testid="stHorizontalBlock"]:has(button[key^="nav_"]) {{
         position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
+        bottom: 15px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 92% !important;
+        max-width: 500px !important;
         background-color: {card_bg} !important;
-        border-top: 1px solid {border_color} !important;
+        border: 1px solid {border_color} !important;
+        border-radius: 24px !important;
         padding: 8px 12px !important;
         z-index: 999999 !important;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.08) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -172,22 +180,25 @@ def remove_from_cart(product_id):
         else:
             del st.session_state.cart[product_id]
 
-# 4. Encabezado Limpio con Switch Compacto de Tema
-col_head, col_switch = st.columns([4, 1])
+# 4. Header Superior: Logo y Nombre en Grande a la Izquierda, Switch de Tema a la Derecha
+col_title, col_switch = st.columns([4, 1])
 
-with col_head:
+with col_title:
     st.markdown("""
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="material-symbols-outlined" style="font-size: 32px; color: #ff5200;">storefront</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="material-symbols-outlined" style="font-size: 38px; color: #ff5200;">storefront</span>
         <div>
-            <h3 style="margin: 0; font-size: 1.2rem;">Mostacho Botanas</h3>
-            <span style="font-size: 0.8rem; color: #888;">Pedidos en línea</span>
+            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px;">Mostacho Botanas</h2>
+            <span style="font-size: 0.85rem; color: #777; font-weight: 500;">Catálogo y pedidos en línea</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 with col_switch:
+    is_dark = st.session_state.theme == "Oscuro"
     icon_theme = "light_mode" if is_dark else "dark_mode"
+    # Alineado a la derecha en su columna
+    st.write("")
     if st.button(f":material/{icon_theme}:", key="theme_toggle", help="Cambiar tema"):
         st.session_state.theme = "Claro" if is_dark else "Oscuro"
         st.rerun()
@@ -205,7 +216,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # Carrusel Publicitario
+    # Carrusel Publicitario (Más Alto y Ancho)
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
@@ -220,7 +231,7 @@ if tab == "Inicio":
     </div>
     """, unsafe_allow_html=True)
 
-    # Buscador Estilo DiDi Food (Campo + Botón Naranja con Lupita)
+    # Buscador Estilizado
     col_input, col_btn_search = st.columns([4, 1])
     with col_input:
         search_query = st.text_input("Buscar productos...", placeholder="Buscar botanas, semillas...", label_visibility="collapsed")
@@ -251,7 +262,7 @@ if tab == "Inicio":
         for product in filtered_products:
             pid = product.get("id")
             st.markdown('<div class="product-card">', unsafe_allow_html=True)
-            col_img, col_info, col_action = st.columns([1, 3, 1])
+            col_img, col_info, col_action = st.columns([1, 2.5, 1.5])
             
             with col_img:
                 st.image(product.get("image", "https://via.placeholder.com/300"), use_container_width=True)
@@ -264,19 +275,20 @@ if tab == "Inicio":
             with col_action:
                 qty_in_cart = st.session_state.cart.get(pid, 0)
                 if qty_in_cart == 0:
-                    if st.button("Agregar", key=f"add_{pid}"):
+                    if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
                         add_to_cart(pid)
                         st.rerun()
                 else:
-                    c1, c2, c3 = st.columns([1, 1, 1])
-                    with c1:
-                        if st.button("-", key=f"minus_{pid}"):
+                    # Controles en línea estricta para evitar filas amontonadas
+                    sub_c1, sub_c2, sub_c3 = st.columns([1, 1, 1])
+                    with sub_c1:
+                        if st.button("-", key=f"minus_{pid}", use_container_width=True):
                             remove_from_cart(pid)
                             st.rerun()
-                    with c2:
-                        st.markdown(f"**{qty_in_cart}**")
-                    with c3:
-                        if st.button("+", key=f"plus_{pid}"):
+                    with sub_c2:
+                        st.markdown(f"<div style='text-align: center; font-weight: bold;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                    with sub_c3:
+                        if st.button("+", key=f"plus_{pid}", use_container_width=True):
                             add_to_cart(pid)
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
@@ -304,7 +316,7 @@ elif tab == "Carrito":
                 
                 col_c1, col_c2 = st.columns([3, 1])
                 with col_c1:
-                    st.write(f"**{p.get('name')}**")
+                    st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
                     if st.button(":material/delete:", key=f"del_cart_{item_id}"):
@@ -362,7 +374,7 @@ elif tab == "Admin":
     elif admin_pass:
         st.error("Contraseña incorrecta.")
 
-# 6. BARRA INFERIOR FIJA LINEAL (SIEMPRE VISIBLE)
+# 6. ISLA FLOTANTE INFERIOR (Menú Fijo Todo el Tiempo)
 nav_cols = st.columns(4)
 
 with nav_cols[0]:
