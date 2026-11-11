@@ -22,8 +22,8 @@ if "nav_tab" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# URL de tu logo en GitHub (Sustituye este enlace con el enlace "Raw" de tu imagen en GitHub cuando la subas)
-LOGO_URL = "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=100"
+# Enlace de tu logo en GitHub (Asegúrate de cambiarlo por el enlace "Raw" de tu imagen subida a tu repo)
+LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Blindaje definitivo de colores y eliminación de bordes negros en buscador
+# 3. Estilos CSS: Blindaje definitivo de colores, iconos outline y eliminación de recuadros negros
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -108,7 +108,7 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* BOTONES NARANJAS CON TEXTO BLANCO INQUEBRANTABLE */
+    /* BOTONES NARANJAS CON TEXTO BLANCO */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -125,7 +125,7 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* BARRA DE BÚSQUEDA Y CAMPOS: Estilo Píldora Limpio y sin recuadros negros */
+    /* BARRA DE BÚSQUEDA Y CAMPOS: Estilo Píldora Limpio y sin bordes oscuros */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
@@ -140,9 +140,10 @@ st.markdown("""
 
     .material-symbols-outlined {
         font-family: 'Material Symbols Outlined' !important;
-        font-size: 22px !important;
+        font-size: 20px !important;
         vertical-align: middle;
         line-height: 1;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
     .product-card {
@@ -239,13 +240,13 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo y Nombre
+# 4. Header Superior con Logo y Carrito con Icono Outline Nativo de Streamlit
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="{LOGO_URL}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200;" />
+        <img src="{LOGO_URL}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200;" onerror="this.style.display='none'" />
         <div>
             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #1a202c;">Mostacho Botanas</h2>
             <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Catálogo y Pedidos</span>
@@ -254,7 +255,7 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
-    cart_label = "Carrito" if total_items == 0 else f"Carrito ({total_items})"
+    cart_label = f":material/shopping_cart: Carrito ({total_items})" if total_items > 0 else ":material/shopping_cart: Carrito"
     if st.button(cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
@@ -265,11 +266,11 @@ st.write("---")
 if tab == "Inicio":
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
-        if st.button("Compartir", use_container_width=True):
+        if st.button(":material/share: Compartir", use_container_width=True):
             st.toast("Enlace listo para enviar por WhatsApp")
 
     st.markdown(
-        '<div class="promo-banner">¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
