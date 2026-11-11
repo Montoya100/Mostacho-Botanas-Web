@@ -25,6 +25,9 @@ if "nav_tab" not in st.session_state:
 if "selected_cat" not in st.session_state:
     st.session_state.selected_cat = "Todo"
 
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
@@ -91,56 +94,66 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Todos los botones generales vuelven a ser naranja, y solo las categorías manejan su estado activo/inactivo
-st.markdown("""
+# 3. Definir colores dinámicos según el modo oscuro aislado (hasta abajo) o claro
+is_dark = st.session_state.dark_mode
+
+bg_color = "#121824" if is_dark else "#f8f7f4"
+text_color = "#f1f5f9" if is_dark else "#222222"
+sub_text_color = "#94a3b8" if is_dark else "#4a5568"
+card_bg = "#1e293b" if is_dark else "#ffffff"
+border_color = "#334155" if is_dark else "#e2e8f0"
+input_bg = "#0f172a" if is_dark else "#ffffff"
+
+# 3. Estilos CSS con Soporte Opcional de Modo Oscuro Aislado y Selector de Categorías Estilo Switch
+st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    header { visibility: hidden !important; height: 0px !important; display: none !important; }
-    #MainMenu { visibility: hidden !important; }
-    footer { visibility: hidden !important; }
-    .stDeployButton { display: none !important; }
+    header {{ visibility: hidden !important; height: 0px !important; display: none !important; }}
+    #MainMenu {{ visibility: hidden !important; }}
+    footer {{ visibility: hidden !important; }}
+    .stDeployButton {{ display: none !important; }}
     
-    .block-container {
+    .block-container {{
         padding-top: 0.5rem !important;
         padding-bottom: 3rem !important;
-        background-color: #f8f7f4 !important;
+        background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(6px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
 
-    .stApp, body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: #f8f7f4 !important;
-        color: #222222 !important;
-    }
+    .stApp, body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+        background-color: {bg_color} !important;
+        color: {text_color} !important;
+    }}
 
-    div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {
+    div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {{
         background-color: transparent !important;
-        color: #222222 !important;
-    }
+        color: {text_color} !important;
+    }}
 
-    .app-title {
+    .app-title {{
         font-size: 2.3rem !important;
         font-weight: 900 !important;
-        color: #1a202c !important;
+        color: {text_color} !important;
         margin: 0 !important;
         line-height: 1.0 !important;
-    }
-    .app-subtitle {
+    }}
+    .app-subtitle {{
         font-size: 0.9rem !important;
-        color: #4a5568 !important;
+        color: {sub_text_color} !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
         display: block;
-    }
+    }}
 
-    /* BOTÓN DE WHATSAPP INACTIVO (NEGRO ELEGANTE) */
-    .whatsapp-btn-disabled {
-        background-color: #1a202c !important;
+    /* BOTÓN DE WHATSAPP INACTIVO (NEGRO ELEGANTE / OSCURO) */
+    .whatsapp-btn-disabled {{
+        background-color: {"#334155" if is_dark else "#1a202c"} !important;
         color: #ffffff !important;
         padding: 14px;
         border-radius: 14px;
@@ -151,10 +164,10 @@ st.markdown("""
         display: block;
         width: 100%;
         box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
+    }}
 
     /* BOTÓN DE WHATSAPP ACTIVO (NARANJA VIBRANTE CON PULSO) */
-    .whatsapp-btn-active {
+    .whatsapp-btn-active {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
         padding: 14px;
@@ -169,25 +182,25 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(255, 82, 0, 0.4);
         animation: pulseButton 1.5s infinite;
         transition: transform 0.2s ease;
-    }
-    .whatsapp-btn-active:hover {
+    }}
+    .whatsapp-btn-active:hover {{
         transform: scale(1.02);
-    }
+    }}
 
-    @keyframes pulseButton {
-        0% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.5); }
-        70% { box-shadow: 0 0 0 10px rgba(255, 82, 0, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }
-    }
+    @keyframes pulseButton {{
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.5); }}
+        70% {{ box-shadow: 0 0 0 10px rgba(255, 82, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
+    }}
 
-    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {
-        color: #1a202c !important;
+    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {{
+        color: {text_color} !important;
         font-weight: 700 !important;
         font-size: 1rem !important;
-    }
+    }}
 
-    /* TODOS LOS BOTONES GENERALES DE LA APP VUELVEN A SER NARANJA */
-    button, .stButton > button, div[data-testid="stButton"] > button {
+    /* BOTONES GENERALES DE LA APP EN NARANJA */
+    button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: #ff5200 !important;
         color: #ffffff !important;
         border: none !important;
@@ -195,88 +208,88 @@ st.markdown("""
         font-weight: 700 !important;
         box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
         transition: all 0.2s ease-in-out !important;
-    }
-    button:hover, .stButton > button:hover {
+    }}
+    button:hover, .stButton > button:hover {{
         background-color: #e04800 !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 12px rgba(255, 82, 0, 0.35) !important;
         color: #ffffff !important;
-    }
-    button p, .stButton > button p, button span {
+    }}
+    button p, .stButton > button p, button span {{
         color: #ffffff !important;
-    }
+    }}
 
     /* Botones de cantidad ampliados */
-    div[data-testid="column"] button {
+    div[data-testid="column"] button {{
         font-size: 1.6rem !important;
         font-weight: 900 !important;
         padding: 4px 0px !important;
         min-height: 48px !important;
-    }
-    .qty-number {
+    }}
+    .qty-number {{
         font-size: 1.5rem !important;
         font-weight: 900 !important;
         text-align: center;
-        color: #1a202c !important;
+        color: {text_color} !important;
         margin-top: 10px;
-    }
+    }}
 
-    input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
-        background-color: #ffffff !important;
-        color: #222222 !important;
-        -webkit-text-fill-color: #222222 !important;
-        border: 1px solid #cbd5e0 !important;
+    input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
+        background-color: {input_bg} !important;
+        color: {text_color} !important;
+        -webkit-text-fill-color: {text_color} !important;
+        border: 1px solid {border_color} !important;
         border-radius: 10px !important;
         box-shadow: none !important;
-    }
-    input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
+    }}
+    input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {{
         border-color: #ff5200 !important;
         box-shadow: 0 0 0 3px rgba(255,82,0,0.18) !important;
-    }
-    input::placeholder, textarea::placeholder {
-        color: #a0aec0 !important;
-        -webkit-text-fill-color: #a0aec0 !important;
-    }
+    }}
+    input::placeholder, textarea::placeholder {{
+        color: #94a3b8 !important;
+        -webkit-text-fill-color: #94a3b8 !important;
+    }}
 
-    .material-symbols-outlined {
+    .material-symbols-outlined {{
         font-family: 'Material Symbols Outlined' !important;
         font-size: 22px !important;
         vertical-align: middle;
         line-height: 1;
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
+    }}
 
-    .product-card {
-        background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
+    .product-card {{
+        background-color: {card_bg} !important;
+        border: 1px solid {border_color} !important;
         border-radius: 16px;
         padding: 14px;
         margin-bottom: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         transition: transform 0.25s ease, box-shadow 0.25s ease !important;
-    }
-    .product-card:hover {
+    }}
+    .product-card:hover {{
         transform: translateY(-3px);
         box-shadow: 0 6px 16px rgba(0,0,0,0.07);
-    }
-    .product-title {
+    }}
+    .product-title {{
         font-size: 1.15rem;
         font-weight: 800;
         margin-bottom: 2px;
-        color: #1a202c !important;
-    }
-    .product-desc {
+        color: {text_color} !important;
+    }}
+    .product-desc {{
         font-size: 0.85rem;
-        color: #718096 !important;
+        color: {sub_text_color} !important;
         margin-bottom: 6px;
-    }
-    .product-price {
+    }}
+    .product-price {{
         font-size: 1.15rem;
         font-weight: bold;
         color: #ff5200 !important;
-    }
+    }}
 
-    .promo-banner {
+    .promo-banner {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
         padding: 14px 18px;
@@ -286,19 +299,19 @@ st.markdown("""
         font-size: 0.95rem;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
-    }
+    }}
 
-    .slideshow-container {
+    .slideshow-container {{
         position: relative;
         max-width: 100%;
         height: 230px;
         margin-bottom: 18px;
         border-radius: 16px;
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        border: 1px solid {border_color};
         box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }
-    .slide {
+    }}
+    .slide {{
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         opacity: 0;
@@ -308,26 +321,26 @@ st.markdown("""
         display: flex;
         align-items: flex-end;
         padding: 16px;
-    }
-    .slide:nth-child(1) { animation-delay: 0s; }
-    .slide:nth-child(2) { animation-delay: 4s; }
-    .slide:nth-child(3) { animation-delay: 8s; }
+    }}
+    .slide:nth-child(1) {{ animation-delay: 0s; }}
+    .slide:nth-child(2) {{ animation-delay: 4s; }}
+    .slide:nth-child(3) {{ animation-delay: 8s; }}
     
-    @keyframes slideAnimation {
-        0% { opacity: 0; }
-        10% { opacity: 1; }
-        33% { opacity: 1; }
-        43% { opacity: 0; }
-        100% { opacity: 0; }
-    }
-    .slide-text {
+    @keyframes slideAnimation {{
+        0% {{ opacity: 0; }}
+        10% {{ opacity: 1; }}
+        33% {{ opacity: 1; }}
+        43% {{ opacity: 0; }}
+        100% {{ opacity: 0; }}
+    }}
+    .slide-text {{
         background: rgba(255, 82, 0, 0.85);
         color: white;
         padding: 6px 14px;
         border-radius: 12px;
         font-size: 0.88rem;
         font-weight: 600;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -395,7 +408,7 @@ if tab == "Inicio":
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Selector de Categorías Dinámicas (Activa = Naranja, Inactivas = Gris elegante)
+    # Selector de Categorías (Switch Dinámico: Activa en Naranja, Inactivas en Gris)
     category_options = ["Todo", "Individual", "Para compartir"]
     
     cat_cols = st.columns(len(category_options))
@@ -403,32 +416,27 @@ if tab == "Inicio":
         with cat_cols[i]:
             is_active = (st.session_state.selected_cat == cat)
             
-            # Inyectar estilos específicos únicamente para los botones de categoría según su estado
-            if is_active:
-                st.markdown("""
-                <style>
-                    div[data-testid="column"]:nth-of-type(""" + str(i+1) + """) button {
-                        background-color: #ff5200 !important;
-                        color: #ffffff !important;
-                    }
-                </style>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                <style>
-                    div[data-testid="column"]:nth-of-type(""" + str(i+1) + """) button {
-                        background-color: #e2e8f0 !important;
-                        color: #4a5568 !important;
-                        border: 1px solid #cbd5e0 !important;
-                        box-shadow: none !important;
-                    }
-                    div[data-testid="column"]:nth-of-type(""" + str(i+1) + """) button:hover {
-                        background-color: #cbd5e0 !important;
-                        color: #1a202c !important;
-                        transform: translateY(-1px) !important;
-                    }
-                </style>
-                """, unsafe_allow_html=True)
+            # Aplicar color naranja si está activa, o gris elegante si está inactiva (exclusivo para los 3 botones de categoría)
+            active_bg = "#ff5200"
+            inactive_bg = "#334155" if is_dark else "#e2e8f0"
+            inactive_color = "#f8f7f4" if is_dark else "#4a5568"
+            
+            btn_bg = active_bg if is_active else inactive_bg
+            btn_fg = "#ffffff" if is_active else inactive_color
+            
+            st.markdown(f"""
+            <style>
+                div[data-testid="column"]:nth-of-type({i+1}) button {{
+                    background-color: {btn_bg} !important;
+                    color: {btn_fg} !important;
+                    border: none !important;
+                }}
+                div[data-testid="column"]:nth-of-type({i+1}) button:hover {{
+                    background-color: {"#e04800" if is_active else ("#475569" if is_dark else "#cbd5e0")} !important;
+                    color: #ffffff !important;
+                }}
+            </style>
+            """, unsafe_allow_html=True)
 
             if st.button(cat, use_container_width=True):
                 st.session_state.selected_cat = cat
@@ -443,7 +451,7 @@ if tab == "Inicio":
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
+            cat_filtered = [p for p in current_products_list if p.get("category"] == st.session_state.selected_cat]
 
         # Filtrar por buscador
         filtered_products = [
@@ -556,7 +564,7 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración Discreto
+# 6. Panel de Administración y Selector de Tema Oscuro Aislado (Hasta Abajo)
 st.write("---")
 col_space, col_admin_btn = st.columns([5, 1])
 with col_admin_btn:
@@ -575,3 +583,12 @@ if st.session_state.get("show_admin_login", False):
             st.rerun()
     elif admin_key:
         st.error("Contraseña incorrecta.")
+
+# Selector de Tema Oscuro (Aislado hasta el fondo de la página)
+st.write("")
+st.write("")
+with st.expander("Configuración de Apariencia (Tema Oscuro)"):
+    new_dark_mode = st.toggle("Activar Tema Gris Oscuro", value=st.session_state.dark_mode)
+    if new_dark_mode != st.session_state.dark_mode:
+        st.session_state.dark_mode = new_dark_mode
+        st.rerun()
