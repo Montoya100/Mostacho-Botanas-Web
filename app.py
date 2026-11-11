@@ -61,8 +61,8 @@ def load_saved_slider():
                         if isinstance(item, dict):
                             u = str(item.get("url", "")).strip()
                             c = str(item.get("caption", "")).strip()
-                            if u:
-                                cleaned.append({"url": u, "caption": c if c else "Mostacho Botanas"})
+                            if u and u.lower() != "nan":
+                                cleaned.append({"url": u, "caption": c if c and c.lower() != "nan" else "Mostacho Botanas"})
                     if cleaned:
                         return cleaned[:6]
         except:
@@ -76,7 +76,7 @@ def save_slider_to_file(slider_list):
     except:
         pass
 
-if "slider_items" not in st.session_state:
+if "slider_items" not in st.session_state or not st.session_state.slider_items:
     st.session_state.slider_items = load_saved_slider()
 
 @st.cache_data(ttl=60)
@@ -267,12 +267,34 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON TEXTO BLANCO PURO */
+    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON POSICIONAMIENTO FIJO Y Z-INDEX ALTO */
     .floating-fab-container {{
         position: fixed;
         bottom: 24px;
         right: 24px;
         z-index: 999999;
+    }}
+    
+    /* Forzar texto blanco en el botón flotante del carrito */
+    div.floating-fab-container button {{
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
+        color: #ffffff !important;
+        border-radius: 50px !important;
+        padding: 12px 24px !important;
+        font-size: 1.1rem !important;
+        font-weight: 800 !important;
+        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
+        animation: pulseButton 2s infinite;
+    }}
+    div.floating-fab-container button p, 
+    div.floating-fab-container button span {{
+        color: #ffffff !important;
+    }}
+
+    @keyframes pulseButton {{
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
+        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
     }}
 
     .whatsapp-btn-disabled {{
@@ -727,7 +749,7 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON ACCIÓN REAL Y TEXTO BLANCO
+# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON TEXTO BLANCO PURO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
     st.markdown('<div class="floating-fab-container">', unsafe_allow_html=True)
@@ -842,8 +864,12 @@ def admin_modal():
             st.markdown("### Configuración del Carrusel (Hasta 6 Imágenes)")
             st.caption("Administra las imágenes y textos que rotan en la parte superior de tu tienda (recomendado: 1200x600 px).")
             
-            current_slider_data = st.session_state.slider_items if st.session_state.slider_items else DEFAULT_SLIDER
-            df_slider = pd.DataFrame(current_slider_data)
+            raw_slider_items = st.session_state.slider_items if st.session_state.slider_items else DEFAULT_SLIDER
+            df_slider = pd.DataFrame(raw_slider_items)
+            if "url" not in df_slider.columns:
+                df_slider["url"] = ""
+            if "caption" not in df_slider.columns:
+                df_slider["caption"] = ""
             
             slider_column_config = {
                 "url": st.column_config.TextColumn("URL de la Imagen", required=True, help="Enlace directo o ruta en assets/"),
@@ -851,7 +877,7 @@ def admin_modal():
             }
             
             edited_slider_df = st.data_editor(
-                df_slider,
+                df_slider[["url", "caption"]],
                 num_rows="dynamic",
                 max_rows=6,
                 key="editor_slider_table",
@@ -865,10 +891,10 @@ def admin_modal():
                 for _, row in edited_slider_df.iterrows():
                     u = str(row.get("url", "")).strip()
                     c = str(row.get("caption", "")).strip()
-                    if u and u.lower() != "nan":
+                    if u and u.lower() != "nan" and u != "":
                         new_slider_list.append({
                             "url": u,
-                            "caption": c if c and c.lower() != "nan" else "Mostacho Botanas"
+                            "caption": c if c and c.lower() != "nan" and c != "" else "Mostacho Botanas"
                         })
                 if new_slider_list:
                     st.session_state.slider_items = new_slider_list[:6]
