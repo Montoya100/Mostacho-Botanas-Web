@@ -35,7 +35,6 @@ def fetch_loyverse_products():
         if items_res.status_code == 200:
             for item in items_res.json().get("items", []):
                 cat_name = item.get("category_name", "Chicos")
-                # Si no tiene categoría asignada o viene vacía, por defecto le ponemos "Chicos"
                 if not cat_name:
                     cat_name = "Chicos"
                     
@@ -62,7 +61,7 @@ def fetch_loyverse_products():
                         products_list.append({
                             "id": str(var.get("variant_id", item.get("id"))),
                             "name": display_name,
-                            "category": cat_name, # Se puede modificar desde Admin (ej: Chicos, Para compartir, Detalles)
+                            "category": cat_name,
                             "price": price,
                             "description": desc,
                             "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
@@ -70,7 +69,6 @@ def fetch_loyverse_products():
     except:
         pass
 
-    # Respaldo si falla la red
     if not products_list:
         products_list = [
             {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Chicos", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
@@ -82,12 +80,11 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Blindaje contra recuadros negros y forzar Tema Claro Suave
+# 3. Estilos CSS: Blindaje de recuadros (Naranja suave + texto blanco), Estilo Píldora One UI y Diapositivas más altas
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* Ocultar elementos nativos de Streamlit / GitHub */
     header { visibility: hidden !important; height: 0px !important; display: none !important; }
     #MainMenu { visibility: hidden !important; }
     footer { visibility: hidden !important; }
@@ -98,45 +95,48 @@ st.markdown("""
         padding-bottom: 3rem !important;
     }
 
-    /* FORZAR TEMA CLARO ABSOLUTO: Bloquear recuadros oscuros o negros del navegador */
+    /* Fondo general marfil suave ergonómico */
     .stApp, body, html {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f8f7f4 !important;
         color: #222222 !important;
     }
 
-    /* Forzar fondos blancos limpios en inputs, textos y selectores */
+    /* Neutralizar recuadros oscuros o negros dándoles un tono naranja suave y texto blanco */
+    div[data-testid="stInfoBox"], div[data-testid="stAlert"], .stAlert, div.element-container {
+        color: #ffffff !important;
+    }
+
+    /* Inputs y Buscador en formato Píldora One UI (Naranja suave de fondo con texto blanco o neutro impecable) */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
-        border-color: #cbd5e0 !important;
+        border-color: #e2e8f0 !important;
+        border-radius: 30px !important;
     }
     input::placeholder, textarea::placeholder {
-        color: #a0aec0 !important;
-        -webkit-text-fill-color: #a0aec0 !important;
+        color: #718096 !important;
+        -webkit-text-fill-color: #718096 !important;
     }
 
-    /* Eliminar fondos negros residuales en contenedores genéricos de Streamlit */
-    div[data-testid="stVerticalBlock"] > div {
-        background-color: transparent !important;
-    }
-
+    /* Forzar diseño Outline limpio en iconos de Google */
     .material-symbols-outlined {
         font-family: 'Material Symbols Outlined' !important;
-        font-size: 20px;
+        font-size: 22px !important;
         vertical-align: middle;
         line-height: 1;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* Tarjetas de Producto limpias */
+    /* Tarjetas de Producto estilo píldora/redondeadas */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-radius: 14px;
-        padding: 12px;
-        margin-bottom: 10px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        border-radius: 20px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .product-title {
         font-size: 1.1rem;
@@ -159,23 +159,25 @@ st.markdown("""
     .promo-banner {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
-        padding: 12px 16px;
-        border-radius: 14px;
+        padding: 14px 18px;
+        border-radius: 30px;
         text-align: center;
         font-weight: 700;
         font-size: 0.95rem;
-        margin-bottom: 14px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }
 
-    /* Carrusel / Slideshow */
+    /* Carrusel / Slideshow Más Alto y Estilo Píldora */
     .slideshow-container {
         position: relative;
         max-width: 100%;
-        height: 180px;
-        margin-bottom: 16px;
-        border-radius: 14px;
+        height: 230px; /* Más alto como solicitaste */
+        margin-bottom: 18px;
+        border-radius: 24px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
     .slide {
         position: absolute;
@@ -186,7 +188,7 @@ st.markdown("""
         background-position: center;
         display: flex;
         align-items: flex-end;
-        padding: 14px;
+        padding: 16px;
     }
     .slide:nth-child(1) { animation-delay: 0s; }
     .slide:nth-child(2) { animation-delay: 4s; }
@@ -200,11 +202,11 @@ st.markdown("""
         100% { opacity: 0; }
     }
     .slide-text {
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(255, 82, 0, 0.85); /* Naranja corporativo elegante */
         color: white;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 0.85rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.88rem;
         font-weight: 600;
     }
 </style>
@@ -212,7 +214,7 @@ st.markdown("""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("Producto agregado al carrito", icon=None)
+    st.toast("Producto agregado al carrito")
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -224,7 +226,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Icono Outline
+# 4. Header Superior con Iconos Outline de Google
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -246,20 +248,20 @@ with col_cart_btn:
 
 st.write("---")
 
-# 5. Vistas
+# 5. Vistas de la aplicación
 if tab == "Inicio":
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
         if st.button("Compartir", use_container_width=True):
-            st.toast("Enlace listo para enviar por WhatsApp", icon=None)
+            st.toast("Enlace listo para enviar por WhatsApp")
 
-    # Banner con texto comercial alusivo (Sin mencionar "plataforma")
+    # Banner con icono outline
     st.markdown(
-        '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -3px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
-    # Carrusel Publicitario
+    # Carrusel Publicitario más alto
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
@@ -274,10 +276,10 @@ if tab == "Inicio":
     </div>
     """, unsafe_allow_html=True)
 
-    # Buscador con icono outline
+    # Buscador estilo píldora
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Obtener categorías únicas dinámicas desde los productos (configurables desde Admin)
+    # Categorías dinámicas
     all_categories = sorted(list(set([p.get("category", "Chicos") for p in st.session_state.products if isinstance(p, dict)])))
     if not all_categories:
         all_categories = ["Chicos", "Para compartir", "Detalles"]
@@ -388,11 +390,10 @@ elif tab == "Carrito":
         else:
             st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
 
-# 6. Panel de Administración Sutil y en Botón Pequeño al Pie
+# 6. Panel de Administración Discreto
 st.write("---")
 col_space, col_admin_btn = st.columns([5, 1])
 with col_admin_btn:
-    # Botón chiquito alineado a la derecha que solo ocupa lo del texto
     if st.button("Admin", use_container_width=True):
         st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
 
