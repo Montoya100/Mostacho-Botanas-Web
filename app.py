@@ -56,7 +56,15 @@ def load_saved_slider():
             with open(SLIDER_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list) and len(data) > 0:
-                    return data
+                    cleaned = []
+                    for item in data:
+                        if isinstance(item, dict):
+                            u = str(item.get("url", "")).strip()
+                            c = str(item.get("caption", "")).strip()
+                            if u:
+                                cleaned.append({"url": u, "caption": c if c else "Mostacho Botanas"})
+                    if cleaned:
+                        return cleaned[:6]
         except:
             pass
     return DEFAULT_SLIDER
@@ -259,36 +267,12 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) SIEMPRE A LA MANO PARA EL CARRITO */
-    .floating-cart-btn {{
+    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON TEXTO BLANCO PURO */
+    .floating-fab-container {{
         position: fixed;
         bottom: 24px;
         right: 24px;
         z-index: 999999;
-        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
-        color: white;
-        padding: 14px 22px;
-        border-radius: 50px;
-        font-weight: 800;
-        font-size: 1.05rem;
-        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.5);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        animation: pulseButton 2s infinite;
-    }}
-    .floating-cart-btn:hover {{
-        transform: scale(1.05);
-        color: white !important;
-        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.7);
-    }}
-
-    @keyframes pulseButton {{
-        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
-        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
     }}
 
     .whatsapp-btn-disabled {{
@@ -466,8 +450,9 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Inyectar animación dinámica calculada según cuántas imágenes tenga el carrusel (ej. 4s por imagen)
-total_slides = len(st.session_state.slider_items) if st.session_state.slider_items else 1
+# Inyectar animación dinámica calculada según cuántas imágenes tenga el carrusel
+slider_items_safe = st.session_state.slider_items if st.session_state.slider_items and len(st.session_state.slider_items) > 0 else DEFAULT_SLIDER
+total_slides = len(slider_items_safe)
 total_duration = total_slides * 4
 animation_css = f"""
 <style>
@@ -545,7 +530,7 @@ if tab == "Inicio":
     
     # CARRUSEL DINÁMICO ROTATIVO (HASTA 6 IMÁGENES)
     slides_html = '<div class="slideshow-container">'
-    for idx, slide_item in enumerate(st.session_state.slider_items):
+    for idx, slide_item in enumerate(slider_items_safe):
         slides_html += f'''
         <div class="slide" style="background-image: url('{slide_item.get("url", "https://via.placeholder.com/1200")}'); animation-delay: {idx * 4}s;">
             <div class="slide-text">{slide_item.get("caption", "Mostacho Botanas")}</div>
@@ -742,17 +727,16 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) PARA ACCESO AL CARRITO
+# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON ACCIÓN REAL Y TEXTO BLANCO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
-    st.markdown(f"""
-    <a href="#carrito" onclick="window.location.reload();" target="_self" class="floating-cart-btn" style="cursor: pointer;">
-        <span class="material-symbols-outlined" style="font-size: 26px; color: white;">shopping_cart</span>
-        Ver Carrito ({total_items})
-    </a>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="floating-fab-container">', unsafe_allow_html=True)
+    if st.button(f":material/shopping_cart: Ver Carrito ({total_items})", type="primary", use_container_width=False, key="fab_cart_btn"):
+        st.session_state.nav_tab = "Carrito"
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# 6. Panel de Administración y Configuración en POP-UP (Modal) con Gestión de Carrusel (Hasta 6 imágenes)
+# 6. Panel de Administración y Configuración en POP-UP (Modal) con Gestión Robusta del Carrusel
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
@@ -776,7 +760,6 @@ def admin_modal():
     else:
         st.success("¡Acceso concedido!")
         
-        # PESTAÑAS DE ADMINISTRACIÓN (INCLUYENDO GESTIÓN DEL CARRUSEL HASTA 6 IMÁGENES)
         tab_prod, tab_pop, tab_slider, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "🖼️ Carrusel (Banner)", "📤 Subir Imágenes"])
         
         with tab_prod:
@@ -859,7 +842,8 @@ def admin_modal():
             st.markdown("### Configuración del Carrusel (Hasta 6 Imágenes)")
             st.caption("Administra las imágenes y textos que rotan en la parte superior de tu tienda (recomendado: 1200x600 px).")
             
-            df_slider = pd.DataFrame(st.session_state.slider_items)
+            current_slider_data = st.session_state.slider_items if st.session_state.slider_items else DEFAULT_SLIDER
+            df_slider = pd.DataFrame(current_slider_data)
             
             slider_column_config = {
                 "url": st.column_config.TextColumn("URL de la Imagen", required=True, help="Enlace directo o ruta en assets/"),
@@ -881,18 +865,18 @@ def admin_modal():
                 for _, row in edited_slider_df.iterrows():
                     u = str(row.get("url", "")).strip()
                     c = str(row.get("caption", "")).strip()
-                    if u:
+                    if u and u.lower() != "nan":
                         new_slider_list.append({
                             "url": u,
-                            "caption": c if c else "Mostacho Botanas"
+                            "caption": c if c and c.lower() != "nan" else "Mostacho Botanas"
                         })
                 if new_slider_list:
-                    st.session_state.slider_items = new_slider_list[:6]  # Límite estricto de 6 imágenes
+                    st.session_state.slider_items = new_slider_list[:6]
                     save_slider_to_file(st.session_state.slider_items)
                     st.success("¡Carrusel actualizado con éxito!")
                     st.rerun()
                 else:
-                    st.warning("Debes conservar al menos una imagen en el carrusel.")
+                    st.warning("Debes conservar al menos una imagen válida en el carrusel.")
 
         with tab_upload:
             st.markdown("### Subir Imagen Directamente")
