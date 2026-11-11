@@ -124,7 +124,21 @@ def load_saved_products():
             with open(DATA_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list) and len(data) > 0:
-                    return data
+                    # Asegurar que todos tengan campos mínimos y IDs seguros
+                    cleaned = []
+                    for idx, item in enumerate(data):
+                        if isinstance(item, dict):
+                            item_id = str(item.get("id", f"auto_{idx}"))
+                            item["id"] = item_id if item_id.strip() != "" else f"auto_{idx}"
+                            item["name"] = str(item.get("name", "Sin nombre"))
+                            item["category"] = str(item.get("category", "Individual"))
+                            item["price"] = float(item.get("price", 0.0))
+                            item["description"] = str(item.get("description", ""))
+                            img_val = item.get("image", "")
+                            item["image"] = str(img_val).strip() if pd.notna(img_val) and str(img_val).strip() != "" else "https://via.placeholder.com/300"
+                            cleaned.append(item)
+                    if cleaned:
+                        return cleaned
         except:
             pass
     initial_products = fetch_loyverse_products()
@@ -442,6 +456,11 @@ def remove_from_cart(product_id):
         else:
             del st.session_state.cart[product_id]
 
+# Limpiar carrito si algún producto fue eliminado del inventario
+keys_to_delete = [pid for pid in st.session_state.cart if not any(p.get("id") == pid for p in st.session_state.products)]
+for k in keys_to_delete:
+    del st.session_state.cart[k]
+
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
@@ -521,7 +540,7 @@ if tab == "Inicio":
                         "category": "Individual",
                         "price": pop_p.get('price'),
                         "description": "Producto popular seleccionado.",
-                        "image": pop_p.get('image')
+                        "image": pop_p.get('image', 'https://via.placeholder.com/300')
                     })
                     save_products_to_file(st.session_state.products)
                 add_to_cart(prod_id)
@@ -577,7 +596,10 @@ if tab == "Inicio":
             col_img, col_info, col_action = st.columns([1, 2.5, 1.5])
             
             with col_img:
-                st.image(product.get("image", "https://via.placeholder.com/300"), use_container_width=True)
+                img_src = product.get("image")
+                if not img_src or str(img_src).strip() == "":
+                    img_src = "https://via.placeholder.com/300"
+                st.image(img_src, use_container_width=True)
                 
             with col_info:
                 st.markdown(f'<div class="product-title">{product.get("name")}</div>', unsafe_allow_html=True)
@@ -672,7 +694,7 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Configuración en POP-UP (Modal) Súper Ancho y IDs ocultos
+# 6. Panel de Administración y Configuración en POP-UP (Modal) con ID automático y manejo de vacíos
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
@@ -710,9 +732,8 @@ def admin_modal():
             st.caption("Modifica precios, nombres o asigna la categoría correcta:")
             df_current = pd.DataFrame(st.session_state.products)
             
-            # OCULTAR IDs Y CONFIGURACIÓN DE COLUMNAS
             column_config = {
-                "id": None,  # Oculta la columna ID por defecto
+                "id": None,  # Ocultar ID en la interfaz para ahorrar espacio
                 "category": st.column_config.SelectboxColumn(
                     "Categoría",
                     help="Selecciona estrictamente Individual o Para compartir",
@@ -731,10 +752,28 @@ def admin_modal():
             )
             
             if st.button("Guardar Cambios de Productos"):
-                updated_list = edited_df.to_dict(orient="records")
+                updated_list = []
+                for idx, row in edited_df.iterrows():
+                    # Generación automática de ID si es nuevo o está vacío
+                    raw_id = row.get("id")
+                    prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
+                    
+                    # Manejo seguro de imagen vacía o borrada
+                    raw_img = row.get("image")
+                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" else "https://via.placeholder.com/300"
+                    
+                    updated_list.append({
+                        "id": prod_id,
+                        "name": str(row.get("name", "Nuevo producto")),
+                        "category": str(row.get("category", "Individual")),
+                        "price": float(row.get("price", 0.0)),
+                        "description": str(row.get("description", "")),
+                        "image": prod_img
+                    })
+                    
                 st.session_state.products = updated_list
                 save_products_to_file(updated_list)
-                st.success("¡Productos guardados permanentemente!")
+                st.success("¡Productos guardados permanentemente y IDs/imágenes sincronizados!")
                 st.rerun()
 
         with tab_pop:
@@ -754,7 +793,7 @@ def admin_modal():
                         "id": p_id,
                         "name": p_name,
                         "price": prod.get("price"),
-                        "image": prod.get("image", "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300")
+                        "image": prod.get("image", "https://via.placeholder.com/300")
                     })
             
             if st.button("Guardar Productos Populares"):
