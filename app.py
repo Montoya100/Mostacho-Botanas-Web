@@ -4,13 +4,10 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# Enlace de tu logo en GitHub (O asegúrate de usar tu enlace público válido)
-LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
-
 # 1. Configuración de la página
 st.set_page_config(
-    page_title="Mostacho Botanas Web",
-    page_icon=LOGO_URL,
+    page_title="Mostacho Botanas",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -21,6 +18,9 @@ if "cart" not in st.session_state:
 
 if "nav_tab" not in st.session_state:
     st.session_state.nav_tab = "Inicio"
+
+if "selected_cat" not in st.session_state:
+    st.session_state.selected_cat = "Todo"
 
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
@@ -36,9 +36,16 @@ def fetch_loyverse_products():
         items_res = requests.get("https://api.loyverse.com/v1.0/items", headers=headers, timeout=5)
         if items_res.status_code == 200:
             for item in items_res.json().get("items", []):
-                cat_name = item.get("category_name", "Chicos")
+                cat_name = item.get("category_name", "Individual")
                 if not cat_name:
-                    cat_name = "Chicos"
+                    cat_name = "Individual"
+                
+                # Normalizar categorías de Loyverse a nuestras tres opciones
+                cat_lower = cat_name.lower()
+                if "compartir" in cat_lower or "familiar" in cat_lower:
+                    category_mapped = "Para compartir"
+                else:
+                    category_mapped = "Individual"
                     
                 variants = item.get("variants", [])
                 item_name = item.get("item_name", "Producto")
@@ -63,7 +70,7 @@ def fetch_loyverse_products():
                         products_list.append({
                             "id": str(var.get("variant_id", item.get("id"))),
                             "name": display_name,
-                            "category": cat_name,
+                            "category": category_mapped,
                             "price": price,
                             "description": desc,
                             "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
@@ -73,16 +80,16 @@ def fetch_loyverse_products():
 
     if not products_list:
         products_list = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Chicos", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
             {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mezcla ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-            {"id": "p3", "name": "Frasco Regalo Pistache", "category": "Detalles", "price": 150.0, "description": "Frasco de cristal decorado.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+            {"id": "p3", "name": "Cahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cahuates crujientes tradicionales.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
         ]
     return products_list
 
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS con Animaciones y Estados Dinámicos para el Botón de WhatsApp
+# 3. Estilos CSS: Cero Emojis, Botón Negro/Naranja dinámico y Logotipo Corporativo profesional
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -114,6 +121,22 @@ st.markdown("""
         color: #222222 !important;
     }
 
+    /* INSIGNIA DE LOGOTIPO CORPORATIVO PROFESIONAL (GARANTIZADO SIN ERRORES) */
+    .brand-logo-badge {
+        width: 52px;
+        height: 52px;
+        background: linear-gradient(135deg, #ff5200 0%, #1a202c 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 10px rgba(255, 82, 0, 0.3);
+        border: 2px solid #ffffff;
+    }
+
     .app-title {
         font-size: 1.85rem !important;
         font-weight: 900 !important;
@@ -123,41 +146,26 @@ st.markdown("""
     }
     .app-subtitle {
         font-size: 0.9rem !important;
-        color: #2d3748 !important;
+        color: #4a5568 !important;
         font-weight: 700 !important;
     }
 
-    .whatsapp-alert {
-        background-color: #25d366 !important;
-        color: #ffffff !important;
-        padding: 14px 18px;
-        border-radius: 14px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
-    }
-
-    /* ESTILO DINÁMICO PARA EL BOTÓN DE WHATSAPP INACTIVO (GRIS ATENUADO) */
+    /* BOTÓN DE WHATSAPP INACTIVO (NEGRO ELEGANTE) */
     .whatsapp-btn-disabled {
-        background-color: #cbd5e0 !important;
-        color: #718096 !important;
+        background-color: #1a202c !important;
+        color: #ffffff !important;
         padding: 14px;
         border-radius: 14px;
         text-align: center;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 0.95rem;
         margin-top: 10px;
-        cursor: not-allowed;
-        border: none;
         display: block;
         width: 100%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    /* ESTILO DINÁMICO PARA EL BOTÓN DE WHATSAPP ACTIVO (NARANJA VIBRANTE CON PULSO) */
+    /* BOTÓN DE WHATSAPP ACTIVO (NARANJA VIBRANTE CON PULSO) */
     .whatsapp-btn-active {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
@@ -230,7 +238,6 @@ st.markdown("""
         border: 1px solid #cbd5e0 !important;
         border-radius: 10px !important;
         box-shadow: none !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
     input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
         border-color: #ff5200 !important;
@@ -336,7 +343,7 @@ st.markdown("""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("🛒 ¡Producto agregado al carrito!")
+    st.toast("Producto agregado al carrito")
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -348,13 +355,13 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo y Título
+# 4. Header Superior con Insignia de Logo Profesional
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
-    st.markdown(f"""
+    st.markdown("""
     <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="{LOGO_URL}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
+        <div class="brand-logo-badge">M</div>
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
             <span class="app-subtitle">Catálogo y Pedidos</span>
@@ -363,8 +370,8 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
-    cart_label = f":material/shopping_cart: Carrito ({total_items})" if total_items > 0 else ":material/shopping_cart: Carrito"
-    if st.button(cart_label, use_container_width=True):
+    cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
+    if st.button(f'<span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 4px;">shopping_cart</span> {cart_label}', use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
 
@@ -374,7 +381,7 @@ st.write("---")
 if tab == "Inicio":
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
-        if st.button(":material/share: Compartir", use_container_width=True):
+        if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 4px;">share</span> Compartir', use_container_width=True):
             st.toast("Enlace listo para enviar por WhatsApp")
 
     st.markdown(
@@ -398,18 +405,33 @@ if tab == "Inicio":
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    all_categories = sorted(list(set([p.get("category", "Chicos") for p in st.session_state.products if isinstance(p, dict)])))
-    if not all_categories:
-        all_categories = ["Chicos", "Para compartir", "Detalles"]
+    # Selector de Categorías (Todo, Individual, Para compartir)
+    category_options = ["Todo", "Individual", "Para compartir"]
+    
+    # Renderizar botones de categoría en scroll horizontal / fila
+    cat_cols = st.columns(len(category_options))
+    for i, cat in enumerate(category_options):
+        with cat_cols[i]:
+            btn_type = "primary" if st.session_state.selected_cat == cat else "secondary"
+            if st.button(cat, use_container_width=True, type=btn_type):
+                st.session_state.selected_cat = cat
+                st.rerun()
 
-    selected_category = st.radio("Categorías", all_categories, horizontal=True, label_visibility="collapsed")
     st.write("---")
 
     try:
         current_products_list = st.session_state.products
+        
+        # Filtrar por categoría seleccionada
+        if st.session_state.selected_cat == "Todo":
+            cat_filtered = current_products_list
+        else:
+            cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
+
+        # Filtrar por buscador
         filtered_products = [
-            p for p in current_products_list 
-            if isinstance(p, dict) and p.get("category") == selected_category and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
+            p for p in cat_filtered 
+            if isinstance(p, dict) and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
         ]
     except:
         filtered_products = []
@@ -451,11 +473,11 @@ if tab == "Inicio":
             st.markdown('</div>', unsafe_allow_html=True)
 
 elif tab == "Carrito":
-    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False):
+    if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 4px;">arrow_back</span> Volver al Catálogo', use_container_width=False):
         st.session_state.nav_tab = "Inicio"
         st.rerun()
         
-    st.markdown("### :material/shopping_cart: Carrito de Compras")
+    st.markdown("### <span class=\"material-symbols-outlined\" style=\"vertical-align: -4px;\">shopping_cart</span> Carrito de Compras", unsafe_allow_html=True)
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -470,34 +492,35 @@ elif tab == "Carrito":
             if p:
                 subtotal = float(p.get("price", 0)) * qty
                 total_price += subtotal
-                order_summary.append(f"• {qty}x {p.get('name')} - ${subtotal:.2f}")
+                order_summary.append(f"- {qty}x {p.get('name')} - ${subtotal:.2f} MXN")
                 
                 col_c1, col_c2 = st.columns([3, 1])
                 with col_c1:
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
+                    if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; font-size: 16px;">delete</span> Quitar', key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
+        st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
         
-        st.subheader(":material/local_shipping: Datos de Entrega")
-        customer_name = st.text_input("Nombre del cliente * (Obligatorio)", placeholder="Ej. Juan Pérez")
-        customer_address = st.text_area("Dirección / Referencias * (Obligatorio)", placeholder="Calle, número, colonia...")
+        st.subheader("Datos de Entrega")
+        customer_name = st.text_input("Nombre del cliente (Obligatorio)", placeholder="Ej. Juan Perez")
+        customer_address = st.text_area("Direccion / Referencias (Obligatorio)", placeholder="Calle, numero, colonia...")
         customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
         
         order_folio = f"MOSTACHO-{datetime.now().strftime('%H%M%S')}"
         order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
         
-        msg_header = f"📌 *NUEVO PEDIDO* `[{order_folio}]`\n📅 *Fecha:* {order_date}\n\n"
-        msg_items = "*Detalle de Productos:*\n" + "\n".join(order_summary) + "\n\n"
-        msg_total = f"*Total:* ${total_price:.2f} MXN\n\n"
-        msg_customer = f"*Cliente:* {customer_name}\n"
-        msg_address = f"*Dirección:* {customer_address}\n"
-        msg_notes = f"*Notas:* {customer_notes}\n" if customer_notes else ""
+        # MENSAJE DE WHATSAPP PROFESIONAL Y LIMPIO (SIN TEXTOS RAROS NI EMOJIS)
+        msg_header = f"NUEVO PEDIDO [{order_folio}]\nFecha: {order_date}\n\n"
+        msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
+        msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
+        msg_customer = f"CLIENTE: {customer_name}\n"
+        msg_address = f"DIRECCION: {customer_address}\n"
+        msg_notes = f"NOTAS: {customer_notes}\n" if customer_notes else ""
         
         full_message = msg_header + msg_items + msg_total + msg_customer + msg_address + msg_notes
         encoded_message = urllib.parse.quote(full_message)
@@ -507,12 +530,12 @@ elif tab == "Carrito":
         # Validar si nombre y dirección están completos
         if customer_name.strip() and customer_address.strip():
             st.markdown(
-                f'<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">💬 Enviar Pedido por WhatsApp ({order_folio})</a>',
+                f'<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">Enviar Pedido por WhatsApp ({order_folio})</a>',
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                '<div class="whatsapp-btn-disabled">💬 Completa Nombre y Dirección para activar WhatsApp</div>',
+                '<div class="whatsapp-btn-disabled">Completa Nombre y Direccion para activar el envio</div>',
                 unsafe_allow_html=True
             )
 
@@ -520,11 +543,11 @@ elif tab == "Carrito":
 st.write("---")
 col_space, col_admin_btn = st.columns([5, 1])
 with col_admin_btn:
-    if st.button(":material/settings: Admin", use_container_width=True):
+    if st.button("Admin", use_container_width=True):
         st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
 
 if st.session_state.get("show_admin_login", False):
-    admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contraseña...")
+    admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contrasena...")
     if admin_key == "1234":
         st.success("Acceso concedido")
         df_current = pd.DataFrame(st.session_state.products)
