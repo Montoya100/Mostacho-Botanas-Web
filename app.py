@@ -42,7 +42,7 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DEL CARRUSEL (3 IMÁGENES FIJAS OBLIGATORIAS: PISTACHES, CACAHUATES, SEMILLAS)
+# GESTIÓN DEL CARRUSEL (3 IMÁGENES FIJAS: PISTACHES, CACAHUATES, SEMILLAS)
 # ==========================================
 DEFAULT_SLIDER = [
     {
@@ -276,31 +276,28 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) ABSOLUTO EN HTML PURO PARA GARANTIZAR VISIBILIDAD PERMANENTE Y TEXTO BLANCO */
-    .true-floating-fab {{
+    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) ABSOLUTO CON TEXTO BLANCO */
+    .floating-fab-container {{
         position: fixed !important;
-        bottom: 25px !important;
-        right: 25px !important;
+        bottom: 24px !important;
+        right: 24px !important;
         z-index: 99999999 !important;
+    }}
+    
+    .floating-fab-container button {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
-        padding: 14px 22px !important;
         border-radius: 50px !important;
-        font-weight: 800 !important;
+        padding: 12px 22px !important;
         font-size: 1.05rem !important;
+        font-weight: 800 !important;
         box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        text-decoration: none !important;
         border: none !important;
-        cursor: pointer !important;
         animation: pulseButton 2s infinite;
     }}
-    .true-floating-fab:hover {{
-        transform: scale(1.05);
+    .floating-fab-container button p, 
+    .floating-fab-container button span {{
         color: #ffffff !important;
-        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.8) !important;
     }}
 
     @keyframes pulseButton {{
@@ -449,7 +446,7 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL DINÁMICO (3 IMÁGENES EXACTAS DE 4 SEGUNDOS CADA UNA = 12s TOTAL) */
+    /* CARRUSEL DINÁMICO (3 IMÁGENES EXACTAS DE 4 SEGUNDOS CADA UNA) */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -549,7 +546,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL CON LAS 3 IMÁGENES (PISTACHES, CACAHUATES, SEMILLAS)
+    # CARRUSEL CON LAS 3 IMÁGENES RENDERIZADAS CORRECTAMENTE CON unsafe_allow_html=True
     slides_html = '<div class="slideshow-container">'
     for slide_item in slider_items_safe[:3]:
         slides_html += f'''
@@ -748,26 +745,16 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) REAL EN HTML ABSOLUTO FIJO
+# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) REAL FLOTANTE Y AISLADO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
-    # Manejamos el clic mediante un queryparam o botón invisible para actualizar el estado de sesión
-    if st.query_params.get("goto") == "cart":
+    st.markdown('<div class="floating-fab-container">', unsafe_allow_html=True)
+    if st.button(f":material/shopping_cart: Ver Carrito ({total_items})", key="fab_cart_exclusive_btn"):
         st.session_state.nav_tab = "Carrito"
-        st.query_params.clear()
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <form action="" method="get">
-        <input type="hidden" name="goto" value="cart">
-        <button type="submit" class="true-floating-fab">
-            <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
-            Ver Carrito ({total_items})
-        </button>
-    </form>
-    """, unsafe_allow_html=True)
-
-# 6. Panel de Administración y Configuración en POP-UP (Modal) con Blindaje Total en el Carrusel
+# 6. Panel de Administración y Configuración en POP-UP (Modal)
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
