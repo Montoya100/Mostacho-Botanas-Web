@@ -196,6 +196,13 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
+# Capturar señal de navegación por URL (para el FAB flotante HTML puro)
+query_params = st.query_params
+if query_params.get("goto") == "cart":
+    st.session_state.nav_tab = "Carrito"
+    st.query_params.clear()
+    st.rerun()
+
 # 3. Colores dinámicos limpios
 is_dark = st.session_state.dark_mode
 
@@ -257,7 +264,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FAB FLOTANTE REAL FIJO EN LA ESQUINA INFERIOR DERECHA CON TEXTO BLANCO */
+    /* FAB ABSOLUTO FLOTANTE REAL EN HTML CON POSICIÓN FIXED GARANTIZADA */
     .true-floating-fab-container {{
         position: fixed !important;
         bottom: 25px !important;
@@ -265,6 +272,34 @@ st.markdown(f"""
         z-index: 99999999 !important;
     }}
     
+    .true-fab-btn {{
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
+        color: #ffffff !important;
+        padding: 14px 24px !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        animation: pulseButton 2s infinite;
+    }}
+    .true-fab-btn:hover {{
+        transform: scale(1.05);
+        color: #ffffff !important;
+        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.8) !important;
+    }}
+
+    @keyframes pulseButton {{
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
+        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
+    }}
+
     .whatsapp-btn-disabled {{
         background-color: {"#334155" if is_dark else "#1a202c"} !important;
         color: #ffffff !important;
@@ -458,7 +493,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # IMAGEN DE PISTACHES FIJA COMO EJEMPLO (EDITABLE DESDE EL PANEL DE ADMIN)
+    # BANNER DE PISTACHES FIJO (EJEMPLO EDITABLE DESDE ADMIN)
     st.image(st.session_state.banner_url, use_container_width=True)
     st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 18px; font-size: 0.95rem;">Pistaches Seleccionados • Calidad Premium</div>', unsafe_allow_html=True)
 
@@ -650,14 +685,17 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FAB FLOTANTE REAL CON TEXTO BLANCO
+# BOTÓN FAB FLOTANTE REAL EN HTML FIJO (SE QUEDA FLOTANDO Y MANTIENE EL CARRITO)
 # ==========================================
 if total_items > 0 and tab != "Carrito":
-    st.markdown('<div class="true-floating-fab-container">', unsafe_allow_html=True)
-    if st.button(f":material/shopping_cart: Ver Carrito ({total_items})", key="real_fixed_fab_btn"):
-        st.session_state.nav_tab = "Carrito"
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="true-floating-fab-container">
+        <a href="?goto=cart" target="_self" class="true-fab-btn">
+            <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
+            Ver Carrito ({total_items})
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # 6. Panel de Administración y Configuración en POP-UP (Modal)
 st.write("---")
