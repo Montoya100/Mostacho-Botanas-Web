@@ -42,12 +42,12 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DEL CARRUSEL DINÁMICO (HASTA 6 IMÁGENES)
+# GESTIÓN DEL CARRUSEL DINÁMICO (CON 3 IMÁGENES INICIALES DE PISTACHES, CACAHUATES Y SEMILLAS)
 # ==========================================
 DEFAULT_SLIDER = [
-    {"url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200", "caption": "Pistaches y Garbanzos • Calidad Premium"},
-    {"url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200", "caption": "Snacks y Semillas Seleccionadas"},
-    {"url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200", "caption": "Distribución Directa en Ruta"}
+    {"url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200", "caption": "Pistaches Seleccionados • Calidad Premium"},
+    {"url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200", "caption": "Cahuates y Frituras de Alta Calidad"},
+    {"url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200", "caption": "Semillas y Mix Botanero para Reuniones"}
 ]
 
 def load_saved_slider():
@@ -61,7 +61,7 @@ def load_saved_slider():
                         if isinstance(item, dict):
                             u = str(item.get("url", "")).strip()
                             c = str(item.get("caption", "")).strip()
-                            if u and u.lower() != "nan":
+                            if u and u.lower() != "nan" and u != "":
                                 cleaned.append({"url": u, "caption": c if c and c.lower() != "nan" else "Mostacho Botanas"})
                     if cleaned:
                         return cleaned[:6]
@@ -232,7 +232,7 @@ st.markdown(f"""
     
     .block-container {{
         padding-top: 1rem !important;
-        padding-bottom: 4rem !important;
+        padding-bottom: 5rem !important;
         background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
     }}
@@ -267,34 +267,12 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON POSICIONAMIENTO FIJO Y Z-INDEX ALTO */
+    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) FIJO ABSOLUTO EN HTML PURO PARA GARANTIZAR VISIBILIDAD Y TEXTO BLANCO */
     .floating-fab-container {{
         position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 999999;
-    }}
-    
-    /* Forzar texto blanco en el botón flotante del carrito */
-    div.floating-fab-container button {{
-        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
-        color: #ffffff !important;
-        border-radius: 50px !important;
-        padding: 12px 24px !important;
-        font-size: 1.1rem !important;
-        font-weight: 800 !important;
-        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
-        animation: pulseButton 2s infinite;
-    }}
-    div.floating-fab-container button p, 
-    div.floating-fab-container button span {{
-        color: #ffffff !important;
-    }}
-
-    @keyframes pulseButton {{
-        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
-        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
+        bottom: 25px;
+        right: 25px;
+        z-index: 9999999;
     }}
 
     .whatsapp-btn-disabled {{
@@ -550,7 +528,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL DINÁMICO ROTATIVO (HASTA 6 IMÁGENES)
+    # CARRUSEL DINÁMICO ROTATIVO
     slides_html = '<div class="slideshow-container">'
     for idx, slide_item in enumerate(slider_items_safe):
         slides_html += f'''
@@ -749,7 +727,7 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON TEXTO BLANCO PURO
+# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON CONTENEDOR HTML ABSOLUTO Y TEXTO BLANCO PURO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
     st.markdown('<div class="floating-fab-container">', unsafe_allow_html=True)
@@ -758,7 +736,7 @@ if total_items > 0 and tab != "Carrito":
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 6. Panel de Administración y Configuración en POP-UP (Modal) con Gestión Robusta del Carrusel
+# 6. Panel de Administración y Configuración en POP-UP (Modal) con Blindaje Total en el Carrusel
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
@@ -864,12 +842,19 @@ def admin_modal():
             st.markdown("### Configuración del Carrusel (Hasta 6 Imágenes)")
             st.caption("Administra las imágenes y textos que rotan en la parte superior de tu tienda (recomendado: 1200x600 px).")
             
+            # BLINDAJE TOTAL DE DATOS PARA EL EDITOR DEL CARRUSEL
             raw_slider_items = st.session_state.slider_items if st.session_state.slider_items else DEFAULT_SLIDER
-            df_slider = pd.DataFrame(raw_slider_items)
-            if "url" not in df_slider.columns:
-                df_slider["url"] = ""
-            if "caption" not in df_slider.columns:
-                df_slider["caption"] = ""
+            cleaned_slider_for_df = []
+            for item in raw_slider_items:
+                if isinstance(item, dict):
+                    cleaned_slider_for_df.append({
+                        "url": str(item.get("url", "")).strip(),
+                        "caption": str(item.get("caption", "")).strip()
+                    })
+            if not cleaned_slider_for_df:
+                cleaned_slider_for_df = [{"url": DEFAULT_SLIDER[0]["url"], "caption": DEFAULT_SLIDER[0]["caption"]}]
+                
+            df_slider = pd.DataFrame(cleaned_slider_for_df)
             
             slider_column_config = {
                 "url": st.column_config.TextColumn("URL de la Imagen", required=True, help="Enlace directo o ruta en assets/"),
@@ -877,7 +862,7 @@ def admin_modal():
             }
             
             edited_slider_df = st.data_editor(
-                df_slider[["url", "caption"]],
+                df_slider,
                 num_rows="dynamic",
                 max_rows=6,
                 key="editor_slider_table",
