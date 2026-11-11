@@ -196,7 +196,7 @@ st.markdown(f"""
         font-size: 1rem !important;
     }}
 
-    /* Botones generales de la app estrictamente en NARANJA */
+    /* Botones generales de la app en NARANJA */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -404,7 +404,7 @@ if tab == "Inicio":
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Selector de Categorías (Switch Dinámico: Activa en Naranja, Inactivas en Gris)
+    # Selector de Categorías con Distintivo Visual (●) en la categoría activa
     category_options = ["Todo", "Individual", "Para compartir"]
     
     cat_cols = st.columns(len(category_options))
@@ -412,29 +412,10 @@ if tab == "Inicio":
         with cat_cols[i]:
             is_active = (st.session_state.selected_cat == cat)
             
-            active_bg = "#ff5200"
-            inactive_bg = "#334155" if is_dark else "#e2e8f0"
-            inactive_color = "#f8f7f4" if is_dark else "#4a5568"
+            # Etiqueta con puntito indicador si está activa para que el cliente sepa exactamente dónde está
+            display_label = f"● {cat}" if is_active else cat
             
-            btn_bg = active_bg if is_active else inactive_bg
-            btn_fg = "#ffffff" if is_active else inactive_color
-            
-            st.markdown(f"""
-            <style>
-                div[data-testid="column"]:nth-of-type({i+1}) button {{
-                    background-color: {btn_bg} !important;
-                    color: {btn_fg} !important;
-                    border: none !important;
-                    box-shadow: none !important;
-                }}
-                div[data-testid="column"]:nth-of-type({i+1}) button:hover {{
-                    background-color: {"#e04800" if is_active else ("#475569" if is_dark else "#cbd5e0")} !important;
-                    color: #ffffff !important;
-                }}
-            </style>
-            """, unsafe_allow_html=True)
-
-            if st.button(cat, use_container_width=True):
+            if st.button(display_label, use_container_width=True):
                 st.session_state.selected_cat = cat
                 st.rerun()
 
@@ -556,12 +537,20 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Selector de Tema Oscuro Aislado (Hasta Abajo)
+# 6. Panel de Administración y Botón de Tema Oscuro (Lunita Outline) Aislado hasta Abajo
 st.write("---")
-col_space, col_admin_btn = st.columns([5, 1])
-with col_admin_btn:
+col_admin, col_spacer, col_theme = st.columns([1, 3, 1])
+
+with col_admin:
     if st.button(":material/settings: Admin", use_container_width=True):
         st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
+
+with col_theme:
+    # Botón de un solo toque con icono de lunita outline para alternar el tema oscuro
+    theme_icon = ":material/light_mode:" if is_dark else ":material/dark_mode:"
+    if st.button(theme_icon, use_container_width=True, help="Cambiar tema"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
 
 if st.session_state.get("show_admin_login", False):
     admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contraseña...")
@@ -575,11 +564,3 @@ if st.session_state.get("show_admin_login", False):
             st.rerun()
     elif admin_key:
         st.error("Contraseña incorrecta.")
-
-st.write("")
-st.write("")
-with st.expander("Configuración de Apariencia (Tema Oscuro)"):
-    new_dark_mode = st.toggle("Activar Tema Gris Oscuro", value=st.session_state.dark_mode)
-    if new_dark_mode != st.session_state.dark_mode:
-        st.session_state.dark_mode = new_dark_mode
-        st.rerun()
