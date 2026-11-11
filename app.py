@@ -4,10 +4,10 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# Enlace de tu logo en GitHub (Asegúrate de que coincida exactamente con el archivo .png de tu repo)
+# Enlace de tu logo en GitHub
 LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
-# 1. Configuración de la página (Con el logo también en la pestaña del navegador)
+# 1. Configuración de la página
 st.set_page_config(
     page_title="Mostacho Botanas Web",
     page_icon=LOGO_URL,
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Eliminar recuadros oscuros en campos y personalizar alerta verde menta
+# 3. Estilos CSS: Cajas limpias sin efecto píldora y etiquetas de texto en gris fuerte visible
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -108,11 +108,18 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* ESTILO ALERTA VERDE MENTA PARA ADVERTENCIAS DE WHATSAPP */
+    /* FORZAR UN GRIS FUERTE Y LEGIBLE EN LAS ETIQUETAS DE LOS INPUTS DEL TICKET */
+    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {
+        color: #2d3748 !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* ALERTA VERDE MENTA */
     div[data-testid="stNotification"], .stAlert {
         background-color: #25d366 !important;
         color: #ffffff !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         border: none !important;
     }
     div[data-testid="stNotification"] p, .stAlert p {
@@ -125,7 +132,7 @@ st.markdown("""
         background-color: #ff5200 !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 16px !important;
+        border-radius: 12px !important;
         font-weight: 700 !important;
         box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
     }
@@ -137,13 +144,13 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* CAMPOS DE TEXTO LIMPIOS SIN RECUADROS NEGROS NI SOMBRAS OSCURAS */
+    /* CAMPOS DE TEXTO LIMPIOS (SIN EFECTO PÍLDORA, BORDES RECTOS SUAVES Y FONDO BLANCO PURO) */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
-        border: 1px solid #cbd5e0 !important;
-        border-radius: 14px !important;
+        border: 1px solid #a0aec0 !important;
+        border-radius: 8px !important;
         box-shadow: none !important;
     }
     input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
@@ -151,8 +158,8 @@ st.markdown("""
         box-shadow: 0 0 0 2px rgba(255,82,0,0.15) !important;
     }
     input::placeholder, textarea::placeholder {
-        color: #a0aec0 !important;
-        -webkit-text-fill-color: #a0aec0 !important;
+        color: #718096 !important;
+        -webkit-text-fill-color: #718096 !important;
     }
 
     .material-symbols-outlined {
@@ -166,7 +173,7 @@ st.markdown("""
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-radius: 20px;
+        border-radius: 16px;
         padding: 14px;
         margin-bottom: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
@@ -192,7 +199,7 @@ st.markdown("""
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
         padding: 14px 18px;
-        border-radius: 20px;
+        border-radius: 16px;
         text-align: center;
         font-weight: 700;
         font-size: 0.95rem;
@@ -205,7 +212,7 @@ st.markdown("""
         max-width: 100%;
         height: 230px;
         margin-bottom: 18px;
-        border-radius: 20px;
+        border-radius: 16px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
         box-shadow: 0 4px 12px rgba(0,0,0,0.04);
@@ -236,7 +243,7 @@ st.markdown("""
         background: rgba(255, 82, 0, 0.85);
         color: white;
         padding: 6px 14px;
-        border-radius: 14px;
+        border-radius: 12px;
         font-size: 0.88rem;
         font-weight: 600;
     }
