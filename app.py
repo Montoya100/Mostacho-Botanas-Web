@@ -12,10 +12,13 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# CSS Personalizado (Para ensanchar el diálogo de edición y estilos)
+# CSS Personalizado e integración de Material Symbols (Google Outlined Icons)
 # ---------------------------------------------------------
 st.markdown(
     """
+    <head>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    </head>
     <style>
     /* Estilo para ensanchar las ventanas modales (st.dialog) en Streamlit */
     div[data-baseweb="modal"] > div {
@@ -31,6 +34,12 @@ st.markdown(
         text-align: center;
         color: #7F8C8D;
         margin-bottom: 30px;
+    }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+        display: inline-block;
+        font-size: 20px;
     }
     </style>
 """,
@@ -128,7 +137,7 @@ if "carrito" not in st.session_state:
 # ---------------------------------------------------------
 
 
-@st.dialog("🛠️ Administrador y Editor de Catálogo")
+@st.dialog("Administrador y Editor de Catálogo")
 def modal_editor():
   st.write(
       "Modifica precios, nombres o categorías directamente en la tabla."
@@ -139,7 +148,7 @@ def modal_editor():
 
   # Ocultar la columna 'id' de la vista de edición para ganar espacio visual
   columnas_config = {
-      "id": None,  # Esto oculta la columna ID en st.data_editor
+      "id": None,
       "nombre": st.column_config.TextColumn("Nombre del Producto", required=True),
       "categoria": st.column_config.SelectboxColumn(
           "Categoría",
@@ -163,11 +172,9 @@ def modal_editor():
 
   col1, col2 = st.columns([1, 1])
   with col1:
-    if st.button("💾 Guardar Cambios", type="primary", use_container_width=True):
-      # Reconstruir lista manteniendo o asignando IDs nuevos si se agregaron filas
+    if st.button("Guardar Cambios", type="primary", use_container_width=True):
       nueva_lista = []
       for idx, row in df_editado.iterrows():
-        # Si no tenía ID por ser fila nueva, generar uno único
         prod_id = (
             str(row.get("id"))
             if pd.notna(row.get("id")) and str(row.get("id")).strip() != ""
@@ -198,7 +205,9 @@ def modal_editor():
 # INTERFAZ PRINCIPAL
 # ---------------------------------------------------------
 st.markdown(
-    "<h1 class='main-title'>.::: Mostacho Botanas :::.</h1>",
+    "<h1 class='main-title'><span class='material-symbols-outlined'"
+    " style='font-size: 36px; margin-right: 8px;'>storefront</span>.::: Mostacho"
+    " Botanas :::.</h1>",
     unsafe_allow_html=True,
 )
 st.markdown(
@@ -210,11 +219,15 @@ st.markdown(
 # Barra superior de acciones
 col_top1, col_top2 = st.columns([6, 1])
 with col_top2:
-  if st.button("⚙️ Editar Catálogo", use_container_width=True):
+  if st.button("Editar Catálogo", use_container_width=True):
     modal_editor()
 
 # Sidebar: Carrito de Compras
-st.sidebar.title("🛒 Pedido Actual")
+st.sidebar.markdown(
+    "### <span"
+    " class='material-symbols-outlined'>shopping_cart</span> Pedido Actual",
+    unsafe_allow_html=True,
+)
 
 if not st.session_state.carrito:
   st.sidebar.info("El carrito está vacío. Selecciona productos del catálogo.")
@@ -223,7 +236,6 @@ else:
   items_carrito_texto = []
 
   for prod_id, cantidad in list(st.session_state.carrito.items()):
-    # Buscar producto
     producto = next(
         (p for p in st.session_state.productos if p["id"] == prod_id), None
     )
@@ -235,12 +247,11 @@ else:
       c1.write(f"**{producto['nombre']}**")
       c2.write(f"${subtotal:.2f}")
 
-      # Botones de control de cantidad
       sub_col1, sub_col2 = c3.columns(2)
-      if sub_col1.button("➕", key=f"mas_{prod_id}"):
+      if sub_col1.button("+", key=f"mas_{prod_id}"):
         st.session_state.carrito[prod_id] += 1
         st.rerun()
-      if sub_col2.button("➖", key=f"menos_{prod_id}"):
+      if sub_col2.button("-", key=f"menos_{prod_id}"):
         st.session_state.carrito[prod_id] -= 1
         if st.session_state.carrito[prod_id] <= 0:
           del st.session_state.carrito[prod_id]
@@ -253,27 +264,31 @@ else:
   st.sidebar.markdown("---")
   st.sidebar.markdown(f"### Total: ${total_general:.2f}")
 
-  # Campo para el número de teléfono o nota del cliente de ruta
   nombre_cliente = st.sidebar.text_input(
       "Cliente / Establecimiento", placeholder="Ej. Miscelánea Los Arcos"
   )
 
-  # Botón de WhatsApp con el texto exacto solicitado
+  # Mensaje de WhatsApp
   mensaje_wa = f"Hola, nuevo pedido de *Mostacho Botanas*:\n\nCliente: {nombre_cliente or 'General'}\n"
   mensaje_wa += "\n".join(items_carrito_texto)
   mensaje_wa += f"\n\n*Total a Pagar: ${total_general:.2f}*"
 
   whatsapp_url = f"https://wa.me/?text={urllib.parse.quote(mensaje_wa)}"
 
+  # Botón de WhatsApp con icono outlined de chat/mensaje incorporado
   st.sidebar.markdown(
-      f'<a href="{whatsapp_url}" target="_blank"><button'
-      ' style="width:100%; background-color:#25D366; color:white; border:none;'
-      " padding:10px; border-radius:5px; font-weight:bold; cursor:pointer;'>"
-      "Enviar pedido por WhatsApp</button></a>",
+      f"""
+      <a href="{whatsapp_url}" target="_blank" style="text-decoration: none;">
+          <div style="width:100%; background-color:#25D366; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; text-align:center; cursor:pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="color: white; font-size: 22px;">chat</span>
+              <span>Enviar pedido por WhatsApp</span>
+          </div>
+      </a>
+      """,
       unsafe_allow_html=True,
   )
 
-  if st.sidebar.button("🧹 Vaciar Carrito", use_container_width=True):
+  if st.sidebar.button("Vaciar Carrito", use_container_width=True):
     st.session_state.carrito = {}
     st.rerun()
 
@@ -288,7 +303,7 @@ categoria_seleccionada = st.selectbox(
 )
 
 busqueda = st.text_input(
-    "🔍 Buscar producto por nombre...", placeholder="Ej. Semilla, Cacahuate..."
+    "Buscar producto por nombre...", placeholder="Ej. Semilla, Cacahuate..."
 )
 
 # Filtrado
@@ -314,17 +329,15 @@ for index, producto in enumerate(productos_filtrados):
       st.markdown(f"### {producto['nombre']}")
       st.caption(f"Categoría: {producto['categoria']}")
 
-      # Mostrar imagen si existe, sino icono por defecto
       if os.path.exists(producto["imagen"]):
         st.image(producto["imagen"], use_container_width=True)
       else:
-        st.info("🥜 Imagen no disponible localmente")
+        st.info("Imagen no disponible localmente")
 
       st.markdown(f"**Precio:** ${producto['precio']:.2f}")
 
-      # Botón para agregar al carrito
       if st.button(
-          f"Agregar 🛒",
+          "Agregar al Carrito",
           key=f"add_{producto['id']}_{index}",
           use_container_width=True,
       ):
