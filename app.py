@@ -4,10 +4,13 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# 1. Configuración de la página
+# Enlace de tu logo en GitHub (Asegúrate de que coincida exactamente con el archivo .png de tu repo)
+LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
+
+# 1. Configuración de la página (Con el logo también en la pestaña del navegador)
 st.set_page_config(
     page_title="Mostacho Botanas Web",
-    page_icon=None,
+    page_icon=LOGO_URL,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -21,9 +24,6 @@ if "nav_tab" not in st.session_state:
 
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
-
-# Enlace de tu logo en GitHub (Asegúrate de que coincida exactamente con el archivo .png de tu repo)
-LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Corrección definitiva de bordes negros en barra de búsqueda web y blindaje claro
+# 3. Estilos CSS: Eliminar recuadros oscuros en campos y personalizar alerta verde menta
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -103,9 +103,21 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container, .stAlert, div[data-testid="stInfoBox"] {
+    div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {
         background-color: transparent !important;
         color: #222222 !important;
+    }
+
+    /* ESTILO ALERTA VERDE MENTA PARA ADVERTENCIAS DE WHATSAPP */
+    div[data-testid="stNotification"], .stAlert {
+        background-color: #25d366 !important;
+        color: #ffffff !important;
+        border-radius: 14px !important;
+        border: none !important;
+    }
+    div[data-testid="stNotification"] p, .stAlert p {
+        color: #ffffff !important;
+        font-weight: 600 !important;
     }
 
     /* BOTONES NARANJAS CON TEXTO BLANCO */
@@ -113,7 +125,7 @@ st.markdown("""
         background-color: #ff5200 !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 20px !important;
+        border-radius: 16px !important;
         font-weight: 700 !important;
         box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
     }
@@ -125,21 +137,22 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* BARRA DE BÚSQUEDA Y CAMPOS: Eliminar bordes negros/sombras al enfocar en versión web */
+    /* CAMPOS DE TEXTO LIMPIOS SIN RECUADROS NEGROS NI SOMBRAS OSCURAS */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
         -webkit-text-fill-color: #222222 !important;
-        border-color: #cbd5e0 !important;
-        border-radius: 30px !important;
+        border: 1px solid #cbd5e0 !important;
+        border-radius: 14px !important;
+        box-shadow: none !important;
     }
     input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
         border-color: #ff5200 !important;
-        box-shadow: 0 0 0 2px rgba(255,82,0,0.2) !important;
+        box-shadow: 0 0 0 2px rgba(255,82,0,0.15) !important;
     }
     input::placeholder, textarea::placeholder {
-        color: #718096 !important;
-        -webkit-text-fill-color: #718096 !important;
+        color: #a0aec0 !important;
+        -webkit-text-fill-color: #a0aec0 !important;
     }
 
     .material-symbols-outlined {
@@ -179,7 +192,7 @@ st.markdown("""
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
         padding: 14px 18px;
-        border-radius: 30px;
+        border-radius: 20px;
         text-align: center;
         font-weight: 700;
         font-size: 0.95rem;
@@ -192,7 +205,7 @@ st.markdown("""
         max-width: 100%;
         height: 230px;
         margin-bottom: 18px;
-        border-radius: 24px;
+        border-radius: 20px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
         box-shadow: 0 4px 12px rgba(0,0,0,0.04);
@@ -223,7 +236,7 @@ st.markdown("""
         background: rgba(255, 82, 0, 0.85);
         color: white;
         padding: 6px 14px;
-        border-radius: 20px;
+        border-radius: 14px;
         font-size: 0.88rem;
         font-weight: 600;
     }
@@ -244,13 +257,13 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo y Carrito con Icono Outline
+# 4. Header Superior con Logo y Nombre
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="{LOGO_URL}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200;" onerror="this.style.display='none'" />
+        <img src="{LOGO_URL}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
         <div>
             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #1a202c;">Mostacho Botanas</h2>
             <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Catálogo y Pedidos</span>
@@ -373,7 +386,8 @@ elif tab == "Carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button(":material/delete:", key=f"del_cart_{item_id}"):
+                    # Botón con icono y la palabra Quitar
+                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
@@ -400,7 +414,7 @@ elif tab == "Carrito":
         whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
         
         if customer_name and customer_address:
-            st.link_button("Enviar Pedido por WhatsApp", whatsapp_url, use_container_width=True)
+            st.link_button(":material/chat: Enviar Pedido por WhatsApp", whatsapp_url, use_container_width=True)
         else:
             st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
 
