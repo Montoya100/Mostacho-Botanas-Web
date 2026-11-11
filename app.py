@@ -4,10 +4,13 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# 1. Configuración de la página
+# Enlace Raw real de tu logo en tu repositorio de GitHub
+LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
+
+# 1. Configuración de la página (Con tu logo en la pestaña del navegador)
 st.set_page_config(
     page_title="Mostacho Botanas",
-    page_icon=None,
+    page_icon=LOGO_URL,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -40,7 +43,6 @@ def fetch_loyverse_products():
                 if not cat_name:
                     cat_name = "Individual"
                 
-                # Normalizar categorías de Loyverse a nuestras tres opciones
                 cat_lower = cat_name.lower()
                 if "compartir" in cat_lower or "familiar" in cat_lower:
                     category_mapped = "Para compartir"
@@ -89,7 +91,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Cero Emojis, Botón Negro/Naranja dinámico y Logotipo Corporativo profesional
+# 3. Estilos CSS: Cero Emojis, Botón dinámico Negro/Naranja y diseño limpio
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -119,22 +121,6 @@ st.markdown("""
     div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {
         background-color: transparent !important;
         color: #222222 !important;
-    }
-
-    /* INSIGNIA DE LOGOTIPO CORPORATIVO PROFESIONAL (GARANTIZADO SIN ERRORES) */
-    .brand-logo-badge {
-        width: 52px;
-        height: 52px;
-        background: linear-gradient(135deg, #ff5200 0%, #1a202c 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 900;
-        font-size: 1.5rem;
-        box-shadow: 0 4px 10px rgba(255, 82, 0, 0.3);
-        border: 2px solid #ffffff;
     }
 
     .app-title {
@@ -355,13 +341,13 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Insignia de Logo Profesional
+# 4. Header Superior con tu Logo Real de GitHub
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
-    st.markdown("""
+    st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 12px;">
-        <div class="brand-logo-badge">M</div>
+        <img src="{LOGO_URL}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
             <span class="app-subtitle">Catálogo y Pedidos</span>
@@ -371,7 +357,7 @@ with col_title:
 
 with col_cart_btn:
     cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
-    if st.button(f'<span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 4px;">shopping_cart</span> {cart_label}', use_container_width=True):
+    if st.button(":material/shopping_cart: " + cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
         st.rerun()
 
@@ -381,7 +367,7 @@ st.write("---")
 if tab == "Inicio":
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
-        if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 4px;">share</span> Compartir', use_container_width=True):
+        if st.button(":material/share: Compartir", use_container_width=True):
             st.toast("Enlace listo para enviar por WhatsApp")
 
     st.markdown(
@@ -408,7 +394,6 @@ if tab == "Inicio":
     # Selector de Categorías (Todo, Individual, Para compartir)
     category_options = ["Todo", "Individual", "Para compartir"]
     
-    # Renderizar botones de categoría en scroll horizontal / fila
     cat_cols = st.columns(len(category_options))
     for i, cat in enumerate(category_options):
         with cat_cols[i]:
@@ -473,11 +458,11 @@ if tab == "Inicio":
             st.markdown('</div>', unsafe_allow_html=True)
 
 elif tab == "Carrito":
-    if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 4px;">arrow_back</span> Volver al Catálogo', use_container_width=False):
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False):
         st.session_state.nav_tab = "Inicio"
         st.rerun()
         
-    st.markdown("### <span class=\"material-symbols-outlined\" style=\"vertical-align: -4px;\">shopping_cart</span> Carrito de Compras", unsafe_allow_html=True)
+    st.markdown("### :material/shopping_cart: Carrito de Compras")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -499,22 +484,22 @@ elif tab == "Carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; font-size: 16px;">delete</span> Quitar', key=f"del_cart_{item_id}", use_container_width=True):
+                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
+        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
         
-        st.subheader("Datos de Entrega")
-        customer_name = st.text_input("Nombre del cliente (Obligatorio)", placeholder="Ej. Juan Perez")
-        customer_address = st.text_area("Direccion / Referencias (Obligatorio)", placeholder="Calle, numero, colonia...")
+        st.subheader(":material/local_shipping: Datos de Entrega")
+        customer_name = st.text_input("Nombre del cliente (Obligatorio)", placeholder="Ej. Juan Pérez")
+        customer_address = st.text_area("Dirección / Referencias (Obligatorio)", placeholder="Calle, número, colonia...")
         customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
         
         order_folio = f"MOSTACHO-{datetime.now().strftime('%H%M%S')}"
         order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
         
-        # MENSAJE DE WHATSAPP PROFESIONAL Y LIMPIO (SIN TEXTOS RAROS NI EMOJIS)
+        # MENSAJE DE WHATSAPP PROFESIONAL, LIMPIO Y SIN EMOJIS
         msg_header = f"NUEVO PEDIDO [{order_folio}]\nFecha: {order_date}\n\n"
         msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
         msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
@@ -535,7 +520,7 @@ elif tab == "Carrito":
             )
         else:
             st.markdown(
-                '<div class="whatsapp-btn-disabled">Completa Nombre y Direccion para activar el envio</div>',
+                '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el envío</div>',
                 unsafe_allow_html=True
             )
 
@@ -543,11 +528,11 @@ elif tab == "Carrito":
 st.write("---")
 col_space, col_admin_btn = st.columns([5, 1])
 with col_admin_btn:
-    if st.button("Admin", use_container_width=True):
+    if st.button(":material/settings: Admin", use_container_width=True):
         st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
 
 if st.session_state.get("show_admin_login", False):
-    admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contrasena...")
+    admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contraseña...")
     if admin_key == "1234":
         st.success("Acceso concedido")
         df_current = pd.DataFrame(st.session_state.products)
@@ -557,4 +542,4 @@ if st.session_state.get("show_admin_login", False):
             st.success("¡Actualizado con éxito!")
             st.rerun()
     elif admin_key:
-        st.error("Incorrecta")
+        st.error("Contraseña incorrecta.")
