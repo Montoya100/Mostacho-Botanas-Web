@@ -7,7 +7,7 @@ from datetime import datetime
 # Enlace Raw real de tu logo en tu repositorio de GitHub
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
 
-# 1. Configuración de la página (Con tu logo en la pestaña del navegador)
+# 1. Configuración de la página
 st.set_page_config(
     page_title="Mostacho Botanas",
     page_icon=LOGO_URL,
@@ -91,7 +91,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Cero Emojis, Botón dinámico Negro/Naranja y diseño limpio
+# 3. Estilos CSS: Logo limpio, Título grande en web, Subtítulo pegado y Categorías dinámicas (Naranja/Gris)
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -123,17 +123,20 @@ st.markdown("""
         color: #222222 !important;
     }
 
+    /* TÍTULO IMOPONENTE Y COMPACTO CON EL SUBTÍTULO */
     .app-title {
-        font-size: 1.85rem !important;
+        font-size: 2.3rem !important;
         font-weight: 900 !important;
         color: #1a202c !important;
         margin: 0 !important;
-        line-height: 1.1 !important;
+        line-height: 1.0 !important;
     }
     .app-subtitle {
         font-size: 0.9rem !important;
         color: #4a5568 !important;
         font-weight: 700 !important;
+        margin-top: 2px !important;
+        display: block;
     }
 
     /* BOTÓN DE WHATSAPP INACTIVO (NEGRO ELEGANTE) */
@@ -184,6 +187,14 @@ st.markdown("""
         font-size: 1rem !important;
     }
 
+    /* ESTILO DINÁMICO PARA LAS CATEGORÍAS (ACTIVA = NARANJA, INACTIVAS = GRIS) */
+    div[data-testid="column"] button {
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    
+    /* Botones generales naranjas */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -191,18 +202,17 @@ st.markdown("""
         border-radius: 12px !important;
         font-weight: 700 !important;
         box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
-        transition: all 0.2s ease-in-out !important;
     }
     button:hover, .stButton > button:hover {
         background-color: #e04800 !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(255, 82, 0, 0.35) !important;
         color: #ffffff !important;
     }
     button p, .stButton > button p, button span {
         color: #ffffff !important;
     }
 
+    /* Botones de cantidad ampliados */
     div[data-testid="column"] button {
         font-size: 1.6rem !important;
         font-weight: 900 !important;
@@ -341,16 +351,16 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con tu Logo Real de GitHub
+# 4. Header Superior con tu Logo limpio (sin círculo naranja)
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
     <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="{LOGO_URL}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #ff5200; background: #ffffff;" onerror="this.style.display='none'" />
+        <img src="{LOGO_URL}" style="width: 58px; height: 58px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
-            <span class="app-subtitle">Catálogo y Pedidos</span>
+            <span class="app-subtitle">Catálogo y pedidos en línea</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -391,13 +401,39 @@ if tab == "Inicio":
 
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # Selector de Categorías (Todo, Individual, Para compartir)
+    # Selector de Categorías Dinámicas (Activa = Naranja, Inactivas = Gris limpio)
     category_options = ["Todo", "Individual", "Para compartir"]
     
     cat_cols = st.columns(len(category_options))
     for i, cat in enumerate(category_options):
         with cat_cols[i]:
-            btn_type = "primary" if st.session_state.selected_cat == cat else "secondary"
+            is_active = (st.session_state.selected_cat == cat)
+            # Inyectar estilo dinámico de color mediante botón primario (naranja) o secundario (gris elegante)
+            btn_type = "primary" if is_active else "secondary"
+            if is_active:
+                st.markdown("""
+                <style>
+                    div.stButton > button[kind="primary"] {
+                        background-color: #ff5200 !important;
+                        color: #ffffff !important;
+                    }
+                </style>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <style>
+                    div.stButton > button[kind="secondary"] {
+                        background-color: #e2e8f0 !important;
+                        color: #4a5568 !important;
+                        border: 1px solid #cbd5e0 !important;
+                    }
+                    div.stButton > button[kind="secondary"]:hover {
+                        background-color: #cbd5e0 !important;
+                        color: #1a202c !important;
+                    }
+                </style>
+                """, unsafe_allow_html=True)
+
             if st.button(cat, use_container_width=True, type=btn_type):
                 st.session_state.selected_cat = cat
                 st.rerun()
