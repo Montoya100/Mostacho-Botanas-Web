@@ -224,6 +224,7 @@ card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
 input_bg = "#0f172a" if is_dark else "#ffffff"
 
+# ESTILOS CSS GENERALES Y FAB VERDADERO FLOTANTE
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -241,7 +242,7 @@ st.markdown(f"""
     
     .block-container {{
         padding-top: 1rem !important;
-        padding-bottom: 5rem !important;
+        padding-bottom: 6rem !important;
         background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
     }}
@@ -276,28 +277,34 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) ABSOLUTO CON TEXTO BLANCO */
-    .floating-fab-container {{
+    /* FAB ABSOLUTO FLOTANTE REAL EN HTML PURO (SE QUEDA FIJO EN LA ESQUINA INFERIOR DERECHA) */
+    .true-floating-fab-container {{
         position: fixed !important;
-        bottom: 24px !important;
-        right: 24px !important;
+        bottom: 25px !important;
+        right: 25px !important;
         z-index: 99999999 !important;
     }}
     
-    .floating-fab-container button {{
+    .true-fab-btn {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
+        padding: 14px 24px !important;
         border-radius: 50px !important;
-        padding: 12px 22px !important;
-        font-size: 1.05rem !important;
         font-weight: 800 !important;
+        font-size: 1.05rem !important;
         box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
         border: none !important;
+        cursor: pointer !important;
         animation: pulseButton 2s infinite;
     }}
-    .floating-fab-container button p, 
-    .floating-fab-container button span {{
+    .true-fab-btn:hover {{
+        transform: scale(1.05);
         color: #ffffff !important;
+        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.8) !important;
     }}
 
     @keyframes pulseButton {{
@@ -446,7 +453,7 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL DINÁMICO (3 IMÁGENES EXACTAS DE 4 SEGUNDOS CADA UNA) */
+    /* CARRUSEL SEGURO CON ANIMACIÓN DE 12 SEGUNDOS (4s por imagen) */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -512,6 +519,14 @@ for k in keys_to_delete:
     del st.session_state.cart[k]
 
 total_items = sum(st.session_state.cart.values())
+
+# Capturar señal de navegación mediante parámetros de URL seguros (para el FAB flotante real)
+query_params = st.query_params
+if query_params.get("goto") == "cart":
+    st.session_state.nav_tab = "Carrito"
+    st.query_params.clear()
+    st.rerun()
+
 tab = st.session_state.nav_tab
 
 # ==========================================
@@ -546,7 +561,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL CON LAS 3 IMÁGENES RENDERIZADAS CORRECTAMENTE CON unsafe_allow_html=True
+    # CARRUSEL SEGURO RENDERIZADO CORRECTAMENTE CON HTML HTML PURO
     slides_html = '<div class="slideshow-container">'
     for slide_item in slider_items_safe[:3]:
         slides_html += f'''
@@ -628,7 +643,7 @@ if tab == "Inicio":
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category") == st.session_state.selected_cat]
+            cat_filtered = [p for p in current_products_list if p.get("category"] == st.session_state.selected_cat]
 
         filtered_products = [
             p for p in cat_filtered 
@@ -745,14 +760,17 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) REAL FLOTANTE Y AISLADO
+# BOTÓN FLOTANTE (FAB) ABSOLUTO EN HTML PURO (SE QUEDA FLOTANDO Y SOLO CAMBIA AL CARRITO AL PRESIONARLO)
 # ==========================================
 if total_items > 0 and tab != "Carrito":
-    st.markdown('<div class="floating-fab-container">', unsafe_allow_html=True)
-    if st.button(f":material/shopping_cart: Ver Carrito ({total_items})", key="fab_cart_exclusive_btn"):
-        st.session_state.nav_tab = "Carrito"
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="true-floating-fab-container">
+        <a href="?goto=cart" target="_self" class="true-fab-btn">
+            <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
+            Ver Carrito ({total_items})
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # 6. Panel de Administración y Configuración en POP-UP (Modal)
 st.write("---")
