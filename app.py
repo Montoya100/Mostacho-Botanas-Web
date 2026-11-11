@@ -42,12 +42,21 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DEL CARRUSEL DINÁMICO (CON 3 IMÁGENES INICIALES DE PISTACHES, CACAHUATES Y SEMILLAS)
+# GESTIÓN DEL CARRUSEL (3 IMÁGENES FIJAS OBLIGATORIAS: PISTACHES, CACAHUATES, SEMILLAS)
 # ==========================================
 DEFAULT_SLIDER = [
-    {"url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200", "caption": "Pistaches Seleccionados • Calidad Premium"},
-    {"url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200", "caption": "Cahuates y Frituras de Alta Calidad"},
-    {"url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200", "caption": "Semillas y Mix Botanero para Reuniones"}
+    {
+        "url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200", 
+        "caption": "Pistaches Seleccionados • Calidad Premium"
+    },
+    {
+        "url": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200", 
+        "caption": "Cahuates y Frituras de Alta Calidad"
+    },
+    {
+        "url": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=1200", 
+        "caption": "Semillas y Mix Botanero para Reuniones"
+    }
 ]
 
 def load_saved_slider():
@@ -267,12 +276,37 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) FIJO ABSOLUTO EN HTML PURO PARA GARANTIZAR VISIBILIDAD Y TEXTO BLANCO */
-    .floating-fab-container {{
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        z-index: 9999999;
+    /* BOTÓN FLOTANTE ESTILO MÓVIL (FAB) ABSOLUTO EN HTML PURO PARA GARANTIZAR VISIBILIDAD PERMANENTE Y TEXTO BLANCO */
+    .true-floating-fab {{
+        position: fixed !important;
+        bottom: 25px !important;
+        right: 25px !important;
+        z-index: 99999999 !important;
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
+        color: #ffffff !important;
+        padding: 14px 22px !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        animation: pulseButton 2s infinite;
+    }}
+    .true-floating-fab:hover {{
+        transform: scale(1.05);
+        color: #ffffff !important;
+        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.8) !important;
+    }}
+
+    @keyframes pulseButton {{
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
+        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
     }}
 
     .whatsapp-btn-disabled {{
@@ -415,7 +449,7 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL DINÁMICO CON LAS HASTA 6 IMÁGENES CONFIGURADAS */
+    /* CARRUSEL DINÁMICO (3 IMÁGENES EXACTAS DE 4 SEGUNDOS CADA UNA = 12s TOTAL) */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -431,13 +465,25 @@ st.markdown(f"""
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         opacity: 0;
-        animation: slideAnimationDynamic infinite;
+        animation: slideAnimation12s 12s infinite;
         background-size: cover;
         background-position: center;
         display: flex;
         align-items: flex-end;
         padding: 16px;
     }}
+    .slide:nth-child(1) {{ animation-delay: 0s; }}
+    .slide:nth-child(2) {{ animation-delay: 4s; }}
+    .slide:nth-child(3) {{ animation-delay: 8s; }}
+
+    @keyframes slideAnimation12s {{
+        0% {{ opacity: 0; }}
+        8% {{ opacity: 1; }}
+        33% {{ opacity: 1; }}
+        41% {{ opacity: 0; }}
+        100% {{ opacity: 0; }}
+    }}
+
     .slide-text {{
         background: rgba(255, 82, 0, 0.88);
         color: white;
@@ -450,32 +496,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Inyectar animación dinámica calculada según cuántas imágenes tenga el carrusel
 slider_items_safe = st.session_state.slider_items if st.session_state.slider_items and len(st.session_state.slider_items) > 0 else DEFAULT_SLIDER
-total_slides = len(slider_items_safe)
-total_duration = total_slides * 4
-animation_css = f"""
-<style>
-@keyframes slideAnimationDynamic {{
-"""
-for idx in range(total_slides):
-    start_pct = (idx / total_slides) * 100
-    show_pct = start_pct + (3.0 / total_duration) * 100
-    hide_pct = ((idx + 1) / total_slides) * 100
-    end_pct = hide_pct + (1.0 / total_duration) * 100
-    
-    if idx == 0:
-        animation_css += f"    0% {{ opacity: 1; }}\n"
-        animation_css += f"    {hide_pct:.1f}% {{ opacity: 1; }}\n"
-        animation_css += f"    {min(end_pct, 100):.1f}% {{ opacity: 0; }}\n"
-    else:
-        animation_css += f"    {max(0, start_pct - 1):.1f}% {{ opacity: 0; }}\n"
-        animation_css += f"    {start_pct:.1f}% {{ opacity: 1; }}\n"
-        animation_css += f"    {hide_pct:.1f}% {{ opacity: 1; }}\n"
-        animation_css += f"    {min(end_pct, 100):.1f}% {{ opacity: 0; }}\n"
-
-animation_css += "}\n</style>"
-st.markdown(animation_css, unsafe_allow_html=True)
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
@@ -528,11 +549,11 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # CARRUSEL DINÁMICO ROTATIVO
+    # CARRUSEL CON LAS 3 IMÁGENES (PISTACHES, CACAHUATES, SEMILLAS)
     slides_html = '<div class="slideshow-container">'
-    for idx, slide_item in enumerate(slider_items_safe):
+    for slide_item in slider_items_safe[:3]:
         slides_html += f'''
-        <div class="slide" style="background-image: url('{slide_item.get("url", "https://via.placeholder.com/1200")}'); animation-delay: {idx * 4}s;">
+        <div class="slide" style="background-image: url('{slide_item.get("url", "https://via.placeholder.com/1200")}');">
             <div class="slide-text">{slide_item.get("caption", "Mostacho Botanas")}</div>
         </div>
         '''
@@ -727,14 +748,24 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) CON CONTENEDOR HTML ABSOLUTO Y TEXTO BLANCO PURO
+# BOTÓN FLOTANTE ESTILO MÓVIL (FAB) REAL EN HTML ABSOLUTO FIJO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
-    st.markdown('<div class="floating-fab-container">', unsafe_allow_html=True)
-    if st.button(f":material/shopping_cart: Ver Carrito ({total_items})", type="primary", use_container_width=False, key="fab_cart_btn"):
+    # Manejamos el clic mediante un queryparam o botón invisible para actualizar el estado de sesión
+    if st.query_params.get("goto") == "cart":
         st.session_state.nav_tab = "Carrito"
+        st.query_params.clear()
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <form action="" method="get">
+        <input type="hidden" name="goto" value="cart">
+        <button type="submit" class="true-floating-fab">
+            <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
+            Ver Carrito ({total_items})
+        </button>
+    </form>
+    """, unsafe_allow_html=True)
 
 # 6. Panel de Administración y Configuración en POP-UP (Modal) con Blindaje Total en el Carrusel
 st.write("---")
@@ -842,7 +873,6 @@ def admin_modal():
             st.markdown("### Configuración del Carrusel (Hasta 6 Imágenes)")
             st.caption("Administra las imágenes y textos que rotan en la parte superior de tu tienda (recomendado: 1200x600 px).")
             
-            # BLINDAJE TOTAL DE DATOS PARA EL EDITOR DEL CARRUSEL
             raw_slider_items = st.session_state.slider_items if st.session_state.slider_items else DEFAULT_SLIDER
             cleaned_slider_for_df = []
             for item in raw_slider_items:
