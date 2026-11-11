@@ -4,8 +4,8 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# Enlace de tu logo en GitHub
-LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
+# Enlace de tu logo (Puedes usar tu enlace de GitHub o una URL pública de Imgur para asegurar que cargue al instante)
+LOGO_URL = "https://github.com/Montoya100/Mostacho-Botanas-Web/blob/main/logo.png"
 
 # 1. Configuración de la página
 st.set_page_config(
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS: Título grande, subtítulo oscuro, botones de cantidad ampliados y Alerta personalizada Verde Menta WhatsApp
+# 3. Estilos CSS con Animaciones Dinámicas Fluidas
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -96,6 +96,12 @@ st.markdown("""
         padding-top: 0.5rem !important;
         padding-bottom: 3rem !important;
         background-color: #f8f7f4 !important;
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .stApp, body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
@@ -108,7 +114,7 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* TÍTULO MÁS GRANDE Y SUBTÍTULO OSCURO Y DESTACADO */
+    /* TÍTULO Y SUBTÍTULO */
     .app-title {
         font-size: 1.85rem !important;
         font-weight: 900 !important;
@@ -122,7 +128,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* ALERTA PERSONALIZADA VERDE MENTA WHATSAPP */
+    /* ALERTA WHATSAPP VERDE MENTA */
     .whatsapp-alert {
         background-color: #25d366 !important;
         color: #ffffff !important;
@@ -135,16 +141,23 @@ st.markdown("""
         gap: 10px;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+        animation: pulseAlert 2s infinite;
     }
 
-    /* ETIQUETAS DE TEXTO EN TICKET (GRIS FUERTE) */
+    @keyframes pulseAlert {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.01); }
+        100% { transform: scale(1); }
+    }
+
+    /* ETIQUETAS DE TEXTO EN TICKET */
     label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {
         color: #1a202c !important;
         font-weight: 700 !important;
         font-size: 1rem !important;
     }
 
-    /* BOTONES GENERALES NARANJAS CON TEXTO BLANCO */
+    /* BOTONES NARANJAS CON ANIMACIÓN AL PASAR EL MOUSE / PULSAR */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -152,16 +165,19 @@ st.markdown("""
         border-radius: 12px !important;
         font-weight: 700 !important;
         box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
+        transition: all 0.2s ease-in-out !important;
     }
     button:hover, .stButton > button:hover {
         background-color: #e04800 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(255, 82, 0, 0.35) !important;
         color: #ffffff !important;
     }
     button p, .stButton > button p, button span {
         color: #ffffff !important;
     }
 
-    /* BOTONES DE CANTIDAD (+ / -) MÁS GRANDES Y CLAROS */
+    /* BOTONES DE CANTIDAD AMPLIADOS */
     div[data-testid="column"] button {
         font-size: 1.6rem !important;
         font-weight: 900 !important;
@@ -176,7 +192,7 @@ st.markdown("""
         margin-top: 10px;
     }
 
-    /* CAMPOS DE TEXTO LIMPIOS Y CLAROS */
+    /* CAMPOS DE TEXTO LIMPIOS */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
@@ -184,10 +200,11 @@ st.markdown("""
         border: 1px solid #cbd5e0 !important;
         border-radius: 10px !important;
         box-shadow: none !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
     input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {
         border-color: #ff5200 !important;
-        box-shadow: 0 0 0 2px rgba(255,82,0,0.15) !important;
+        box-shadow: 0 0 0 3px rgba(255,82,0,0.18) !important;
     }
     input::placeholder, textarea::placeholder {
         color: #a0aec0 !important;
@@ -202,6 +219,7 @@ st.markdown("""
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
+    /* TARJETAS DE PRODUCTO CON ANIMACIÓN DE ELEVACIÓN */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -209,6 +227,11 @@ st.markdown("""
         padding: 14px;
         margin-bottom: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+    }
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.07);
     }
     .product-title {
         font-size: 1.15rem;
@@ -227,6 +250,7 @@ st.markdown("""
         color: #ff5200 !important;
     }
 
+    /* BANNER PROMOCIONAL CON ANIMACIÓN SUAVE */
     .promo-banner {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
@@ -237,6 +261,12 @@ st.markdown("""
         font-size: 0.95rem;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
+        animation: glowBanner 3s infinite alternate;
+    }
+
+    @keyframes glowBanner {
+        from { box-shadow: 0 4px 12px rgba(255,82,0,0.2); }
+        to { box-shadow: 0 4px 20px rgba(255,82,0,0.4); }
     }
 
     .slideshow-container {
@@ -296,7 +326,7 @@ def remove_from_cart(product_id):
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo y Título Más Grande
+# 4. Header Superior con Logo y Título
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
@@ -454,7 +484,6 @@ elif tab == "Carrito":
         if customer_name and customer_address:
             st.link_button(":material/chat: Enviar Pedido por WhatsApp", whatsapp_url, use_container_width=True)
         else:
-            # Alerta personalizada en Verde Menta WhatsApp con icono outline corporativo
             st.markdown(
                 '<div class="whatsapp-alert"><span class="material-symbols-outlined">chat</span> Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.</div>',
                 unsafe_allow_html=True
