@@ -37,9 +37,6 @@ if "selected_cat" not in st.session_state:
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
-if "show_cart_banner" not in st.session_state:
-    st.session_state.show_cart_banner = False
-
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
@@ -206,6 +203,18 @@ st.markdown(f"""
     footer {{ visibility: hidden !important; }}
     .stDeployButton {{ display: none !important; }}
     
+    /* BARRA SUPERIOR FIJA (STICKY HEADER) PARA EL TÍTULO Y CARRITO */
+    .sticky-header-container {{
+        position: sticky;
+        top: 0;
+        z-index: 99999;
+        background-color: {bg_color} !important;
+        padding-top: 10px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid {border_color};
+        margin-top: -10px;
+    }}
+
     /* MODAL / DIALOG AMPLIADO AL MÁXIMO (95vw / hasta 1400px) */
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
@@ -213,7 +222,7 @@ st.markdown(f"""
     }}
     
     .block-container {{
-        padding-top: 0.5rem !important;
+        padding-top: 0.2rem !important;
         padding-bottom: 3rem !important;
         background-color: {bg_color} !important;
         animation: fadeIn 0.4s ease-in-out;
@@ -235,14 +244,14 @@ st.markdown(f"""
     }}
 
     .app-title {{
-        font-size: 2.3rem !important;
+        font-size: 2.1rem !important;
         font-weight: 900 !important;
         color: {text_color} !important;
         margin: 0 !important;
         line-height: 1.0 !important;
     }}
     .app-subtitle {{
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
         color: {sub_text_color} !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
@@ -250,8 +259,8 @@ st.markdown(f"""
     }}
 
     .cart-cta-container button {{
-        min-height: 75px !important;
-        font-size: 1.1rem !important;
+        min-height: 52px !important;
+        font-size: 1rem !important;
         font-weight: 800 !important;
     }}
 
@@ -449,7 +458,6 @@ st.markdown(f"""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.session_state.show_cart_banner = True
     st.toast("Producto añadido al carrito", icon="🛒")
 
 def remove_from_cart(product_id):
@@ -467,13 +475,16 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 tab = st.session_state.nav_tab
 
-# 4. Header Superior con Logo limpio y Botón de Carrito imponente
+# ==========================================
+# 4. HEADER SUPERIOR FIJO (STICKY HEADER)
+# ==========================================
+st.markdown('<div class="sticky-header-container">', unsafe_allow_html=True)
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="{LOGO_URL}" style="width: 58px; height: 58px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="{LOGO_URL}" style="width: 48px; height: 48px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
             <span class="app-subtitle">Catálogo y pedidos en línea</span>
@@ -482,14 +493,13 @@ with col_title:
     """, unsafe_allow_html=True)
 
 with col_cart_btn:
-    st.write("") 
     cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
     st.markdown('<div class="cart-cta-container">', unsafe_allow_html=True)
     if st.button(":material/shopping_cart: " + cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
-        st.session_state.show_cart_banner = False
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)  # Fin de la barra fija
 
 st.write("---")
 
@@ -499,17 +509,6 @@ if tab == "Inicio":
         '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
-    
-    # BANNER INTERACTIVO DE ACCESO DIRECTO AL CARRITO (Aparece al agregar un producto)
-    if st.session_state.show_cart_banner:
-        col_banner_text, col_banner_btn = st.columns([2.5, 1.5])
-        with col_banner_text:
-            st.success("¡Producto agregado con éxito! ¿Deseas terminar tu pedido?")
-        with col_banner_btn:
-            if st.button("Ir al Carrito 🛒", type="primary", use_container_width=True):
-                st.session_state.nav_tab = "Carrito"
-                st.session_state.show_cart_banner = False
-                st.rerun()
     
     # CARRUSEL AUTOMÁTICO SEGURO
     slides_html = '<div class="slideshow-container">'
