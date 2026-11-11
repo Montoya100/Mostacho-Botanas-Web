@@ -4,8 +4,8 @@ import urllib.parse
 import requests
 from datetime import datetime
 
-# Enlace de tu logo (Puedes usar tu enlace de GitHub o una URL pública de Imgur para asegurar que cargue al instante)
-LOGO_URL = "https://github.com/Montoya100/Mostacho-Botanas-Web/blob/main/logo.png"
+# Enlace de tu logo en GitHub (O asegúrate de usar tu enlace público válido)
+LOGO_URL = "https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/assets/logo.png"
 
 # 1. Configuración de la página
 st.set_page_config(
@@ -82,7 +82,7 @@ def fetch_loyverse_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_products()
 
-# 3. Estilos CSS con Animaciones Dinámicas Fluidas
+# 3. Estilos CSS con Animaciones y Estados Dinámicos para el Botón de WhatsApp
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -114,7 +114,6 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* TÍTULO Y SUBTÍTULO */
     .app-title {
         font-size: 1.85rem !important;
         font-weight: 900 !important;
@@ -128,7 +127,6 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* ALERTA WHATSAPP VERDE MENTA */
     .whatsapp-alert {
         background-color: #25d366 !important;
         color: #ffffff !important;
@@ -141,23 +139,57 @@ st.markdown("""
         gap: 10px;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
-        animation: pulseAlert 2s infinite;
     }
 
-    @keyframes pulseAlert {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.01); }
-        100% { transform: scale(1); }
+    /* ESTILO DINÁMICO PARA EL BOTÓN DE WHATSAPP INACTIVO (GRIS ATENUADO) */
+    .whatsapp-btn-disabled {
+        background-color: #cbd5e0 !important;
+        color: #718096 !important;
+        padding: 14px;
+        border-radius: 14px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-top: 10px;
+        cursor: not-allowed;
+        border: none;
+        display: block;
+        width: 100%;
     }
 
-    /* ETIQUETAS DE TEXTO EN TICKET */
+    /* ESTILO DINÁMICO PARA EL BOTÓN DE WHATSAPP ACTIVO (NARANJA VIBRANTE CON PULSO) */
+    .whatsapp-btn-active {
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
+        color: #ffffff !important;
+        padding: 14px;
+        border-radius: 14px;
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.05rem;
+        margin-top: 10px;
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(255, 82, 0, 0.4);
+        animation: pulseButton 1.5s infinite;
+        transition: transform 0.2s ease;
+    }
+    .whatsapp-btn-active:hover {
+        transform: scale(1.02);
+    }
+
+    @keyframes pulseButton {
+        0% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.5); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 82, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }
+    }
+
     label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {
         color: #1a202c !important;
         font-weight: 700 !important;
         font-size: 1rem !important;
     }
 
-    /* BOTONES NARANJAS CON ANIMACIÓN AL PASAR EL MOUSE / PULSAR */
     button, .stButton > button, div[data-testid="stButton"] > button {
         background-color: #ff5200 !important;
         color: #ffffff !important;
@@ -177,7 +209,6 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* BOTONES DE CANTIDAD AMPLIADOS */
     div[data-testid="column"] button {
         font-size: 1.6rem !important;
         font-weight: 900 !important;
@@ -192,7 +223,6 @@ st.markdown("""
         margin-top: 10px;
     }
 
-    /* CAMPOS DE TEXTO LIMPIOS */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
         color: #222222 !important;
@@ -219,7 +249,6 @@ st.markdown("""
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* TARJETAS DE PRODUCTO CON ANIMACIÓN DE ELEVACIÓN */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -250,7 +279,6 @@ st.markdown("""
         color: #ff5200 !important;
     }
 
-    /* BANNER PROMOCIONAL CON ANIMACIÓN SUAVE */
     .promo-banner {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
@@ -261,12 +289,6 @@ st.markdown("""
         font-size: 0.95rem;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
-        animation: glowBanner 3s infinite alternate;
-    }
-
-    @keyframes glowBanner {
-        from { box-shadow: 0 4px 12px rgba(255,82,0,0.2); }
-        to { box-shadow: 0 4px 20px rgba(255,82,0,0.4); }
     }
 
     .slideshow-container {
@@ -314,7 +336,7 @@ st.markdown("""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("Producto agregado al carrito")
+    st.toast("🛒 ¡Producto agregado al carrito!")
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -463,9 +485,9 @@ elif tab == "Carrito":
         st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
         
         st.subheader(":material/local_shipping: Datos de Entrega")
-        customer_name = st.text_input("Nombre del cliente", placeholder="Ej. Juan Pérez")
-        customer_address = st.text_area("Dirección / Referencias", placeholder="Calle, número, colonia...")
-        customer_notes = st.text_input("Notas adicionales", placeholder="Ej. Cambio de $500")
+        customer_name = st.text_input("Nombre del cliente * (Obligatorio)", placeholder="Ej. Juan Pérez")
+        customer_address = st.text_area("Dirección / Referencias * (Obligatorio)", placeholder="Calle, número, colonia...")
+        customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
         
         order_folio = f"MOSTACHO-{datetime.now().strftime('%H%M%S')}"
         order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -473,19 +495,24 @@ elif tab == "Carrito":
         msg_header = f"📌 *NUEVO PEDIDO* `[{order_folio}]`\n📅 *Fecha:* {order_date}\n\n"
         msg_items = "*Detalle de Productos:*\n" + "\n".join(order_summary) + "\n\n"
         msg_total = f"*Total:* ${total_price:.2f} MXN\n\n"
-        msg_customer = f"*Cliente:* {customer_name if customer_name else 'No especificado'}\n"
-        msg_address = f"*Dirección:* {customer_address if customer_address else 'No especificada'}\n"
+        msg_customer = f"*Cliente:* {customer_name}\n"
+        msg_address = f"*Dirección:* {customer_address}\n"
         msg_notes = f"*Notas:* {customer_notes}\n" if customer_notes else ""
         
         full_message = msg_header + msg_items + msg_total + msg_customer + msg_address + msg_notes
         encoded_message = urllib.parse.quote(full_message)
         whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
         
-        if customer_name and customer_address:
-            st.link_button(":material/chat: Enviar Pedido por WhatsApp", whatsapp_url, use_container_width=True)
+        st.write("")
+        # Validar si nombre y dirección están completos
+        if customer_name.strip() and customer_address.strip():
+            st.markdown(
+                f'<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">💬 Enviar Pedido por WhatsApp ({order_folio})</a>',
+                unsafe_allow_html=True
+            )
         else:
             st.markdown(
-                '<div class="whatsapp-alert"><span class="material-symbols-outlined">chat</span> Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.</div>',
+                '<div class="whatsapp-btn-disabled">💬 Completa Nombre y Dirección para activar WhatsApp</div>',
                 unsafe_allow_html=True
             )
 
