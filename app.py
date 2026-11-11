@@ -37,6 +37,9 @@ if "selected_cat" not in st.session_state:
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
+if "show_cart_banner" not in st.session_state:
+    st.session_state.show_cart_banner = False
+
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
@@ -124,7 +127,6 @@ def load_saved_products():
             with open(DATA_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list) and len(data) > 0:
-                    # Asegurar que todos tengan campos mínimos y IDs seguros
                     cleaned = []
                     for idx, item in enumerate(data):
                         if isinstance(item, dict):
@@ -447,7 +449,8 @@ st.markdown(f"""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("¡Producto añadido al carrito con éxito!", icon="🛒")
+    st.session_state.show_cart_banner = True
+    st.toast("Producto añadido al carrito", icon="🛒")
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -484,6 +487,7 @@ with col_cart_btn:
     st.markdown('<div class="cart-cta-container">', unsafe_allow_html=True)
     if st.button(":material/shopping_cart: " + cart_label, use_container_width=True):
         st.session_state.nav_tab = "Carrito" if st.session_state.nav_tab != "Carrito" else "Inicio"
+        st.session_state.show_cart_banner = False
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -495,6 +499,17 @@ if tab == "Inicio":
         '<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
+    
+    # BANNER INTERACTIVO DE ACCESO DIRECTO AL CARRITO (Aparece al agregar un producto)
+    if st.session_state.show_cart_banner:
+        col_banner_text, col_banner_btn = st.columns([2.5, 1.5])
+        with col_banner_text:
+            st.success("¡Producto agregado con éxito! ¿Deseas terminar tu pedido?")
+        with col_banner_btn:
+            if st.button("Ir al Carrito 🛒", type="primary", use_container_width=True):
+                st.session_state.nav_tab = "Carrito"
+                st.session_state.show_cart_banner = False
+                st.rerun()
     
     # CARRUSEL AUTOMÁTICO SEGURO
     slides_html = '<div class="slideshow-container">'
@@ -754,11 +769,9 @@ def admin_modal():
             if st.button("Guardar Cambios de Productos"):
                 updated_list = []
                 for idx, row in edited_df.iterrows():
-                    # Generación automática de ID si es nuevo o está vacío
                     raw_id = row.get("id")
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
                     
-                    # Manejo seguro de imagen vacía o borrada
                     raw_img = row.get("image")
                     prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" else "https://via.placeholder.com/300"
                     
