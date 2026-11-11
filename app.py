@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import urllib.parse
-import requests
 from datetime import datetime
 
 # 1. Configuración de la página
@@ -19,98 +18,46 @@ if "cart" not in st.session_state:
 if "nav_tab" not in st.session_state:
     st.session_state.nav_tab = "Inicio"
 
-LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
+# Catálogo base editable y controlado desde Admin (Categoría Plataforma)
+if "products" not in st.session_state:
+    st.session_state.products = [
+        {
+            "id": "p1", 
+            "name": "Garbanzo 1k", 
+            "category": "Plataforma", 
+            "price": 45.0, 
+            "description": "Garbanzo seleccionado de alta calidad para distribución.", 
+            "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
+        },
+        {
+            "id": "p2", 
+            "name": "Garbanzo Enchilado", 
+            "category": "Plataforma", 
+            "price": 50.0, 
+            "description": "Garbanzo con sazón especial enchilado.", 
+            "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"
+        },
+        {
+            "id": "p3", 
+            "name": "Japonés 1k", 
+            "category": "Plataforma", 
+            "price": 40.0, 
+            "description": "Cahuate estilo japonés crujiente.", 
+            "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"
+        },
+        {
+            "id": "p4", 
+            "name": "Crujiente 1k", 
+            "category": "Plataforma", 
+            "price": 42.0, 
+            "description": "Mix crujiente para distribución directa.", 
+            "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
+        }
+    ]
+
 WHATSAPP_PHONE = "522381174698"
 
-# Función robusta para extraer precios reales y categoría "Plataforma" de Loyverse
-@st.cache_data(ttl=60)
-def fetch_loyverse_platform_products():
-    headers = {
-        "Authorization": f"Bearer {LOYVERSE_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    products_list = []
-    
-    try:
-        # 1. Obtener categorías para ubicar el ID de "Plataforma"
-        cat_res = requests.get("https://api.loyverse.com/v1.0/categories", headers=headers, timeout=5)
-        platform_category_id = None
-        
-        if cat_res.status_code == 200:
-            categories = cat_res.json().get("categories", [])
-            for cat in categories:
-                if "plataforma" in cat.get("name", "").lower():
-                    platform_category_id = cat.get("id")
-                    break
-
-        # 2. Obtener items
-        items_res = requests.get("https://api.loyverse.com/v1.0/items", headers=headers, timeout=5)
-        if items_res.status_code == 200:
-            items = items_res.json().get("items", [])
-            
-            for item in items:
-                item_cat_id = item.get("category_id")
-                cat_name = item.get("category_name", "").lower()
-                
-                is_platform = False
-                if platform_category_id and item_cat_id == platform_category_id:
-                    is_platform = True
-                elif "plataforma" in cat_name:
-                    is_platform = True
-                
-                # Filtrar estrictamente la categoría Plataforma
-                if is_platform or not platform_category_id:
-                    variants = item.get("variants", [])
-                    item_name = item.get("item_name", "Producto")
-                    desc = item.get("description", "Producto oficial de la plataforma Mostacho.")
-                    
-                    if variants:
-                        for var in variants:
-                            # Extracción precisa y segura del precio real de la variante
-                            price = 0.0
-                            price_val = var.get("price")
-                            
-                            # Si no está directo en la variante, revisamos precios por tienda (store_prices)
-                            if price_val is None and "store_prices" in var:
-                                store_prices = var.get("store_prices", {})
-                                if store_prices:
-                                    price_val = list(store_prices.values())[0]
-                            
-                            try:
-                                price = float(price_val or 0.0)
-                            except (TypeError, ValueError):
-                                price = 0.0
-                                
-                            var_name = var.get("variant_name", "")
-                            display_name = f"{item_name} ({var_name})" if var_name and var_name != "Default" else item_name
-                            
-                            # Solo agregamos si tiene un precio válido o variante activa
-                            products_list.append({
-                                "id": var.get("variant_id", item.get("id")),
-                                "name": display_name,
-                                "category": "Plataforma",
-                                "price": price,
-                                "description": desc,
-                                "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
-                            })
-    except Exception as e:
-        pass
-        
-    # Respaldo seguro si la API no responde momentáneamente
-    if not products_list:
-        products_list = [
-            {"id": "p1", "name": "Garbanzo 1k", "category": "Plataforma", "price": 45.0, "description": "Garbanzo seleccionado de alta calidad.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-            {"id": "p2", "name": "Garbanzo Enchilado", "category": "Plataforma", "price": 50.0, "description": "Garbanzo con sazón especial enchilado.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-            {"id": "p3", "name": "Japonés 1k", "category": "Plataforma", "price": 40.0, "description": "Cahuate estilo japonés crujiente.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"},
-            {"id": "p4", "name": "Crujiente 1k", "category": "Plataforma", "price": 42.0, "description": "Mix crujiente para distribución.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"}
-        ]
-        
-    return products_list
-
-if "products" not in st.session_state:
-    st.session_state.products = fetch_loyverse_platform_products()
-
-# 3. Estilos CSS Forzados al Tema Claro (Eliminando barras negras y forzando campos blancos)
+# 3. Estilos CSS: Forzar Tema Claro Ergonómico (Fondo Marfil Suave, Cero Recuadros Negros)
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -127,14 +74,14 @@ st.markdown("""
         padding-bottom: 3rem !important;
     }
 
-    /* FORZAR TEMA CLARO ABSOLUTO: Anular modo oscuro del navegador en toda la app */
+    /* FORZAR TEMA CLARO ABSOLUTO: Anular modo oscuro del navegador e impedir recuadros negros */
     .stApp, body, html {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #ffffff !important;
+        background-color: #f8f7f4 !important; /* Marfil suave que no lastima la vista */
         color: #222222 !important;
     }
 
-    /* Forzar fondo blanco y texto oscuro en TODOS los campos de texto e inputs */
+    /* Forzar fondo blanco y texto oscuro en TODOS los campos e inputs de texto */
     input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
         background-color: #ffffff !important;
         color: #222222 !important;
@@ -153,7 +100,7 @@ st.markdown("""
         line-height: 1;
     }
 
-    /* Tarjetas de Producto limpias */
+    /* Tarjetas de Producto limpias sobre fondo suave */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -191,7 +138,7 @@ st.markdown("""
         margin-bottom: 14px;
     }
 
-    /* Carrusel / Slideshow */
+    /* Carrusel / Slideshow Atractivo */
     .slideshow-container {
         position: relative;
         max-width: 100%;
@@ -272,23 +219,23 @@ st.write("---")
 
 # 5. Vistas de la Aplicación
 if tab == "Inicio":
-    # Botón para compartir catálogo
+    # Botón para compartir catálogo con icono outline
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
         if st.button("📤 Compartir", use_container_width=True):
             st.toast("¡Enlace listo para enviar por WhatsApp!", icon="📤")
 
-    # Banner Promocional
+    # Banner Promocional con icono outline
     st.markdown(
-        '<div class="promo-banner"><span class="material-symbols-outlined">local_fire_department</span> Categoría Plataforma • Sincronizado con Loyverse</div>', 
+        '<div class="promo-banner"><span class="material-symbols-outlined">local_fire_department</span> Categoría Plataforma • Control Total de Precios y Títulos</div>', 
         unsafe_allow_html=True
     )
     
-    # Carrusel Publicitario
+    # Carrusel Publicitario (Conservado y atractivo)
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
-            <div class="slide-text">Pistaches Plataforma • Calidad Premium</div>
+            <div class="slide-text">Pistaches y Garbanzos • Calidad Premium</div>
         </div>
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800');">
             <div class="slide-text">Snacks y Semillas Seleccionadas</div>
@@ -409,17 +356,24 @@ elif tab == "Carrito":
         else:
             st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
 
-# Acceso Admin discreto al pie
+# Panel de Administración Interactivo (Modifica títulos, precios y enlaces de fotos al instante)
 st.write("---")
-col_adm1, col_adm2 = st.columns([4, 1])
-with col_adm2:
-    if st.button("Admin"):
-        admin_key = st.text_input("Clave", type="password", key="admin_inline")
-        if admin_key == "1234":
-            st.success("Acceso concedido")
-            df_current = pd.DataFrame(st.session_state.products)
-            edited_df = st.data_editor(df_current, num_rows="dynamic", key="editor_admin_hidden")
-            if st.button("Guardar cambios"):
-                st.session_state.products = edited_df.to_dict(orient="records")
-                st.success("¡Actualizado!")
-                st.rerun()
+with st.expander("⚙️ Panel de Administración (Precios, Títulos y Fotos)"):
+    admin_key = st.text_input("Contraseña de Administrador", type="password", key="admin_pass_input")
+    if admin_key == "1234":
+        st.success("¡Acceso concedido! Modifica los datos directamente en la tabla:")
+        df_current = pd.DataFrame(st.session_state.products)
+        
+        edited_df = st.data_editor(
+            df_current,
+            num_rows="dynamic",
+            use_container_width=True,
+            key="product_table_editor"
+        )
+        
+        if st.button("Guardar Cambios en el Catálogo"):
+            st.session_state.products = edited_df.to_dict(orient="records")
+            st.success("¡Catálogo actualizado correctamente!")
+            st.rerun()
+    elif admin_key:
+        st.error("Contraseña incorrecta (Usa 1234).")
