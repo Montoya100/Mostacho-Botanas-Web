@@ -2,10 +2,14 @@ import streamlit as st
 import pandas as pd
 import urllib.parse
 import requests
+import json
+import os
 from datetime import datetime
 
 # Enlace Raw real de tu logo en tu repositorio de GitHub
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
+DATA_FILE = "productos_mostacho.json"
+POPULAR_FILE = "populares_mostacho.json"
 
 # 1. Configuración de la página
 st.set_page_config(
@@ -33,7 +37,6 @@ WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
 # CONFIGURACIÓN DE IMÁGENES DEL CARRUSEL (DIAPOSITIVAS)
-# RECOMENDACIÓN DE TAMAÑO: 1200 x 600 px (Proporción 2:1 horizontal) para evitar compresiones.
 SLIDER_ITEMS = [
     {
         "url": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200",
@@ -110,10 +113,63 @@ def fetch_loyverse_products():
         ]
     return products_list
 
-if "products" not in st.session_state:
-    st.session_state.products = fetch_loyverse_products()
+# Sistema de Persistencia de Productos (JSON)
+def load_saved_products():
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+        except:
+            pass
+    initial_products = fetch_loyverse_products()
+    save_products_to_file(initial_products)
+    return initial_products
 
-# 3. Colores dinámicos limpios (Sin fondo de imagen)
+def save_products_to_file(prod_list):
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(prod_list, f, ensure_ascii=False, indent=4)
+    except:
+        pass
+
+# Sistema de Persistencia de Populares (JSON)
+def load_saved_populares():
+    if os.path.exists(POPULAR_FILE):
+        try:
+            with open(POPULAR_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+        except:
+            pass
+    # Predeterminados iniciales
+    default_pops = [
+        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+        {"id": "p3", "name": "Cahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+    ]
+    save_populares_to_file(default_pops)
+    return default_pops
+
+def save_populares_to_file(pop_list):
+    try:
+        with open(POPULAR_FILE, "w", encoding="utf-8") as f:
+            json.dump(pop_list, f, ensure_ascii=False, indent=4)
+    except:
+        pass
+
+if "products" not in st.session_state:
+    st.session_state.products = load_saved_products()
+
+if "popular_items" not in st.session_state:
+    st.session_state.popular_items = load_saved_populares()
+
+if "admin_authenticated" not in st.session_state:
+    st.session_state.admin_authenticated = False
+
+# 3. Colores dinámicos limpios
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -321,7 +377,6 @@ st.markdown(f"""
         box-shadow: 0 4px 12px rgba(255,82,0,0.2);
     }}
 
-    /* CARRUSEL AUTOMÁTICO SEGURO (SIN RASTRO DE CÓDIGO) */
     .slideshow-container {{
         position: relative;
         max-width: 100%;
@@ -427,43 +482,46 @@ if tab == "Inicio":
     # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    # 2. PRODUCTOS POPULARES (Justo abajo de la búsqueda)
+    # 2. PRODUCTOS POPULARES (Dinamicos seleccionados desde admin)
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
     
-    popular_products = [
-        {"id": "pop_1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-        {"id": "pop_2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-        {"id": "pop_3", "name": "Cahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
-    ]
+    popular_products = st.session_state.popular_items
+    if not popular_products:
+        popular_products = [
+            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"}
+        ]
     
     pop_cols = st.columns(len(popular_products))
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{pop_p['image']}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
-                <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p['name']}</div>
-                <div style="color: #ff5200; font-weight: bold; font-size: 0.95rem;">${pop_p['price']:.2f} MXN</div>
+                <img src="{pop_p.get('image', 'https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
+                <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p.get('name', 'Producto')}</div>
+                <div style="color: #ff5200; font-weight: bold; font-size: 0.95rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("Agregar +", key=f"quick_add_{pop_p['id']}", use_container_width=True):
-                if not any(p.get("id") == pop_p['id'] for p in st.session_state.products):
+            if st.button("Agregar +", key=f"quick_add_{pop_p.get('id', idx)}", use_container_width=True):
+                prod_id = pop_p.get('id', str(idx))
+                if not any(p.get("id") == prod_id for p in st.session_state.products):
                     st.session_state.products.append({
-                        "id": pop_p['id'],
-                        "name": pop_p['name'],
+                        "id": prod_id,
+                        "name": pop_p.get('name'),
                         "category": "Individual",
-                        "price": pop_p['price'],
+                        "price": pop_p.get('price'),
                         "description": "Producto popular seleccionado.",
-                        "image": pop_p['image']
+                        "image": pop_p.get('image')
                     })
-                add_to_cart(pop_p['id'])
+                    save_products_to_file(st.session_state.products)
+                add_to_cart(prod_id)
                 st.rerun()
 
     st.write("---")
 
-    # 3. FILA DE CATEGORÍAS (Abajo de populares y arriba del catálogo general)
+    # 3. SECCIÓN DE CATEGORÍAS (Con Título Legible)
+    st.markdown("### Categorías")
     category_options = ["Todo", "Individual", "Para compartir"]
     
     cat_cols = st.columns(len(category_options))
@@ -602,7 +660,7 @@ elif tab == "Carrito":
                 unsafe_allow_html=True
             )
 
-# 6. Panel de Administración y Botones Inferiores
+# 6. Panel de Administración y Configuración en POP-UP (Modal)
 st.write("---")
 col_theme, col_space_footer, col_admin = st.columns([1, 4, 1])
 
@@ -612,19 +670,92 @@ with col_theme:
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
 
+@st.dialog("Panel de Administración y Configuración")
+def admin_modal():
+    if not st.session_state.admin_authenticated:
+        st.subheader("Acceso Restringido")
+        pass_input = st.text_input("Ingresa la contraseña de administrador", type="password", placeholder="Clave de 4 dígitos...")
+        if st.button("Ingresar"):
+            if pass_input == "7031":
+                st.session_state.admin_authenticated = True
+                st.rerun()
+            else:
+                st.error("Contraseña incorrecta.")
+    else:
+        st.success("¡Acceso concedido!")
+        
+        # NOTAS Y GUÍA DE TAMAÑOS DE IMAGEN
+        st.info(
+            "📌 **GUÍA DE TAMAÑOS DE IMAGEN RECOMENDADOS:**\n\n"
+            "• **Imágenes del Carrusel (Banner):** `1200 x 600 px` (Proporción 2:1 horizontal).\n"
+            "• **Imágenes de Productos:** `600 x 600 px` (Proporción 1:1 cuadrada).\n\n"
+            "*Usar estas medidas evita que las imágenes se compriman, estiren o distorsionen al cambiar entre versión web y móvil.*"
+        )
+        
+        tab_prod, tab_pop = st.tabs(["📦 Editar Productos", "⭐ Seleccionar Populares"])
+        
+        with tab_prod:
+            st.markdown("### Inventario de Productos")
+            st.caption("Modifica precios, nombres o asigna la categoría correcta:")
+            df_current = pd.DataFrame(st.session_state.products)
+            
+            column_config = {
+                "category": st.column_config.SelectboxColumn(
+                    "Categoría",
+                    help="Selecciona estrictamente Individual o Para compartir",
+                    options=["Individual", "Para compartir"],
+                    required=True
+                )
+            }
+            
+            edited_df = st.data_editor(
+                df_current, 
+                num_rows="dynamic", 
+                key="editor_admin_table",
+                column_config=column_config
+            )
+            
+            if st.button("Guardar Cambios de Productos"):
+                updated_list = edited_df.to_dict(orient="records")
+                st.session_state.products = updated_list
+                save_products_to_file(updated_list)
+                st.success("¡Productos guardados permanentemente!")
+                st.rerun()
+
+        with tab_pop:
+            st.markdown("### Seleccionar Productos Populares")
+            st.caption("Elige cuáles productos aparecerán destacados en la sección de populares:")
+            
+            current_pop_ids = [p.get("id") for p in st.session_state.popular_items]
+            
+            selected_populares_new = []
+            for prod in st.session_state.products:
+                p_id = prod.get("id")
+                p_name = prod.get("name")
+                is_currently_pop = p_id in current_pop_ids
+                
+                if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
+                    selected_populares_new.append({
+                        "id": p_id,
+                        "name": p_name,
+                        "price": prod.get("price"),
+                        "image": prod.get("image", "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300")
+                    })
+            
+            if st.button("Guardar Productos Populares"):
+                if selected_populares_new:
+                    st.session_state.popular_items = selected_populares_new
+                    save_populares_to_file(selected_populares_new)
+                    st.success("¡Productos populares actualizados con éxito!")
+                    st.rerun()
+                else:
+                    st.warning("Debes seleccionar al menos un producto popular.")
+        
+        st.write("---")
+        if st.button("Cerrar Sesión de Admin"):
+            st.session_state.admin_authenticated = False
+            st.rerun()
+
 with col_admin:
     if st.button(":material/settings: Admin", use_container_width=True):
-        st.session_state.show_admin_login = not st.session_state.get("show_admin_login", False)
-
-if st.session_state.get("show_admin_login", False):
-    admin_key = st.text_input("Clave de acceso", type="password", key="admin_pass_mini", placeholder="Contraseña...")
-    if admin_key == "1234":
-        st.success("Acceso concedido")
-        df_current = pd.DataFrame(st.session_state.products)
-        edited_df = st.data_editor(df_current, num_rows="dynamic", key="editor_admin_table")
-        if st.button("Guardar cambios"):
-            st.session_state.products = edited_df.to_dict(orient="records")
-            st.success("¡Actualizado con éxito!")
-            st.rerun()
-    elif admin_key:
-        st.error("Contraseña incorrecta.")
+        admin_modal()
