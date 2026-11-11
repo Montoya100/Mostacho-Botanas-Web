@@ -13,9 +13,6 @@ st.set_page_config(
 )
 
 # 2. Inicializar Estado
-if "theme" not in st.session_state:
-    st.session_state.theme = "Claro"
-
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
@@ -25,7 +22,7 @@ if "nav_tab" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Función robusta para conectar con Loyverse y filtrar SOLO categoría "Plataforma" con precios reales
+# Función robusta para extraer los precios reales de Loyverse filtrando la categoría Plataforma
 @st.cache_data(ttl=60)
 def fetch_loyverse_platform_products():
     headers = {
@@ -35,65 +32,63 @@ def fetch_loyverse_platform_products():
     products_list = []
     
     try:
-        # 1. Obtener categorías para identificar el ID de la categoría "Plataforma"
+        # 1. Obtener categorías para ubicar el ID de "Plataforma"
         cat_res = requests.get("https://api.loyverse.com/v1.0/categories", headers=headers, timeout=5)
         platform_category_id = None
         
         if cat_res.status_code == 200:
-            categories = cat_res.status_code and cat_res.json().get("categories", [])
+            categories = cat_res.json().get("categories", [])
             for cat in categories:
                 if "plataforma" in cat.get("name", "").lower():
                     platform_category_id = cat.get("id")
                     break
 
-        # 2. Obtener items
+        # 2. Obtener items y precios de variantes
         items_res = requests.get("https://api.loyverse.com/v1.0/items", headers=headers, timeout=5)
         if items_res.status_code == 200:
             items = items_res.json().get("items", [])
             
             for item in items:
                 item_cat_id = item.get("category_id")
-                
-                # Si se encontró la categoría Plataforma, filtramos estrictamente por su ID. 
-                # Si no, filtramos por nombre de categoría si viene incluido.
                 cat_name = item.get("category_name", "").lower()
-                is_platform = False
                 
+                is_platform = False
                 if platform_category_id and item_cat_id == platform_category_id:
                     is_platform = True
                 elif "plataforma" in cat_name:
                     is_platform = True
                 
-                # Para pruebas o si el usuario quiere forzar la muestra si la categoría se llama exacto
                 if is_platform or not platform_category_id:
-                    # Extraer variantes y precios reales
                     variants = item.get("variants", [])
+                    item_name = item.get("item_name", "Producto")
+                    desc = item.get("description", "Producto oficial de la plataforma Mostacho.")
+                    
                     if variants:
                         for var in variants:
-                            price = float(var.get("price", 0.0))
+                            # Extracción limpia del precio de cada variante
+                            price = float(var.get("price") or 0.0)
                             var_name = var.get("variant_name", "")
-                            display_name = f"{item.get('item_name')} ({var_name})" if var_name and var_name != "Default" else item.get('item_name')
+                            
+                            display_name = f"{item_name} ({var_name})" if var_name and var_name != "Default" else item_name
                             
                             products_list.append({
                                 "id": var.get("variant_id", item.get("id")),
                                 "name": display_name,
                                 "category": "Plataforma",
                                 "price": price,
-                                "description": item.get("description", "Producto oficial de la plataforma Mostacho."),
+                                "description": desc,
                                 "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
                             })
-                    else:
-                        products_list.cesso = True
-                        
     except Exception as e:
         pass
         
-    # Respaldo seguro si la API no devuelve elementos en este momento
+    # Respaldo seguro si la API no responde momentáneamente
     if not products_list:
         products_list = [
-            {"id": "p1", "name": "Pistaches Plataforma (90g)", "category": "Plataforma", "price": 35.0, "description": "Pistaches seleccionados de alta calidad.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-            {"id": "p2", "name": "Cahuates Plataforma (100g)", "category": "Plataforma", "price": 22.5, "description": "Cahuate especial de distribución directa.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-            {"id": "p3", "name": "Mix Especial Plataforma (1kg)", "category": "Plataforma", "price": 185.0, "description": "Mezcla optimizada para puntos de venta.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+            {"id": "p1", "name": "Garbanzo 1k", "category": "Plataforma", "price": 45.0, "description": "Garbanzo seleccionado de alta calidad.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+            {"id": "p2", "name": "Garbanzo Enchilado", "category": "Plataforma", "price": 50.0, "description": "Garbanzo con sazón especial enchilado.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+            {"id": "p3", "name": "Japonés 1k", "category": "Plataforma", "price": 40.0, "description": "Cahuate estilo japonés crujiente.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"},
+            {"id": "p4", "name": "Crujiente 1k", "category": "Plataforma", "price": 42.0, "description": "Mix crujiente para distribución.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"}
         ]
         
     return products_list
@@ -101,24 +96,28 @@ def fetch_loyverse_platform_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_platform_products()
 
-# 3. Estilos CSS Forzados a Modo Claro Limpio (Fondo Blanco y Recuadros Claros Visibles)
+# 3. Estilos CSS Definitivos (Forzar fondo blanco puro, eliminar barras negras y ajustar márgenes superiores)
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
     /* Ocultar elementos nativos de Streamlit / GitHub */
-    header { visibility: hidden !important; height: 0px !important; }
+    header { visibility: hidden !important; height: 0px !important; display: none !important; }
     #MainMenu { visibility: hidden !important; }
     footer { visibility: hidden !important; }
     .stDeployButton { display: none !important; }
+    
+    /* Eliminar espacios vacíos superiores */
+    .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 3rem !important;
+    }
 
-    /* Forzar diseño limpio y claro para evitar fondos oscuros */
-    .stApp {
+    /* Forzar fondo blanco y evitar recuadros oscuros o negros por el sistema */
+    .stApp, body, html {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #f8f9fa !important;
+        background-color: #ffffff !important;
         color: #222222 !important;
-        padding-top: 10px !important;
-        padding-bottom: 50px !important;
     }
 
     .material-symbols-outlined {
@@ -128,28 +127,28 @@ st.markdown("""
         line-height: 1;
     }
 
-    /* Tarjetas de Producto claras y visibles con bordes grises suaves */
+    /* Tarjetas de Producto limpias */
     .product-card {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-radius: 16px;
-        padding: 14px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.02);
     }
     .product-title {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         font-weight: 800;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
         color: #1a202c !important;
     }
     .product-desc {
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         color: #718096 !important;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     .product-price {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: bold;
         color: #ff5200 !important;
     }
@@ -158,21 +157,21 @@ st.markdown("""
     .promo-banner {
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%);
         color: white;
-        padding: 14px 16px;
-        border-radius: 16px;
+        padding: 12px 16px;
+        border-radius: 14px;
         text-align: center;
         font-weight: 700;
         font-size: 0.95rem;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
-    /* Carrusel / Slideshow */
+    /* Carrusel / Slideshow Atractivo */
     .slideshow-container {
         position: relative;
         max-width: 100%;
-        height: 200px;
-        margin-bottom: 20px;
-        border-radius: 16px;
+        height: 180px;
+        margin-bottom: 16px;
+        border-radius: 14px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
     }
@@ -185,7 +184,7 @@ st.markdown("""
         background-position: center;
         display: flex;
         align-items: flex-end;
-        padding: 16px;
+        padding: 14px;
     }
     .slide:nth-child(1) { animation-delay: 0s; }
     .slide:nth-child(2) { animation-delay: 4s; }
@@ -221,17 +220,18 @@ def remove_from_cart(product_id):
             del st.session_state.cart[product_id]
 
 total_items = sum(st.session_state.cart.values())
+tab = st.session_state.nav_tab
 
-# 4. Header Superior: Logo, Nombre Grande y Botón de Carrito con Contador Naranja debajo
+# 4. Header Superior Sin Espacios Vacios
 col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown("""
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <span class="material-symbols-outlined" style="font-size: 38px; color: #ff5200;">storefront</span>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="material-symbols-outlined" style="font-size: 34px; color: #ff5200;">storefront</span>
         <div>
-            <h2 style="margin: 0; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; color: #1a202c;">Mostacho Botanas</h2>
-            <span style="font-size: 0.85rem; color: #718096; font-weight: 500;">Plataforma Oficial de Pedidos</span>
+            <h2 style="margin: 0; font-size: 1.35rem; font-weight: 900; color: #1a202c;">Mostacho Botanas</h2>
+            <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">Plataforma Oficial</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -244,14 +244,12 @@ with col_cart_btn:
 
 st.write("---")
 
-tab = st.session_state.nav_tab
-
 # 5. Vistas de la Aplicación
 if tab == "Inicio":
-    # Botón superior para compartir catálogo
+    # Botón para compartir catálogo
     col_sh1, col_sh2 = st.columns([3, 1])
     with col_sh2:
-        if st.button(":material/share: Compartir", use_container_width=True):
+        if st.button("📤 Compartir", use_container_width=True):
             st.toast("¡Enlace listo para enviar por WhatsApp!", icon="📤")
 
     # Banner Promocional
@@ -260,7 +258,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # Carrusel Publicitario
+    # Carrusel Publicitario (Conservado y mejorado)
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
@@ -275,20 +273,13 @@ if tab == "Inicio":
     </div>
     """, unsafe_allow_html=True)
 
-    # Buscador Estilizado
-    col_input, col_btn_search = st.columns([4, 1])
-    with col_input:
-        search_query = st.text_input("Buscar productos...", placeholder="Buscar en plataforma...", label_visibility="collapsed")
-    with col_btn_search:
-        st.button(":material/search:", type="primary", use_container_width=True, key="search_action")
+    # Buscador Limpio
+    search_query = st.text_input("Buscar productos en plataforma...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
 
-    st.write("")
-
-    # Pestaña fija exclusiva de la categoría Plataforma
-    st.markdown("### Categoría: Plataforma")
+    st.markdown("#### Categoría: Plataforma")
     st.write("---")
 
-    # Lista de Productos (Filtrada estrictamente)
+    # Lista de Productos
     try:
         current_products_list = st.session_state.products
         filtered_products = [
@@ -339,7 +330,7 @@ elif tab == "Carrito":
         st.session_state.nav_tab = "Inicio"
         st.rerun()
         
-    st.markdown("### <span class='material-symbols-outlined'>shopping_cart</span> Carrito de Compras", unsafe_allow_html=True)
+    st.markdown("### 🛒 Carrito de Compras")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -392,7 +383,7 @@ elif tab == "Carrito":
         else:
             st.warning("Escribe tu Nombre y Dirección para habilitar el envío por WhatsApp.")
 
-# Menú secundario discreto para cambiar a Admin si se necesita
+# Acceso Admin discreto al pie
 st.write("---")
 col_adm1, col_adm2 = st.columns([4, 1])
 with col_adm2:
