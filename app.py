@@ -41,8 +41,34 @@ if "dark_mode" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Imagen promocional fija (banner superior de alta calidad)
-DEFAULT_BANNER_URL = "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200"
+# ==========================================
+# GESTIÓN DE LA IMAGEN DE PISTACHES / BANNER
+# ==========================================
+DEFAULT_BANNER = "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200"
+
+def load_saved_banner():
+    if os.path.exists(SLIDER_FILE):
+        try:
+            with open(SLIDER_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    url = data[0].get("url", "").strip()
+                    if url:
+                        return url
+        except:
+            pass
+    return DEFAULT_BANNER
+
+def save_banner_to_file(url):
+    try:
+        data = [{"url": url, "caption": "Pistaches y Snacks Premium"}]
+        with open(SLIDER_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except:
+        pass
+
+if "banner_url" not in st.session_state:
+    st.session_state.banner_url = load_saved_banner()
 
 @st.cache_data(ttl=60)
 def fetch_loyverse_products():
@@ -231,7 +257,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB ABSOLUTO FLOTANTE REAL EN HTML CON TEXTO BLANCO Y FIJO EN ESQUINA INFERIOR DERECHA */
+    /* BOTÓN FAB FLOTANTE REAL FIJO EN LA ESQUINA INFERIOR DERECHA CON TEXTO BLANCO */
     .true-floating-fab-container {{
         position: fixed !important;
         bottom: 25px !important;
@@ -239,34 +265,6 @@ st.markdown(f"""
         z-index: 99999999 !important;
     }}
     
-    .true-fab-btn {{
-        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
-        color: #ffffff !important;
-        padding: 14px 24px !important;
-        border-radius: 50px !important;
-        font-weight: 800 !important;
-        font-size: 1.05rem !important;
-        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        text-decoration: none !important;
-        border: none !important;
-        cursor: pointer !important;
-        animation: pulseButton 2s infinite;
-    }}
-    .true-fab-btn:hover {{
-        transform: scale(1.05);
-        color: #ffffff !important;
-        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.8) !important;
-    }}
-
-    @keyframes pulseButton {{
-        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.6); }}
-        70% {{ box-shadow: 0 0 0 12px rgba(255, 82, 0, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
-    }}
-
     .whatsapp-btn-disabled {{
         background-color: {"#334155" if is_dark else "#1a202c"} !important;
         color: #ffffff !important;
@@ -426,12 +424,6 @@ for k in keys_to_delete:
     del st.session_state.cart[k]
 
 total_items = sum(st.session_state.cart.values())
-
-# Manejar clic en el FAB flotante mediante botón nativo de Streamlit invisible o callback
-if "go_to_cart_click" in st.session_state and st.session_state.go_to_cart_click:
-    st.session_state.nav_tab = "Carrito"
-    st.session_state.go_to_cart_click = False
-
 tab = st.session_state.nav_tab
 
 # ==========================================
@@ -466,9 +458,9 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # IMAGEN PROMOCIONAL FIJA DE ALTA CALIDAD (CARRUSEL REEMPLAZADO PARA CERO ERRORES DE RENDERIZADO)
-    st.image(DEFAULT_BANNER_URL, use_container_width=True)
-    st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 18px; font-size: 0.95rem;">Pistaches, Cacahuates y Mix Botanero • Calidad Premium</div>', unsafe_allow_html=True)
+    # IMAGEN DE PISTACHES FIJA COMO EJEMPLO (EDITABLE DESDE EL PANEL DE ADMIN)
+    st.image(st.session_state.banner_url, use_container_width=True)
+    st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 18px; font-size: 0.95rem;">Pistaches Seleccionados • Calidad Premium</div>', unsafe_allow_html=True)
 
     # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
@@ -658,7 +650,7 @@ elif tab == "Carrito":
             )
 
 # ==========================================
-# BOTÓN FLOTANTE (FAB) REAL CON ESTADO PERSISTENTE EN SESSION_STATE
+# BOTÓN FAB FLOTANTE REAL CON TEXTO BLANCO
 # ==========================================
 if total_items > 0 and tab != "Carrito":
     st.markdown('<div class="true-floating-fab-container">', unsafe_allow_html=True)
@@ -691,7 +683,7 @@ def admin_modal():
     else:
         st.success("¡Acceso concedido!")
         
-        tab_prod, tab_pop, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "📤 Subir Imágenes"])
+        tab_prod, tab_pop, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
@@ -769,9 +761,20 @@ def admin_modal():
                 else:
                     st.warning("Debes seleccionar al menos un producto popular.")
 
+        with tab_banner:
+            st.markdown("### Cambiar Imagen de Banner / Pistaches")
+            st.caption("Actualiza la URL de la imagen principal que aparece arriba en la tienda:")
+            new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
+            if st.button("Guardar Banner"):
+                if new_banner_url.strip():
+                    st.session_state.banner_url = new_banner_url.strip()
+                    save_banner_to_file(new_banner_url.strip())
+                    st.success("¡Imagen de banner actualizada con éxito!")
+                    st.rerun()
+
         with tab_upload:
             st.markdown("### Subir Imagen Directamente")
-            st.caption("Sube una imagen desde tu dispositivo para obtener su enlace y usarla en tus productos:")
+            st.caption("Sube una imagen desde tu dispositivo para obtener su enlace:")
             
             uploaded_file = st.file_uploader("Elige una imagen (PNG, JPG, WEBP)", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
@@ -783,8 +786,7 @@ def admin_modal():
                 st.image(file_path, width=200)
                 
                 local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
-                st.text_input("Copia esta ruta/enlace para usarla en tus productos:", value=local_url)
-                st.info("💡 *Nota: Si usas tu app en la nube de Streamlit, te recomendamos subir tus imágenes directamente a tu repositorio de GitHub.*")
+                st.text_input("Copia esta ruta/enlace para usarla en tu banner o productos:", value=local_url)
         
         st.write("---")
         if st.button("Cerrar Sesión de Admin"):
