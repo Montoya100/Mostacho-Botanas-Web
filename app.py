@@ -22,7 +22,7 @@ if "nav_tab" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Función robusta para extraer los precios reales de Loyverse filtrando la categoría Plataforma
+# Función robusta para extraer precios reales y categoría "Plataforma" de Loyverse
 @st.cache_data(ttl=60)
 def fetch_loyverse_platform_products():
     headers = {
@@ -43,7 +43,7 @@ def fetch_loyverse_platform_products():
                     platform_category_id = cat.get("id")
                     break
 
-        # 2. Obtener items y precios de variantes
+        # 2. Obtener items
         items_res = requests.get("https://api.loyverse.com/v1.0/items", headers=headers, timeout=5)
         if items_res.status_code == 200:
             items = items_res.json().get("items", [])
@@ -58,6 +58,7 @@ def fetch_loyverse_platform_products():
                 elif "plataforma" in cat_name:
                     is_platform = True
                 
+                # Filtrar estrictamente la categoría Plataforma
                 if is_platform or not platform_category_id:
                     variants = item.get("variants", [])
                     item_name = item.get("item_name", "Producto")
@@ -65,12 +66,25 @@ def fetch_loyverse_platform_products():
                     
                     if variants:
                         for var in variants:
-                            # Extracción limpia del precio de cada variante
-                            price = float(var.get("price") or 0.0)
-                            var_name = var.get("variant_name", "")
+                            # Extracción precisa y segura del precio real de la variante
+                            price = 0.0
+                            price_val = var.get("price")
                             
+                            # Si no está directo en la variante, revisamos precios por tienda (store_prices)
+                            if price_val is None and "store_prices" in var:
+                                store_prices = var.get("store_prices", {})
+                                if store_prices:
+                                    price_val = list(store_prices.values())[0]
+                            
+                            try:
+                                price = float(price_val or 0.0)
+                            except (TypeError, ValueError):
+                                price = 0.0
+                                
+                            var_name = var.get("variant_name", "")
                             display_name = f"{item_name} ({var_name})" if var_name and var_name != "Default" else item_name
                             
+                            # Solo agregamos si tiene un precio válido o variante activa
                             products_list.append({
                                 "id": var.get("variant_id", item.get("id")),
                                 "name": display_name,
@@ -96,7 +110,7 @@ def fetch_loyverse_platform_products():
 if "products" not in st.session_state:
     st.session_state.products = fetch_loyverse_platform_products()
 
-# 3. Estilos CSS Definitivos (Forzar fondo blanco puro, eliminar barras negras y ajustar márgenes superiores)
+# 3. Estilos CSS Forzados al Tema Claro (Eliminando barras negras y forzando campos blancos)
 st.markdown("""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
@@ -113,11 +127,23 @@ st.markdown("""
         padding-bottom: 3rem !important;
     }
 
-    /* Forzar fondo blanco y evitar recuadros oscuros o negros por el sistema */
+    /* FORZAR TEMA CLARO ABSOLUTO: Anular modo oscuro del navegador en toda la app */
     .stApp, body, html {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #ffffff !important;
         color: #222222 !important;
+    }
+
+    /* Forzar fondo blanco y texto oscuro en TODOS los campos de texto e inputs */
+    input, textarea, select, div[data-baseweb="input"], div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        -webkit-text-fill-color: #222222 !important;
+        border-color: #cbd5e0 !important;
+    }
+    input::placeholder, textarea::placeholder {
+        color: #a0aec0 !important;
+        -webkit-text-fill-color: #a0aec0 !important;
     }
 
     .material-symbols-outlined {
@@ -165,7 +191,7 @@ st.markdown("""
         margin-bottom: 14px;
     }
 
-    /* Carrusel / Slideshow Atractivo */
+    /* Carrusel / Slideshow */
     .slideshow-container {
         position: relative;
         max-width: 100%;
@@ -258,7 +284,7 @@ if tab == "Inicio":
         unsafe_allow_html=True
     )
     
-    # Carrusel Publicitario (Conservado y mejorado)
+    # Carrusel Publicitario
     st.markdown("""
     <div class="slideshow-container">
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=800');">
