@@ -4,6 +4,7 @@ import urllib.parse
 import requests
 import json
 import os
+import streamlit.components.v1 as components
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -40,10 +41,9 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR
+# GESTIÓN DE LA IMAGEN DE BANNER (USANDO LA URL ESTABLE DEL MIX BOTANERO)
 # ==========================================
-# Imagen segura de respaldo (tipo mix botanero/snack garantizada)
-DEFAULT_BANNER = "https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=1200&auto=format&fit=crop&q=80"
+DEFAULT_BANNER = "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200"
 
 def load_saved_banner():
     if os.path.exists(BANNER_FILE):
@@ -116,16 +116,16 @@ def fetch_loyverse_products():
                             "category": category_mapped,
                             "price": price,
                             "description": desc,
-                            "image": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=400&auto=format&fit=crop&q=80"
+                            "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"
                         })
     except:
         pass
 
     if not products_list:
         products_list = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=400&auto=format&fit=crop&q=80"},
-            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=400&auto=format&fit=crop&q=80"},
-            {"id": "p3", "name": "Cacahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cacahuates crujientes tradicionales.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=400&auto=format&fit=crop&q=80"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+            {"id": "p3", "name": "Cacahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cacahuates crujientes tradicionales.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
         ]
     return products_list
 
@@ -172,9 +172,9 @@ def load_saved_populares():
         except:
             pass
     default_pops = [
-        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=400&auto=format&fit=crop&q=80"},
-        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=400&auto=format&fit=crop&q=80"},
-        {"id": "p3", "name": "Cacahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=400&auto=format&fit=crop&q=80"}
+        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
+        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
+        {"id": "p3", "name": "Cacahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
     ]
     save_populares_to_file(default_pops)
     return default_pops
@@ -195,7 +195,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos y OCULTAR DEFINITIVAMENTE EL FOOTER, MENU Y MARCA DE AGUA
+# 3. Colores dinámicos y OCULTAR FOOTER Y MARCA DE AGUA CON SELECTORES ACTUALIZADOS
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -209,8 +209,8 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ELIMINAR 100% MARCA DE AGUA, FOOTER Y MENU DE STREAMLIT */
-    #MainMenu, header, footer, .stDeployButton, div[data-testid="stStatusWidget"], footer[data-testid="stFooter"], .viewerBadge_container__1QSob {{
+    /* OCULTAR COMPLETAMENTE HEADER, FOOTER, MENU Y GITHUB BADGE DE STREAMLIT */
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], footer[data-testid="stFooter"], .viewerBadge_container__1QSob {{
         display: none !important;
         visibility: hidden !important;
         height: 0px !important;
@@ -474,20 +474,22 @@ with col_cart_btn:
 st.write("---")
 
 # ==========================================
-# 5. SCRIPT JAVASCRIPT ROBUSTO PARA SCROLL ARRIBA Y ELIMINAR FOOTER
+# 5. COMPONENTE IFRAME PARA FORZAR SCROLL ARRIBA 100% EFECTIVO
 # ==========================================
-st.markdown("""
-<script>
-    const doc = window.parent.document;
-    // Forzar scroll arriba
-    doc.querySelector('section.main').scrollTo({ top: 0, behavior: 'auto' });
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    
-    // Ocultar marca de agua y footer por si acaso
-    const footers = doc.querySelectorAll('footer, [data-testid="stFooter"], .viewerBadge_container__1QSob');
-    footers.forEach(el => el.style.display = 'none');
-</script>
-""", unsafe_allow_html=True)
+components.html(
+    """
+    <script>
+        const doc = window.parent.document;
+        const mainContainer = doc.querySelector('section.main') || doc.querySelector('[data-testid="stAppViewContainer"]');
+        if (mainContainer) {
+            mainContainer.scrollTo({ top: 0, behavior: 'auto' });
+        }
+        window.parent.scrollTo({ top: 0, behavior: 'auto' });
+    </script>
+    """,
+    height=0,
+    width=0
+)
 
 # ==========================================
 # 6. VISTA DE CATÁLOGO O CARRITO
@@ -498,13 +500,10 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR ESTILO HTML PURO (IDÉNTICO A LAS TARJETAS DE POPULARES QUE SÍ CARGAN)
+    # BANNER RECTANGULAR PRINCIPAL USANDO st.image NATIVO (EL MISMO ENTORNO QUE LAS TARJETAS QUE SÍ CARGAN)
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
-    st.markdown(f"""
-    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
-        <img src="{banner_to_show}" style="width: 100%; height: 260px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=800';" />
-    </div>
-    """, unsafe_allow_html=True)
+    st.image(banner_to_show, use_container_width=True)
+    st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 
     # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
@@ -517,7 +516,7 @@ if st.session_state.nav_view == "catalogo":
     popular_products = st.session_state.popular_items
     if not popular_products:
         popular_products = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=400"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"}
         ]
 
     pop_cols = st.columns(len(popular_products))
@@ -525,7 +524,7 @@ if st.session_state.nav_view == "catalogo":
         with pop_cols[idx]:
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{pop_p.get('image', 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff26?w=400')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
+                <img src="{pop_p.get('image', 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
                 <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p.get('name', 'Producto')}</div>
                 <div style="color: #ff5200; font-weight: bold; font-size: 0.95rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
@@ -618,7 +617,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB NATIVO (MANTIENE EL PEDIDO Y CAMBIA DE VISTA)
+    # FAB NATIVO (CONSERVA EL CARRITO Y CAMBIA DE VISTA)
     if total_items > 0:
         st.button(
             f":material/shopping_cart: Ver Carrito ({total_items})",
