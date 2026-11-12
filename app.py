@@ -193,7 +193,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos limpios y FORZAR BARRA LATERAL (SIDEBAR) SIEMPRE EN TONO CLARO
+# 3. Colores dinámicos y FORZAR SIDEBAR (CAJÓN) EN TONO CLARO
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -234,7 +234,7 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* FORZAR QUE LA BARRA LATERAL (SIDEBAR / CAJÓN) SEA SIEMPRE EN TONO CLARO E IMPOLUTO */
+    /* FORZAR QUE LA BARRA LATERAL (SIDEBAR / CAJÓN) SEA SIEMPRE CLARA E IMPOLUTA */
     section[data-testid="stSidebar"] {{
         background-color: #ffffff !important;
         color: #222222 !important;
@@ -270,7 +270,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB MÓVIL FUNCIONAL CON SCRIPT DE APERTURA */
+    /* FAB MÓVIL FUNCIONAL */
     .mobile-fab {{
         position: fixed !important;
         bottom: 20px !important;
@@ -549,7 +549,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# IMAGEN RECTANGULAR FIJA DE PISTACHES / BOTANAS DE ANCHO COMPLETO
+# IMAGEN RECTANGULAR FIJA DE PISTACHES (ANCHO COMPLETO)
 st.image(st.session_state.banner_url, use_container_width=True)
 st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 20px; font-size: 1rem;">Pistaches y Snacks Seleccionados • Calidad Premium</div>', unsafe_allow_html=True)
 
@@ -666,7 +666,7 @@ else:
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# BOTÓN FLOTANTE MÓVIL (FAB) CON ACCIÓN JAVASCRIPT PARA ABRIR EL SIDEBAR
+# BOTÓN FLOTANTE MÓVIL (FAB) CON ACCIÓN JAVASCRIPT
 # ==========================================
 if total_items > 0:
     st.markdown(f"""
@@ -790,7 +790,7 @@ def admin_modal():
             uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
                 file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
-                with open(file_path, "wb"] as f:
+                with open(file_path, "wb") as f:
                     f.write(uploaded_file.getbuffer())
                 
                 st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
@@ -803,8 +803,8 @@ def admin_modal():
             st.session_state.admin_authenticated = False
             st.rerun()
 
-# Botón de Admin ubicado discretamente hasta el fondo en el pie de página
-col_foot1, col_foot_admin, col_foot2 = [st.columns(3)[0], st.columns(3)[1], st.columns(3)[2]]
+# Botón de Admin ubicado discretamente hasta el fondo corregido
+col_foot1, col_foot_admin, col_foot2 = st.columns(3)
 with col_foot_admin:
     if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
         admin_modal()
