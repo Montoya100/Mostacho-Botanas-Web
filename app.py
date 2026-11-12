@@ -207,7 +207,7 @@ input_text_color = "#222222" if not is_dark else "#f1f5f9"
 
 # TONOS SOLICITADOS:
 # #FE8330 -> Botones generales
-# #FF4500 -> Carrito y FAB (Muy destacado)
+# #FF4500 -> Carrito y FAB
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
 BTN_CART_FAB = "#FF4500"
@@ -217,7 +217,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR COMPLETAMENTE MARCA DE AGUA Y ELEMENTOS DE STREAMLIT */
+    /* OCULTAR COMPLETAMENTE MARCA DE AGUA, HEADER Y MENÚ DE STREAMLIT */
     #MainMenu, header, footer, 
     [data-testid="stHeader"], 
     [data-testid="stToolbar"], 
@@ -381,39 +381,37 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* CONTENEDOR DE BÚSQUEDA PROFESIONAL EN UNA SOLA LÍNEA (FLEX INTACTO) */
-    .search-bar-wrapper {{
+    /* ESTILO PROFESIONAL PARA INTEGRAR LA LUPA DENTRO DEL INPUT EN UNA SOLA LÍNEA */
+    div[data-baseweb="input"] {{
+        background-color: {input_bg} !important;
+        color: {input_text_color} !important;
+        border: 2px solid {BTN_GENERAL} !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15) !important;
+        padding-left: 8px !important;
+    }}
+    div[data-baseweb="input"]:focus-within {{
+        border-color: {BTN_GENERAL_HOVER} !important;
+        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25) !important;
+    }}
+    div[data-baseweb="input"]::before {{
+        content: "search";
+        font-family: 'Material Symbols Outlined' !important;
+        font-size: 22px !important;
+        color: {BTN_GENERAL} !important;
         display: flex;
         align-items: center;
-        background-color: {input_bg};
-        border: 2px solid {BTN_GENERAL};
-        border-radius: 12px;
-        padding: 0 12px;
-        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15);
-        width: 100%;
-        height: 48px;
+        margin-right: 6px;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }}
-    .search-bar-wrapper:focus-within {{
-        border-color: {BTN_GENERAL_HOVER};
-        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25);
-    }}
-    /* Truco para anidar el input de Streamlit limpio y sin bordes duplicados */
-    .search-bar-wrapper div[data-baseweb="input"] {{
+    input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
         background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        width: 100%;
-    }}
-    .search-bar-wrapper input {{
-        background: transparent !important;
         color: {input_text_color} !important;
         -webkit-text-fill-color: {input_text_color} !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 0px !important;
-        font-size: 1rem;
     }}
-    .search-bar-wrapper input::placeholder {{
+    input::placeholder, textarea::placeholder {{
         color: #94a3b8 !important;
         -webkit-text-fill-color: #94a3b8 !important;
     }}
@@ -497,7 +495,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA EN UNA SOLA LÍNEA (ICONOS OUTLINE RESTAURADOS)
+# 4. ENCABEZADO Y BÚSQUEDA NATIVA EN UNA SOLA LÍNEA
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -523,16 +521,8 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA PROFESIONAL EN UNA SOLA LÍNEA CON LUPA OUTLINE INTERNA
-st.markdown(f"""
-<div class="search-bar-wrapper">
-    <span class="material-symbols-outlined" style="color: {BTN_GENERAL}; font-size: 24px; margin-right: 10px; font-variation-settings: 'FILL' 0, 'wght' 400;">search</span>
-    <div style="flex-grow: 1;">
-""", unsafe_allow_html=True)
-
+# BARRA DE BÚSQUEDA 100% NATIVA E INTEGRADA (SIN ROMPERSE EN DOS FILAS)
 search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
-
-st.markdown("</div></div>", unsafe_allow_html=True)
 
 st.write("---")
 
