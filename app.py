@@ -13,7 +13,6 @@ POPULAR_FILE = "populares_mostacho.json"
 BANNER_FILE = "banner_mostacho.json"
 UPLOAD_DIR = "uploaded_images"
 
-# Crear carpeta de subidas si no existe
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
@@ -30,7 +29,7 @@ if "cart" not in st.session_state:
     st.session_state.cart = {}
 
 if "nav_view" not in st.session_state:
-    st.session_state.nav_view = "catalogo"  # "catalogo" o "carrito"
+    st.session_state.nav_view = "catalogo"
 
 if "selected_cat" not in st.session_state:
     st.session_state.selected_cat = "Todo"
@@ -42,9 +41,9 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR
+# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR (EJEMPLO PÚBLICO ESTABLE)
 # ==========================================
-DEFAULT_BANNER = "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=1200"
+DEFAULT_BANNER = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/1280px-Pistachios_in_shell.jpg"
 
 def load_saved_banner():
     if os.path.exists(BANNER_FILE):
@@ -53,7 +52,7 @@ def load_saved_banner():
                 data = json.load(f)
                 if isinstance(data, dict):
                     url = data.get("url", "").strip()
-                    if url:
+                    if url and "unsplash.com/photo-1536591375315" not in url:
                         return url
         except:
             pass
@@ -117,16 +116,16 @@ def fetch_loyverse_products():
                             "category": category_mapped,
                             "price": price,
                             "description": desc,
-                            "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"
+                            "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg"
                         })
     except:
         pass
 
     if not products_list:
         products_list = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-            {"id": "p3", "name": "Cahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cahuates crujientes tradicionales.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg"},
+            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Mixed_nuts_in_bowl.jpg/640px-Mixed_nuts_in_bowl.jpg"},
+            {"id": "p3", "name": "Cacahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cacahuates crujientes tradicionales.", "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg"}
         ]
     return products_list
 
@@ -173,9 +172,9 @@ def load_saved_populares():
         except:
             pass
     default_pops = [
-        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-        {"id": "p3", "name": "Cahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg"},
+        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Mixed_nuts_in_bowl.jpg/640px-Mixed_nuts_in_bowl.jpg"},
+        {"id": "p3", "name": "Cacahuates Japoneses (200g)", "price": 25.0, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg"}
     ]
     save_populares_to_file(default_pops)
     return default_pops
@@ -195,13 +194,6 @@ if "popular_items" not in st.session_state:
 
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
-
-# Capturar señal de navegación por URL para el FAB funcional
-query_params = st.query_params
-if query_params.get("goto") == "carrito":
-    st.session_state.nav_view = "carrito"
-    st.query_params.clear()
-    st.rerun()
 
 # 3. Colores dinámicos
 is_dark = st.session_state.dark_mode
@@ -264,31 +256,29 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB FLOTANTE FUNCIONAL REAL */
-    .true-fab {{
+    /* ESTILO DEL FAB NATIVO DE STREAMLIT (SIN RECARGA DE PÁGINA) */
+    div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
-        bottom: 25px !important;
-        right: 25px !important;
+        bottom: 24px !important;
+        right: 24px !important;
         z-index: 99999999 !important;
+        width: auto !important;
+    }}
+    div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
         background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
-        padding: 14px 24px !important;
+        padding: 14px 26px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
         font-size: 1.05rem !important;
-        box-shadow: 0 6px 20px rgba(255, 82, 0, 0.6) !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        text-decoration: none !important;
+        box-shadow: 0 6px 22px rgba(255, 82, 0, 0.65) !important;
         border: none !important;
-        cursor: pointer !important;
+        min-height: 54px !important;
         animation: pulseButton 2s infinite;
     }}
-    .true-fab:hover {{
-        transform: scale(1.05);
-        color: #ffffff !important;
-        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.8) !important;
+    div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
+        transform: scale(1.05) !important;
+        box-shadow: 0 8px 28px rgba(255, 82, 0, 0.85) !important;
     }}
 
     @keyframes pulseButton {{
@@ -448,6 +438,9 @@ def remove_from_cart(product_id):
         else:
             del st.session_state.cart[product_id]
 
+def go_to_cart():
+    st.session_state.nav_view = "carrito"
+
 # Limpiar carrito si algún producto fue eliminado del inventario
 keys_to_delete = [pid for pid in st.session_state.cart if not any(p.get("id") == pid for p in st.session_state.products)]
 for k in keys_to_delete:
@@ -474,7 +467,7 @@ with col_title:
 with col_cart_btn:
     st.write("")
     cart_btn_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
-    if st.button(":material/shopping_cart: " + cart_btn_label, use_container_width=True):
+    if st.button(":material/shopping_cart: " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         st.session_state.nav_view = "carrito" if st.session_state.nav_view != "carrito" else "catalogo"
         st.rerun()
 
@@ -489,10 +482,10 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR ESTILO HTML (GARANTIZADO PARA QUE SE VEA SIEMPRE COMO TUS PRODUCTOS POPULARES)
+    # BANNER RECTANGULAR CON IMAGEN DE EJEMPLO PÚBLICA ESTABLE
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
-        <img src="{st.session_state.banner_url}" style="width: 100%; max-height: 320px; object-fit: cover; border-radius: 12px;" />
+        <img src="{st.session_state.banner_url}" style="width: 100%; height: 240px; object-fit: cover; border-radius: 12px; display: block;" />
         <div style="font-weight: 800; color: #ff5200; margin-top: 10px; font-size: 1.05rem;">Pistaches y Snacks Seleccionados • Calidad Premium</div>
     </div>
     """, unsafe_allow_html=True)
@@ -508,7 +501,7 @@ if st.session_state.nav_view == "catalogo":
     popular_products = st.session_state.popular_items
     if not popular_products:
         popular_products = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg"}
         ]
 
     pop_cols = st.columns(len(popular_products))
@@ -516,7 +509,7 @@ if st.session_state.nav_view == "catalogo":
         with pop_cols[idx]:
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{pop_p.get('image', 'https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
+                <img src="{pop_p.get('image', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/640px-Pistachios_in_shell.jpg')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
                 <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p.get('name', 'Producto')}</div>
                 <div style="color: #ff5200; font-weight: bold; font-size: 0.95rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
@@ -548,7 +541,7 @@ if st.session_state.nav_view == "catalogo":
             is_active = (st.session_state.selected_cat == cat)
             display_label = f"● {cat}" if is_active else cat
             
-            if st.button(display_label, use_container_width=True):
+            if st.button(display_label, use_container_width=True, key=f"cat_btn_{cat}"):
                 st.session_state.selected_cat = cat
                 st.rerun()
 
@@ -609,17 +602,17 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE FUNCIONAL (LLEVA DIRECTO AL CARRITO)
+    # FAB NATIVO DE STREAMLIT (type="primary" LO FIJA EN LA ESQUINA Y CONSERVA EL CARRITO SIN RECARGAR)
     if total_items > 0:
-        st.markdown(f"""
-        <a href="?goto=carrito" target="_self" class="true-fab">
-            <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
-            Ver Carrito ({total_items})
-        </a>
-        """, unsafe_allow_html=True)
+        st.button(
+            f":material/shopping_cart: Ver Carrito ({total_items})",
+            type="primary",
+            on_click=go_to_cart,
+            key="native_floating_fab"
+        )
 
-elif st.session_view == "carrito" if "session_view" in st.session_state else st.session_state.nav_view == "carrito":
-    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False):
+elif st.session_state.nav_view == "carrito":
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
         st.session_state.nav_view = "catalogo"
         st.rerun()
         
