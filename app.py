@@ -381,13 +381,15 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* ESTILO PROFESIONAL PARA INTEGRAR LA LUPA DENTRO DEL INPUT EN UNA SOLA LÍNEA */
+    /* BARRA DE BÚSQUEDA EN UNA SOLA LÍNEA CON LUPA OUTLINE (SIN FONDO NEGRO FORZADO) */
     div[data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
         border: 2px solid {BTN_GENERAL} !important;
         border-radius: 12px !important;
         box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15) !important;
+        display: flex !important;
+        align-items: center !important;
         padding-left: 8px !important;
     }}
     div[data-baseweb="input"]:focus-within {{
@@ -495,7 +497,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA NATIVA EN UNA SOLA LÍNEA
+# 4. ENCABEZADO Y BÚSQUEDA NATIVA EN UNA SOLA LÍNEA CON LUPA OUTLINE
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -521,7 +523,7 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA 100% NATIVA E INTEGRADA (SIN ROMPERSE EN DOS FILAS)
+# CAMPO DE BÚSQUEDA NATIVO EN UNA SOLA LÍNEA CON LUPA OUTLINE INTEGRADA
 search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
 
 st.write("---")
