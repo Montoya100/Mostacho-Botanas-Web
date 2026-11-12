@@ -41,7 +41,7 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR (EJEMPLO PÚBLICO ESTABLE)
+# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR
 # ==========================================
 DEFAULT_BANNER = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Pistachios_in_shell.jpg/1280px-Pistachios_in_shell.jpg"
 
@@ -256,7 +256,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* ESTILO DEL FAB NATIVO DE STREAMLIT (SIN RECARGA DE PÁGINA) */
+    /* ESTILO DEL FAB NATIVO DE STREAMLIT (FIJO EN ESQUINA INFERIOR DERECHA) */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -440,6 +440,12 @@ def remove_from_cart(product_id):
 
 def go_to_cart():
     st.session_state.nav_view = "carrito"
+    # Script para forzar que la página suba hasta arriba al cambiar de vista
+    st.markdown("<script>window.scrollTo({top: 0, behavior: 'instant'});</script>", unsafe_allow_html=True)
+
+def go_to_catalogo():
+    st.session_state.nav_view = "catalogo"
+    st.markdown("<script>window.scrollTo({top: 0, behavior: 'instant'});</script>", unsafe_allow_html=True)
 
 # Limpiar carrito si algún producto fue eliminado del inventario
 keys_to_delete = [pid for pid in st.session_state.cart if not any(p.get("id") == pid for p in st.session_state.products)]
@@ -468,7 +474,10 @@ with col_cart_btn:
     st.write("")
     cart_btn_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
     if st.button(":material/shopping_cart: " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
-        st.session_state.nav_view = "carrito" if st.session_state.nav_view != "carrito" else "catalogo"
+        if st.session_state.nav_view != "carrito":
+            go_to_cart()
+        else:
+            go_to_catalogo()
         st.rerun()
 
 st.write("---")
@@ -482,13 +491,10 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR CON IMAGEN DE EJEMPLO PÚBLICA ESTABLE
-    st.markdown(f"""
-    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
-        <img src="{st.session_state.banner_url}" style="width: 100%; height: 240px; object-fit: cover; border-radius: 12px; display: block;" />
-        <div style="font-weight: 800; color: #ff5200; margin-top: 10px; font-size: 1.05rem;">Pistaches y Snacks Seleccionados • Calidad Premium</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # BANNER RECTANGULAR PRINCIPAL (USANDO st.image NATIVO PARA GARANTIZAR VISUALIZACIÓN)
+    banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
+    st.image(banner_to_show, use_container_width=True)
+    st.markdown('<div style="text-align: center; font-weight: 700; color: #ff5200; margin-bottom: 20px; font-size: 1.05rem;">Pistaches y Snacks Seleccionados • Calidad Premium</div>', unsafe_allow_html=True)
 
     # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
@@ -602,7 +608,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB NATIVO DE STREAMLIT (type="primary" LO FIJA EN LA ESQUINA Y CONSERVA EL CARRITO SIN RECARGAR)
+    # FAB NATIVO (AL PRESIONARLO CAMBIA A VISTA CARRITO Y SUBE AUTOMÁTICAMENTE ARRIBA)
     if total_items > 0:
         st.button(
             f":material/shopping_cart: Ver Carrito ({total_items})",
@@ -613,7 +619,7 @@ if st.session_state.nav_view == "catalogo":
 
 elif st.session_state.nav_view == "carrito":
     if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
-        st.session_state.nav_view = "catalogo"
+        go_to_catalogo()
         st.rerun()
         
     st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
