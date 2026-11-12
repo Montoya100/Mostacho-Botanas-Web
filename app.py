@@ -4,6 +4,7 @@ import urllib.parse
 import requests
 import json
 import os
+import streamlit.components.v1 as components
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -202,21 +203,22 @@ text_color = "#f1f5f9" if is_dark else "#222222"
 sub_text_color = "#94a3b8" if is_dark else "#4a5568"
 card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
-input_bg = "#0f172a" if is_dark else "#ffffff"
+input_bg = "#ffffff" if not is_dark else "#1e293b"
+input_text_color = "#222222" if not is_dark else "#f1f5f9"
 
 # TONOS SOLICITADOS:
 # #FE8330 -> Botones generales
-# #FE5F2F -> Carrito y FAB
+# #FF4500 (Naranja súper encendido/intenso) -> Carrito y FAB para máxima distinción
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
-BTN_CART_FAB = "#FE5F2F"
-BTN_CART_FAB_HOVER = "#d94b1c"
+BTN_CART_FAB = "#FF4500"
+BTN_CART_FAB_HOVER = "#d93800"
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ELIMINAR 100% MARCA DE AGUA, CORONA, HEADER Y FOOTER DE STREAMLIT (SELECTORES AGRESIVOS) */
+    /* ELIMINAR 100% MARCA DE AGUA, CORONA Y BADGES DE STREAMLIT (CSS + INYECCIÓN) */
     #MainMenu, header, footer, 
     [data-testid="stHeader"], 
     [data-testid="stToolbar"], 
@@ -225,8 +227,7 @@ st.markdown(f"""
     footer[data-testid="stFooter"], 
     .viewerBadge_container__1QSob,
     div[class*="viewerBadge"],
-    a[href*="streamlit.io/cloud"],
-    div:has(> a[href*="streamlit.io"]) {{
+    a[href*="streamlit.io/cloud"] {{
         display: none !important;
         visibility: hidden !important;
         height: 0px !important;
@@ -277,7 +278,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB NATIVO: USANDO #FE5F2F SIN BORDE BLANCO */
+    /* FAB NATIVO: USANDO #FF4500 MUY DESTACADO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -286,13 +287,13 @@ st.markdown(f"""
         width: auto !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
-        background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff7a4d) !important;
+        background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
         padding: 14px 28px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
         font-size: 1.1rem !important;
-        box-shadow: 0 8px 25px rgba(254, 95, 47, 0.5) !important;
+        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.6) !important;
         border: none !important;
         min-height: 56px !important;
         animation: pulseOrange 2s infinite;
@@ -300,16 +301,16 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
         transform: scale(1.06) !important;
         background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
-        box-shadow: 0 10px 30px rgba(254, 95, 47, 0.7) !important;
+        box-shadow: 0 10px 30px rgba(255, 69, 0, 0.8) !important;
     }}
 
     @keyframes pulseOrange {{
-        0% {{ box-shadow: 0 0 0 0 rgba(254, 95, 47, 0.5); }}
-        70% {{ box-shadow: 0 0 0 14px rgba(254, 95, 47, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(254, 95, 47, 0); }}
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.6); }}
+        70% {{ box-shadow: 0 0 0 14px rgba(255, 69, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }}
     }}
 
-    /* BOTÓN DE CARRITO EN ENCABEZADO CON #FE5F2F */
+    /* BOTÓN DE CARRITO EN ENCABEZADO CON #FF4500 */
     div[data-testid="column"]:has(button[key*="header_cart_btn"]) button,
     button[key="header_cart_btn"] {{
         background-color: {BTN_CART_FAB} !important;
@@ -390,33 +391,26 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* BARRA DE BÚSQUEDA EN UNA SOLA LÍNEA SIN ROMPERSE EN MÓVIL */
-    .search-container {{
-        display: flex;
-        align-items: center;
-        background-color: {input_bg};
-        border: 2px solid {BTN_GENERAL};
-        border-radius: 12px;
-        padding: 0 12px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15);
+    /* CORRECCIÓN DE LA BARRA DE BÚSQUEDA WEB/MÓVIL EN UNA SOLA LÍNEA Y CON FONDO CORRECTO */
+    div[data-baseweb="input"] {{
+        background-color: {input_bg} !important;
+        color: {input_text_color} !important;
+        border: 2px solid {BTN_GENERAL} !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15) !important;
     }}
-    .search-container:focus-within {{
-        border-color: {BTN_GENERAL_HOVER};
-        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25);
+    div[data-baseweb="input"]:focus-within {{
+        border-color: {BTN_GENERAL_HOVER} !important;
+        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25) !important;
     }}
-    .search-container input {{
-        background: transparent !important;
+    input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
+        background-color: transparent !important;
+        color: {input_text_color} !important;
+        -webkit-text-fill-color: {input_text_color} !important;
         border: none !important;
-        color: {text_color} !important;
-        -webkit-text-fill-color: {text_color} !important;
-        width: 100%;
-        padding: 10px 8px;
-        font-size: 1rem;
-        outline: none;
         box-shadow: none !important;
     }}
-    .search-container input::placeholder {{
+    input::placeholder, textarea::placeholder {{
         color: #94a3b8 !important;
         -webkit-text-fill-color: #94a3b8 !important;
     }}
@@ -473,6 +467,24 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
+# ==========================================
+# 4. SCRIPT JAVASCRIPT AGRESIVO PARA ELIMINAR MARCA DE AGUA DEL DOM
+# ==========================================
+components.html(
+    f"""
+    <script>
+        const removeWatermark = () => {
+            const doc = window.parent.document;
+            const elementsToRemove = doc.querySelectorAll('footer, [data-testid="stFooter"], .viewerBadge_container__1QSob, a[href*="streamlit.io"]');
+            elementsToRemove.forEach(el => el.remove());
+        };
+        setInterval(removeWatermark, 500);
+    </script>
+    """,
+    height=0,
+    width=0
+)
+
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
     st.toast("Producto añadido al carrito", icon="🛒")
@@ -500,7 +512,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA INTEGRADA EN UNA SOLA LÍNEA (HTML/JS)
+# 5. ENCABEZADO Y BÚSQUEDA EN UNA SOLA LÍNEA CON LUPA OUTLINE NARANJA
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -518,7 +530,7 @@ with col_title:
 with col_cart_btn:
     st.write("")
     cart_btn_label = f"({total_items})" if total_items > 0 else ""
-    if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
+    if st.button("🛒 Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         if st.session_state.nav_view != "carrito":
             go_to_cart()
         else:
@@ -526,13 +538,21 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA CON LUPA INTEGRADA PERFECTAMENTE EN UNA SOLA LÍNEA (ESTÉTICA Y MÓVIL)
-search_query = st.text_input("Buscar productos...", placeholder="🔍  Buscar snack, pistaches, mix...", label_visibility="collapsed")
+# BARRA DE BÚSQUEDA INTEGRADA CON LUPA OUTLINE EN COLOR NARANJA (SIN EMOJIS)
+search_col_icon, search_col_input = st.columns([0.08, 3.92])
+with search_col_icon:
+    st.markdown(f"""
+    <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-top: 2px;">
+        <span class="material-symbols-outlined" style="color: {BTN_GENERAL}; font-size: 24px; font-variation-settings: 'FILL' 0, 'wght' 400;">search</span>
+    </div>
+    """, unsafe_allow_html=True)
+with search_col_input:
+    search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
 
 st.write("---")
 
 # ==========================================
-# 5. VISTA DE CATÁLOGO O CARRITO
+# 6. VISTA DE CATÁLOGO O CARRITO
 # ==========================================
 if st.session_state.nav_view == "catalogo":
     st.markdown(
@@ -657,10 +677,10 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE EN #FE5F2F
+    # FAB FLOTANTE EN #FF4500
     if total_items > 0:
         st.button(
-            f":material/shopping_cart: Ver Carrito ({total_items})",
+            "🛒 Ver Carrito (" + str(total_items) + ")",
             type="primary",
             on_click=go_to_cart,
             key="native_floating_fab"
@@ -669,10 +689,10 @@ if st.session_state.nav_view == "catalogo":
 elif st.session_state.nav_view == "carrito":
     st.markdown('<div id="top-cart-anchor"></div>', unsafe_allow_html=True)
     
-    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
+    if st.button("Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
         go_to_catalogo()
         
-    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
+    st.markdown("### 🛒 Carrito de Compras y Pedido")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -694,14 +714,14 @@ elif st.session_state.nav_view == "carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
+                    if st.button("Quitar", key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
+        st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
         
-        st.subheader(":material/local_shipping: Datos de Entrega")
+        st.subheader("Datos de Entrega")
         customer_name = st.text_input("Nombre del cliente (Obligatorio)", placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias (Obligatorio)", placeholder="Calle, número, colonia...")
         customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
@@ -860,5 +880,5 @@ def admin_modal():
 # Botón de Admin ubicado discretamente hasta el fondo en el pie de página
 col_foot1, col_foot_admin, col_foot2 = st.columns(3)
 with col_foot_admin:
-    if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
+    if st.button("Admin", use_container_width=True, key="admin_footer_btn"):
         admin_modal()
