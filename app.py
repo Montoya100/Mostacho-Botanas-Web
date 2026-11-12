@@ -4,7 +4,6 @@ import urllib.parse
 import requests
 import json
 import os
-import streamlit.components.v1 as components
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -208,7 +207,7 @@ input_text_color = "#222222" if not is_dark else "#f1f5f9"
 
 # TONOS SOLICITADOS:
 # #FE8330 -> Botones generales
-# #FF4500 (Naranja súper encendido/intenso) -> Carrito y FAB para máxima distinción
+# #FF4500 -> Carrito y FAB
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
 BTN_CART_FAB = "#FF4500"
@@ -218,7 +217,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ELIMINAR 100% MARCA DE AGUA, CORONA Y BADGES DE STREAMLIT (CSS + INYECCIÓN) */
+    /* OCULTAR COMPLETAMENTE MARCA DE AGUA, CORONA Y FOOTER */
     #MainMenu, header, footer, 
     [data-testid="stHeader"], 
     [data-testid="stToolbar"], 
@@ -233,7 +232,6 @@ st.markdown(f"""
         height: 0px !important;
         opacity: 0 !important;
         pointer-events: none !important;
-        z-index: -999999 !important;
     }}
     
     div[data-baseweb="modal"] > div {{
@@ -278,7 +276,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB NATIVO: USANDO #FF4500 MUY DESTACADO */
+    /* FAB NATIVO: #FF4500 */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -296,18 +294,10 @@ st.markdown(f"""
         box-shadow: 0 8px 25px rgba(255, 69, 0, 0.6) !important;
         border: none !important;
         min-height: 56px !important;
-        animation: pulseOrange 2s infinite;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
         transform: scale(1.06) !important;
         background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
-        box-shadow: 0 10px 30px rgba(255, 69, 0, 0.8) !important;
-    }}
-
-    @keyframes pulseOrange {{
-        0% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.6); }}
-        70% {{ box-shadow: 0 0 0 14px rgba(255, 69, 0, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }}
     }}
 
     /* BOTÓN DE CARRITO EN ENCABEZADO CON #FF4500 */
@@ -391,7 +381,7 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* CORRECCIÓN DE LA BARRA DE BÚSQUEDA WEB/MÓVIL EN UNA SOLA LÍNEA Y CON FONDO CORRECTO */
+    /* BARRA DE BÚSQUEDA EN UNA SOLA LÍNEA CON LUPA OUTLINE */
     div[data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
@@ -467,24 +457,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# 4. SCRIPT JAVASCRIPT AGRESIVO PARA ELIMINAR MARCA DE AGUA DEL DOM
-# ==========================================
-components.html(
-    f"""
-    <script>
-        const removeWatermark = () => {
-            const doc = window.parent.document;
-            const elementsToRemove = doc.querySelectorAll('footer, [data-testid="stFooter"], .viewerBadge_container__1QSob, a[href*="streamlit.io"]');
-            elementsToRemove.forEach(el => el.remove());
-        };
-        setInterval(removeWatermark, 500);
-    </script>
-    """,
-    height=0,
-    width=0
-)
-
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
     st.toast("Producto añadido al carrito", icon="🛒")
@@ -512,7 +484,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 5. ENCABEZADO Y BÚSQUEDA EN UNA SOLA LÍNEA CON LUPA OUTLINE NARANJA
+# 4. ENCABEZADO Y BÚSQUEDA EN UNA SOLA LÍNEA (LUPA OUTLINE NARANJA)
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -530,7 +502,7 @@ with col_title:
 with col_cart_btn:
     st.write("")
     cart_btn_label = f"({total_items})" if total_items > 0 else ""
-    if st.button("🛒 Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
+    if st.button("Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         if st.session_state.nav_view != "carrito":
             go_to_cart()
         else:
@@ -538,7 +510,7 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA INTEGRADA CON LUPA OUTLINE EN COLOR NARANJA (SIN EMOJIS)
+# BARRA DE BÚSQUEDA INTEGRADA EN UNA SOLA LÍNEA CON LUPA OUTLINE
 search_col_icon, search_col_input = st.columns([0.08, 3.92])
 with search_col_icon:
     st.markdown(f"""
@@ -552,7 +524,7 @@ with search_col_input:
 st.write("---")
 
 # ==========================================
-# 6. VISTA DE CATÁLOGO O CARRITO
+# 5. VISTA DE CATÁLOGO O CARRITO
 # ==========================================
 if st.session_state.nav_view == "catalogo":
     st.markdown(
@@ -680,7 +652,7 @@ if st.session_state.nav_view == "catalogo":
     # FAB FLOTANTE EN #FF4500
     if total_items > 0:
         st.button(
-            "🛒 Ver Carrito (" + str(total_items) + ")",
+            "Ver Carrito (" + str(total_items) + ")",
             type="primary",
             on_click=go_to_cart,
             key="native_floating_fab"
@@ -692,7 +664,7 @@ elif st.session_state.nav_view == "carrito":
     if st.button("Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
         go_to_catalogo()
         
-    st.markdown("### 🛒 Carrito de Compras y Pedido")
+    st.markdown("### Carrito de Compras y Pedido")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
