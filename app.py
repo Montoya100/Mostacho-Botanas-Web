@@ -193,7 +193,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos limpios
+# 3. Colores dinámicos limpios y FORZAR BARRA LATERAL (SIDEBAR) SIEMPRE EN TONO CLARO
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -234,6 +234,22 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
+    /* FORZAR QUE LA BARRA LATERAL (SIDEBAR / CAJÓN) SEA SIEMPRE EN TONO CLARO E IMPOLUTO */
+    section[data-testid="stSidebar"] {{
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        border-right: 1px solid #e2e8f0 !important;
+    }}
+    section[data-testid="stSidebar"] * {{
+        color: #222222 !important;
+    }}
+    section[data-testid="stSidebar"] input, section[data-testid="stSidebar"] textarea {{
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        -webkit-text-fill-color: #222222 !important;
+        border: 1px solid #cbd5e1 !important;
+    }}
+
     div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {{
         background-color: transparent !important;
         color: {text_color} !important;
@@ -254,7 +270,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) FIJO PARA MÓVIL Y WEB */
+    /* FAB MÓVIL FUNCIONAL CON SCRIPT DE APERTURA */
     .mobile-fab {{
         position: fixed !important;
         bottom: 20px !important;
@@ -276,8 +292,8 @@ st.markdown(f"""
     }}
 
     .whatsapp-btn-disabled {{
-        background-color: {"#334155" if is_dark else "#1a202c"} !important;
-        color: #ffffff !important;
+        background-color: #e2e8f0 !important;
+        color: #64748b !important;
         padding: 12px;
         border-radius: 12px;
         text-align: center;
@@ -434,7 +450,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# PANEL LATERAL (DRAWER / CARRITO PRINCIPAL)
+# PANEL LATERAL (DRAWER / CARRITO PRINCIPAL EN CLARO FORZADO)
 # ==========================================
 with st.sidebar:
     st.markdown("### 🛒 Tu Carrito de Compras")
@@ -457,7 +473,7 @@ with st.sidebar:
                 col_i1, col_i2 = st.columns([3, 1])
                 with col_i1:
                     st.markdown(f"**{p.get('name')}**")
-                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} =${subtotal:.2f}")
+                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_i2:
                     if st.button(":material/delete:", key=f"del_cart_{item_id}", help="Quitar producto"):
                         del st.session_state.cart[item_id]
@@ -510,7 +526,7 @@ with st.sidebar:
 # ==========================================
 # 4. HEADER SUPERIOR DEL CATÁLOGO
 # ==========================================
-col_title, col_admin_btn = st.columns([4, 1])
+col_title, col_space = st.columns([4, 1])
 
 with col_title:
     st.markdown(f"""
@@ -522,128 +538,6 @@ with col_title:
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-@st.dialog("Panel de Administración y Configuración")
-def admin_modal():
-    if not st.session_state.admin_authenticated:
-        st.subheader("Acceso Restringido")
-        pass_input = st.text_input("Ingresa la contraseña de administrador", type="password", placeholder="Clave de 4 dígitos...")
-        if st.button("Ingresar"):
-            if pass_input == "7031":
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error("Contraseña incorrecta.")
-    else:
-        st.success("¡Acceso concedido!")
-        
-        tab_prod, tab_pop, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
-        
-        with tab_prod:
-            st.markdown("### Inventario de Productos")
-            df_current = pd.DataFrame(st.session_state.products)
-            
-            column_config = {
-                "id": None,
-                "category": st.column_config.SelectboxColumn(
-                    "Categoría",
-                    options=["Individual", "Para compartir"],
-                    required=True
-                )
-            }
-            
-            edited_df = st.data_editor(
-                df_current, 
-                num_rows="dynamic", 
-                key="editor_admin_table",
-                column_config=column_config,
-                hide_index=True,
-                use_container_width=True
-            )
-            
-            if st.button("Guardar Cambios de Productos"):
-                updated_list = []
-                for idx, row in edited_df.iterrows():
-                    raw_id = row.get("id")
-                    prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
-                    
-                    raw_img = row.get("image")
-                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" else "https://via.placeholder.com/300"
-                    
-                    updated_list.append({
-                        "id": prod_id,
-                        "name": str(row.get("name", "Nuevo producto")),
-                        "category": str(row.get("category", "Individual")),
-                        "price": float(row.get("price", 0.0)),
-                        "description": str(row.get("description", "")),
-                        "image": prod_img
-                    })
-                    
-                st.session_state.products = updated_list
-                save_products_to_file(updated_list)
-                st.success("¡Productos guardados!")
-                st.rerun()
-
-        with tab_pop:
-            st.markdown("### Seleccionar Productos Populares")
-            current_pop_ids = [p.get("id") for p in st.session_state.popular_items]
-            
-            selected_populares_new = []
-            for prod in st.session_state.products:
-                p_id = prod.get("id")
-                p_name = prod.get("name")
-                is_currently_pop = p_id in current_pop_ids
-                
-                if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
-                    selected_populares_new.append({
-                        "id": p_id,
-                        "name": p_name,
-                        "price": prod.get("price"),
-                        "image": prod.get("image", "https://via.placeholder.com/300")
-                    })
-            
-            if st.button("Guardar Productos Populares"):
-                if selected_populares_new:
-                    st.session_state.popular_items = selected_populares_new
-                    save_populares_to_file(selected_populares_new)
-                    st.success("¡Populares actualizados!")
-                    st.rerun()
-                else:
-                    st.warning("Selecciona al menos uno.")
-
-        with tab_banner:
-            st.markdown("### Cambiar Imagen Rectangular del Banner")
-            st.caption("Actualiza el enlace de la imagen fija principal:")
-            new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
-            if st.button("Guardar Banner"):
-                if new_banner_url.strip():
-                    st.session_state.banner_url = new_banner_url.strip()
-                    save_banner_to_file(new_banner_url.strip())
-                    st.success("¡Banner actualizado con éxito!")
-                    st.rerun()
-
-        with tab_upload:
-            st.markdown("### Subir Imagen Directamente")
-            uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
-            if uploaded_file is not None:
-                file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
-                with open(file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                
-                st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
-                st.image(file_path, width=200)
-                local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
-                st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
-        
-        st.write("---")
-        if st.button("Cerrar Sesión"):
-            st.session_state.admin_authenticated = False
-            st.rerun()
-
-with col_admin_btn:
-    st.write("")
-    if st.button(":material/settings: Admin", use_container_width=True):
-        admin_modal()
 
 st.write("---")
 
@@ -772,12 +666,145 @@ else:
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# BOTÓN FLOTANTE MÓVIL (FAB) PARA ABRIR EL CARRITO EN CELULAR
+# BOTÓN FLOTANTE MÓVIL (FAB) CON ACCIÓN JAVASCRIPT PARA ABRIR EL SIDEBAR
 # ==========================================
 if total_items > 0:
     st.markdown(f"""
-    <div class="mobile-fab" onclick="alert('Desliza o abre la barra lateral/menú hamburguesa para ver tu carrito y finalizar pedido.')">
+    <div class="mobile-fab" onclick="
+        const btn = document.querySelector('[data-testid=\'stSidebarNav\'] button, button[kind=\'header\'], [data-testid=\'collapsedControl\']');
+        if (btn) {{ btn.click(); }}
+        window.scrollTo({{ top: 0, behavior: 'smooth' }});
+    ">
         <span class="material-symbols-outlined" style="color: #ffffff; font-size: 24px;">shopping_cart</span>
         Ver Carrito ({total_items})
     </div>
     """, unsafe_allow_html=True)
+
+# ==========================================
+# 6. PIE DE PÁGINA / BOTÓN DE ADMIN DISCRETO HASTA ABAJO
+# ==========================================
+st.write("---")
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+@st.dialog("Panel de Administración y Configuración")
+def admin_modal():
+    if not st.session_state.admin_authenticated:
+        st.subheader("Acceso Restringido")
+        pass_input = st.text_input("Ingresa la contraseña de administrador", type="password", placeholder="Clave de 4 dígitos...")
+        if st.button("Ingresar"):
+            if pass_input == "7031":
+                st.session_state.admin_authenticated = True
+                st.rerun()
+            else:
+                st.error("Contraseña incorrecta.")
+    else:
+        st.success("¡Acceso concedido!")
+        
+        tab_prod, tab_pop, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
+        
+        with tab_prod:
+            st.markdown("### Inventario de Productos")
+            df_current = pd.DataFrame(st.session_state.products)
+            
+            column_config = {
+                "id": None,
+                "category": st.column_config.SelectboxColumn(
+                    "Categoría",
+                    options=["Individual", "Para compartir"],
+                    required=True
+                )
+            }
+            
+            edited_df = st.data_editor(
+                df_current, 
+                num_rows="dynamic", 
+                key="editor_admin_table",
+                column_config=column_config,
+                hide_index=True,
+                use_container_width=True
+            )
+            
+            if st.button("Guardar Cambios de Productos"):
+                updated_list = []
+                for idx, row in edited_df.iterrows():
+                    raw_id = row.get("id")
+                    prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
+                    
+                    raw_img = row.get("image")
+                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" else "https://via.placeholder.com/300"
+                    
+                    updated_list.append({
+                        "id": prod_id,
+                        "name": str(row.get("name", "Nuevo producto")),
+                        "category": str(row.get("category", "Individual")),
+                        "price": float(row.get("price", 0.0)),
+                        "description": str(row.get("description", "")),
+                        "image": prod_img
+                    })
+                    
+                st.session_state.products = updated_list
+                save_products_to_file(updated_list)
+                st.success("¡Productos guardados!")
+                st.rerun()
+
+        with tab_pop:
+            st.markdown("### Seleccionar Productos Populares")
+            current_pop_ids = [p.get("id") for p in st.session_state.popular_items]
+            
+            selected_populares_new = []
+            for prod in st.session_state.products:
+                p_id = prod.get("id")
+                p_name = prod.get("name")
+                is_currently_pop = p_id in current_pop_ids
+                
+                if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
+                    selected_populares_new.append({
+                        "id": p_id,
+                        "name": p_name,
+                        "price": prod.get("price"),
+                        "image": prod.get("image", "https://via.placeholder.com/300")
+                    })
+            
+            if st.button("Guardar Productos Populares"):
+                if selected_populares_new:
+                    st.session_state.popular_items = selected_populares_new
+                    save_populares_to_file(selected_populares_new)
+                    st.success("¡Populares actualizados!")
+                    st.rerun()
+                else:
+                    st.warning("Selecciona al menos uno.")
+
+        with tab_banner:
+            st.markdown("### Cambiar Imagen Rectangular del Banner")
+            st.caption("Actualiza el enlace de la imagen fija principal:")
+            new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
+            if st.button("Guardar Banner"):
+                if new_banner_url.strip():
+                    st.session_state.banner_url = new_banner_url.strip()
+                    save_banner_to_file(new_banner_url.strip())
+                    st.success("¡Banner actualizado con éxito!")
+                    st.rerun()
+
+        with tab_upload:
+            st.markdown("### Subir Imagen Directamente")
+            uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
+            if uploaded_file is not None:
+                file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
+                with open(file_path, "wb"] as f:
+                    f.write(uploaded_file.getbuffer())
+                
+                st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
+                st.image(file_path, width=200)
+                local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
+                st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
+        
+        st.write("---")
+        if st.button("Cerrar Sesión"):
+            st.session_state.admin_authenticated = False
+            st.rerun()
+
+# Botón de Admin ubicado discretamente hasta el fondo en el pie de página
+col_foot1, col_foot_admin, col_foot2 = [st.columns(3)[0], st.columns(3)[1], st.columns(3)[2]]
+with col_foot_admin:
+    if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
+        admin_modal()
