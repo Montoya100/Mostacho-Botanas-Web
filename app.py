@@ -194,7 +194,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos y OCULTAR DEFINITIVAMENTE EL MENÚ Y MARCA DE AGUA
+# 3. Colores dinámicos y estilos generales
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -208,7 +208,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ELIMINAR 100% MARCA DE AGUA, HEADER, FOOTER Y GITHUB BADGE */
+    /* OCULTAR COMPLETAMENTE MENÚ SUPERIOR Y MARCA DE AGUA */
     #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], footer[data-testid="stFooter"], .viewerBadge_container__1QSob {{
         display: none !important;
         visibility: hidden !important;
@@ -329,7 +329,7 @@ st.markdown(f"""
         font-size: 1rem !important;
     }}
 
-    /* BOTONES GENERALES EN NARANJA SUAVE/PASTEL CÁLIDO (ESTILO DE LA REFERENCIA) */
+    /* BOTONES GENERALES EN NARANJA SUAVE/PASTEL CÁLIDO */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: #ff9f68 !important;
         color: #ffffff !important;
@@ -459,7 +459,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ESTRUCTURA ESTILO APP (ENCABEZADO + CARRITO + BÚSQUEDA)
+# 4. ENCABEZADO Y BÚSQUEDA (ESTILO REFERENCIA)
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -477,7 +477,6 @@ with col_title:
 with col_cart_btn:
     st.write("")
     cart_btn_label = f"({total_items})" if total_items > 0 else ""
-    # BOTÓN DEL CARRITO EN EL ENCABEZADO (CON EL NARANJA CORPORATIVO PRINCIPAL)
     if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         if st.session_state.nav_view != "carrito":
             go_to_cart()
@@ -486,7 +485,7 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA ESTILIZADA CON RECUADRO NARANJA Y LUPA (COMO EN LA IMAGEN DE REFERENCIA)
+# Barra de búsqueda con recuadro naranja y lupa a la izquierda
 search_col1, search_col2 = st.columns([0.1, 3.9])
 with search_col1:
     st.markdown("""
@@ -577,7 +576,7 @@ if st.session_state.nav_view == "catalogo":
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category", "Individual"] == st.session_state.selected_cat] # type: ignore
+            cat_filtered = [p for p in current_products_list if p.get("category", "Individual") == st.session_state.selected_cat]
 
         filtered_products = [
             p for p in cat_filtered 
