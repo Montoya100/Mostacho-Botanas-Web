@@ -4,7 +4,6 @@ import urllib.parse
 import requests
 import json
 import os
-import streamlit.components.v1 as components
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -41,9 +40,9 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DE LA IMAGEN DE BANNER (USANDO LA URL ESTABLE DEL MIX BOTANERO)
+# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR
 # ==========================================
-DEFAULT_BANNER = "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1200"
+DEFAULT_BANNER = "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1000"
 
 def load_saved_banner():
     if os.path.exists(BANNER_FILE):
@@ -195,7 +194,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos y OCULTAR FOOTER Y MARCA DE AGUA CON SELECTORES ACTUALIZADOS
+# 3. Colores dinámicos y OCULTAR COMPLETAMENTE LA MARCA DE AGUA Y FOOTER
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -209,7 +208,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR COMPLETAMENTE HEADER, FOOTER, MENU Y GITHUB BADGE DE STREAMLIT */
+    /* OCULTAR 100% MARCA DE AGUA, HEADER Y FOOTER DE STREAMLIT CLOUD */
     #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], footer[data-testid="stFooter"], .viewerBadge_container__1QSob {{
         display: none !important;
         visibility: hidden !important;
@@ -227,12 +226,12 @@ st.markdown(f"""
         padding-top: 1rem !important;
         padding-bottom: 6rem !important;
         background-color: {bg_color} !important;
-        animation: fadeIn 0.4s ease-in-out;
+        animation: fadeIn 0.3s ease-in-out;
     }}
 
     @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(6px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
+        from {{ opacity: 0; }}
+        to {{ opacity: 1; }}
     }}
 
     .stApp, body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
@@ -474,25 +473,7 @@ with col_cart_btn:
 st.write("---")
 
 # ==========================================
-# 5. COMPONENTE IFRAME PARA FORZAR SCROLL ARRIBA 100% EFECTIVO
-# ==========================================
-components.html(
-    """
-    <script>
-        const doc = window.parent.document;
-        const mainContainer = doc.querySelector('section.main') || doc.querySelector('[data-testid="stAppViewContainer"]');
-        if (mainContainer) {
-            mainContainer.scrollTo({ top: 0, behavior: 'auto' });
-        }
-        window.parent.scrollTo({ top: 0, behavior: 'auto' });
-    </script>
-    """,
-    height=0,
-    width=0
-)
-
-# ==========================================
-# 6. VISTA DE CATÁLOGO O CARRITO
+# 5. VISTA DE CATÁLOGO O CARRITO
 # ==========================================
 if st.session_state.nav_view == "catalogo":
     st.markdown(
@@ -500,10 +481,13 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR PRINCIPAL USANDO st.image NATIVO (EL MISMO ENTORNO QUE LAS TARJETAS QUE SÍ CARGAN)
+    # BANNER RECTANGULAR USANDO EL MISMO DISEÑO HTML DE LAS TARJETAS POPULARES (GARANTIZADO QUE SÍ SE VE)
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
-    st.image(banner_to_show, use_container_width=True)
-    st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
+        <img src="{banner_to_show}" style="width: 100%; height: 260px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600';" />
+    </div>
+    """, unsafe_allow_html=True)
 
     # 1. BARRA DE BÚSQUEDA
     search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
@@ -617,7 +601,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB NATIVO (CONSERVA EL CARRITO Y CAMBIA DE VISTA)
+    # FAB NATIVO (MANTIENE EL CARRITO Y CAMBIA DE VISTA)
     if total_items > 0:
         st.button(
             f":material/shopping_cart: Ver Carrito ({total_items})",
@@ -627,11 +611,12 @@ if st.session_state.nav_view == "catalogo":
         )
 
 elif st.session_state.nav_view == "carrito":
-    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
-        go_to_catalogo()
-        
+    # El título se coloca inmediatamente arriba para garantizar que al abrir el carrito aparezca en la parte superior
     st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
     st.caption(f"Artículos seleccionados: {total_items}")
+    
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
+        go_to_catalogo()
     
     if not st.session_state.cart:
         st.info("Tu carrito está vacío. Agrega productos desde el catálogo.")
