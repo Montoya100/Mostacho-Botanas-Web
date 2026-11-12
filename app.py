@@ -4,6 +4,7 @@ import urllib.parse
 import requests
 import json
 import os
+import streamlit.components.v1 as components
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -206,7 +207,7 @@ input_bg = "#ffffff" if not is_dark else "#1e293b"
 input_text_color = "#222222" if not is_dark else "#f1f5f9"
 
 # TONOS SOLICITADOS:
-# #FE8330 -> Botones generales y contorno de barra de búsqueda
+# #FE8330 -> Botones generales y contorno de la barra de búsqueda
 # #FF4500 -> Carrito y FAB
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
@@ -217,7 +218,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR COMPLETAMENTE MARCA DE AGUA, HEADER Y MENÚ DE STREAMLIT */
+    /* OCULTAR ELEMENTOS DE STREAMLIT */
     #MainMenu, header, footer, 
     [data-testid="stHeader"], 
     [data-testid="stToolbar"], 
@@ -381,17 +382,17 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* BARRA DE BÚSQUEDA CON CONTORNO NARANJA INTENSO Y DISTINTIVO (#FE8330) */
-    div[data-baseweb="input"] {{
+    /* FORZAR CONTORNO NARANJA INTENSO Y VISIBLE EN LA BARRA DE BÚSQUEDA */
+    div[data-baseweb="input"], [data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
-        border: 2.5px solid {BTN_GENERAL} !important;
+        border: 3px solid {BTN_GENERAL} !important;
         border-radius: 14px !important;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.2) !important;
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.25) !important;
     }}
-    div[data-baseweb="input"]:focus-within {{
+    div[data-baseweb="input"]:focus-within, [data-baseweb="input"]:focus-within {{
         border-color: {BTN_GENERAL_HOVER} !important;
-        box-shadow: 0 0 0 4px rgba(254, 131, 48, 0.3) !important;
+        box-shadow: 0 0 0 4px rgba(254, 131, 48, 0.4) !important;
     }}
     input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
         background-color: transparent !important;
@@ -484,7 +485,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA NATIVA CON CONTORNO NARANJA
+# 4. ENCABEZADO Y BÚSQUEDA NATIVA
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -510,7 +511,7 @@ with col_cart_btn:
 
 st.write("")
 
-# CAMPO DE BÚSQUEDA CON CONTORNO NARANJA DESTACADO
+# CAMPO DE BÚSQUEDA NATIVO
 search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
 
 st.write("---")
@@ -641,7 +642,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE EN #FF4500 CON ICONO OUTLINE
+    # FAB FLOTANTE EN #FF4500
     if total_items > 0:
         st.button(
             ":material/shopping_cart: Ver Carrito (" + str(total_items) + ")",
@@ -719,7 +720,7 @@ elif st.session_state.nav_view == "carrito":
             )
 
 # ==========================================
-# 7. PIE DE PÁGINA Y BOTÓN DE ADMIN DISCRETO HASTA ABAJO
+# 7. PIE DE PÁGINA Y BOTÓN DE ADMIN
 # ==========================================
 st.write("---")
 st.markdown("<br><br>", unsafe_allow_html=True)
@@ -841,7 +842,7 @@ def admin_modal():
             st.session_state.admin_authenticated = False
             st.rerun()
 
-# Botón de Admin ubicado discretamente hasta el fondo en el pie de página
+# Botón de Admin en el pie de página
 col_foot1, col_foot_admin, col_foot2 = st.columns(3)
 with col_foot_admin:
     if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
