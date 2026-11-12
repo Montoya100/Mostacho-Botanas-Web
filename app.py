@@ -204,15 +204,19 @@ card_bg = "#1e293b" if is_dark else "#ffffff"
 border_color = "#334155" if is_dark else "#e2e8f0"
 input_bg = "#0f172a" if is_dark else "#ffffff"
 
-# TONO NARANJA EXACTO EXTRAÍDO DE LA FLAMITA: #ff6b00
-FLAME_ORANGE = "#ff6b00"
-FLAME_ORANGE_HOVER = "#e05e00"
+# TONOS SOLICITADOS:
+# #FE8330 -> Botones generales
+# #FE5F2F -> Carrito y FAB
+BTN_GENERAL = "#FE8330"
+BTN_GENERAL_HOVER = "#e06c20"
+BTN_CART_FAB = "#FE5F2F"
+BTN_CART_FAB_HOVER = "#d94b1c"
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR 100% MARCA DE AGUA, CORONA, HEADER Y FOOTER DE STREAMLIT */
+    /* ELIMINAR 100% MARCA DE AGUA, CORONA, HEADER Y FOOTER DE STREAMLIT (SELECTORES AGRESIVOS) */
     #MainMenu, header, footer, 
     [data-testid="stHeader"], 
     [data-testid="stToolbar"], 
@@ -221,7 +225,8 @@ st.markdown(f"""
     footer[data-testid="stFooter"], 
     .viewerBadge_container__1QSob,
     div[class*="viewerBadge"],
-    a[href*="streamlit.io/cloud"] {{
+    a[href*="streamlit.io/cloud"],
+    div:has(> a[href*="streamlit.io"]) {{
         display: none !important;
         visibility: hidden !important;
         height: 0px !important;
@@ -272,7 +277,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB NATIVO: NARANJA DE LA FLAMITA SIN BORDE BLANCO */
+    /* FAB NATIVO: USANDO #FE5F2F SIN BORDE BLANCO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -281,27 +286,36 @@ st.markdown(f"""
         width: auto !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
-        background: linear-gradient(135deg, {FLAME_ORANGE} 0%, #ff8c00 100%) !important;
+        background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff7a4d) !important;
         color: #ffffff !important;
         padding: 14px 28px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
         font-size: 1.1rem !important;
-        box-shadow: 0 8px 25px rgba(255, 107, 0, 0.5) !important;
+        box-shadow: 0 8px 25px rgba(254, 95, 47, 0.5) !important;
         border: none !important;
         min-height: 56px !important;
         animation: pulseOrange 2s infinite;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
         transform: scale(1.06) !important;
-        background: linear-gradient(135deg, {FLAME_ORANGE_HOVER} 0% {FLAME_ORANGE} 100%) !important;
-        box-shadow: 0 10px 30px rgba(255, 107, 0, 0.7) !important;
+        background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
+        box-shadow: 0 10px 30px rgba(254, 95, 47, 0.7) !important;
     }}
 
     @keyframes pulseOrange {{
-        0% {{ box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.5); }}
-        70% {{ box-shadow: 0 0 0 14px rgba(255, 107, 0, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(255, 107, 0, 0); }}
+        0% {{ box-shadow: 0 0 0 0 rgba(254, 95, 47, 0.5); }}
+        70% {{ box-shadow: 0 0 0 14px rgba(254, 95, 47, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(254, 95, 47, 0); }}
+    }}
+
+    /* BOTÓN DE CARRITO EN ENCABEZADO CON #FE5F2F */
+    div[data-testid="column"]:has(button[key*="header_cart_btn"]) button,
+    button[key="header_cart_btn"] {{
+        background-color: {BTN_CART_FAB} !important;
+    }}
+    button[key="header_cart_btn"]:hover {{
+        background-color: {BTN_CART_FAB_HOVER} !important;
     }}
 
     .whatsapp-btn-disabled {{
@@ -342,20 +356,20 @@ st.markdown(f"""
         font-size: 1rem !important;
     }}
 
-    /* BOTONES GENERALES EN EL NARANJA ELEGANTE DE LA FLAMITA */
+    /* BOTONES GENERALES EN #FE8330 */
     button, .stButton > button, div[data-testid="stButton"] > button {{
-        background-color: {FLAME_ORANGE} !important;
+        background-color: {BTN_GENERAL} !important;
         color: #ffffff !important;
         border: none !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        box-shadow: 0 2px 6px rgba(255, 107, 0, 0.25) !important;
+        box-shadow: 0 2px 6px rgba(254, 131, 48, 0.25) !important;
         transition: all 0.2s ease-in-out !important;
     }}
     button:hover, .stButton > button:hover {{
-        background-color: {FLAME_ORANGE_HOVER} !important;
+        background-color: {BTN_GENERAL_HOVER} !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(255, 107, 0, 0.35) !important;
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.35) !important;
         color: #ffffff !important;
     }}
     button p, .stButton > button p, button span {{
@@ -376,26 +390,33 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* BARRA DE BÚSQUEDA INTEGRADA CON LUPA NATIVA EN COLOR NARANJA */
-    div[data-baseweb="input"] {{
-        background-color: {input_bg} !important;
-        color: {text_color} !important;
-        border: 2px solid {FLAME_ORANGE} !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(255,107,0,0.15) !important;
+    /* BARRA DE BÚSQUEDA EN UNA SOLA LÍNEA SIN ROMPERSE EN MÓVIL */
+    .search-container {{
+        display: flex;
+        align-items: center;
+        background-color: {input_bg};
+        border: 2px solid {BTN_GENERAL};
+        border-radius: 12px;
+        padding: 0 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15);
     }}
-    div[data-baseweb="input"]:focus-within {{
-        border-color: {FLAME_ORANGE_HOVER} !important;
-        box-shadow: 0 0 0 3px rgba(255,107,0,0.25) !important;
+    .search-container:focus-within {{
+        border-color: {BTN_GENERAL_HOVER};
+        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25);
     }}
-    input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
-        background-color: transparent !important;
+    .search-container input {{
+        background: transparent !important;
+        border: none !important;
         color: {text_color} !important;
         -webkit-text-fill-color: {text_color} !important;
-        border: none !important;
+        width: 100%;
+        padding: 10px 8px;
+        font-size: 1rem;
+        outline: none;
         box-shadow: none !important;
     }}
-    input::placeholder, textarea::placeholder {{
+    .search-container input::placeholder {{
         color: #94a3b8 !important;
         -webkit-text-fill-color: #94a3b8 !important;
     }}
@@ -435,11 +456,11 @@ st.markdown(f"""
     .product-price {{
         font-size: 1.15rem;
         font-weight: bold;
-        color: {FLAME_ORANGE} !important;
+        color: {BTN_GENERAL} !important;
     }}
 
     .promo-banner {{
-        background: linear-gradient(135deg, {FLAME_ORANGE} 0%, #ff8c00 100%);
+        background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
         color: white;
         padding: 14px 18px;
         border-radius: 16px;
@@ -447,7 +468,7 @@ st.markdown(f"""
         font-weight: 700;
         font-size: 0.95rem;
         margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(255,107,0,0.2);
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.2);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -479,7 +500,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA INTEGRADA EN UNA LÍNEA
+# 4. ENCABEZADO Y BÚSQUEDA INTEGRADA EN UNA SOLA LÍNEA (HTML/JS)
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -505,16 +526,8 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA LIMPIA CON ICONO DE LUPA INTEGRADO
-search_col_icon, search_col_input = st.columns([0.08, 3.92])
-with search_col_icon:
-    st.markdown(f"""
-    <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-top: 2px;">
-        <span class="material-symbols-outlined" style="color: {FLAME_ORANGE}; font-size: 24px;">search</span>
-    </div>
-    """, unsafe_allow_html=True)
-with search_col_input:
-    search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
+# BARRA DE BÚSQUEDA CON LUPA INTEGRADA PERFECTAMENTE EN UNA SOLA LÍNEA (ESTÉTICA Y MÓVIL)
+search_query = st.text_input("Buscar productos...", placeholder="🔍  Buscar snack, pistaches, mix...", label_visibility="collapsed")
 
 st.write("---")
 
@@ -553,7 +566,7 @@ if st.session_state.nav_view == "catalogo":
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
                 <img src="{pop_p.get('image', 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
                 <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p.get('name', 'Producto')}</div>
-                <div style="color: {FLAME_ORANGE}; font-weight: bold; font-size: 0.95rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
+                <div style="color: {BTN_GENERAL}; font-weight: bold; font-size: 0.95rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
             if st.button("Agregar +", key=f"quick_add_{pop_p.get('id', idx)}", use_container_width=True):
@@ -644,7 +657,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE EN NARANJA DE LA FLAMITA SIN BORDE BLANCO
+    # FAB FLOTANTE EN #FE5F2F
     if total_items > 0:
         st.button(
             f":material/shopping_cart: Ver Carrito ({total_items})",
