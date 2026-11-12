@@ -207,7 +207,7 @@ input_text_color = "#222222" if not is_dark else "#f1f5f9"
 
 # TONOS SOLICITADOS:
 # #FE8330 -> Botones generales
-# #FF4500 -> Carrito y FAB
+# #FF4500 -> Carrito y FAB (Muy destacado)
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
 BTN_CART_FAB = "#FF4500"
@@ -217,7 +217,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR COMPLETAMENTE MARCA DE AGUA, CORONA Y FOOTER */
+    /* OCULTAR COMPLETAMENTE MARCA DE AGUA Y ELEMENTOS DE STREAMLIT */
     #MainMenu, header, footer, 
     [data-testid="stHeader"], 
     [data-testid="stToolbar"], 
@@ -381,26 +381,39 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* BARRA DE BÚSQUEDA EN UNA SOLA LÍNEA CON LUPA OUTLINE */
-    div[data-baseweb="input"] {{
-        background-color: {input_bg} !important;
-        color: {input_text_color} !important;
-        border: 2px solid {BTN_GENERAL} !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15) !important;
+    /* CONTENEDOR DE BÚSQUEDA PROFESIONAL EN UNA SOLA LÍNEA (FLEX INTACTO) */
+    .search-bar-wrapper {{
+        display: flex;
+        align-items: center;
+        background-color: {input_bg};
+        border: 2px solid {BTN_GENERAL};
+        border-radius: 12px;
+        padding: 0 12px;
+        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15);
+        width: 100%;
+        height: 48px;
     }}
-    div[data-baseweb="input"]:focus-within {{
-        border-color: {BTN_GENERAL_HOVER} !important;
-        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25) !important;
+    .search-bar-wrapper:focus-within {{
+        border-color: {BTN_GENERAL_HOVER};
+        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25);
     }}
-    input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
+    /* Truco para anidar el input de Streamlit limpio y sin bordes duplicados */
+    .search-bar-wrapper div[data-baseweb="input"] {{
         background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100%;
+    }}
+    .search-bar-wrapper input {{
+        background: transparent !important;
         color: {input_text_color} !important;
         -webkit-text-fill-color: {input_text_color} !important;
         border: none !important;
         box-shadow: none !important;
+        padding: 0px !important;
+        font-size: 1rem;
     }}
-    input::placeholder, textarea::placeholder {{
+    .search-bar-wrapper input::placeholder {{
         color: #94a3b8 !important;
         -webkit-text-fill-color: #94a3b8 !important;
     }}
@@ -484,7 +497,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA EN UNA SOLA LÍNEA (LUPA OUTLINE NARANJA)
+# 4. ENCABEZADO Y BÚSQUEDA EN UNA SOLA LÍNEA (ICONOS OUTLINE RESTAURADOS)
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -502,7 +515,7 @@ with col_title:
 with col_cart_btn:
     st.write("")
     cart_btn_label = f"({total_items})" if total_items > 0 else ""
-    if st.button("Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
+    if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         if st.session_state.nav_view != "carrito":
             go_to_cart()
         else:
@@ -510,16 +523,16 @@ with col_cart_btn:
 
 st.write("")
 
-# BARRA DE BÚSQUEDA INTEGRADA EN UNA SOLA LÍNEA CON LUPA OUTLINE
-search_col_icon, search_col_input = st.columns([0.08, 3.92])
-with search_col_icon:
-    st.markdown(f"""
-    <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-top: 2px;">
-        <span class="material-symbols-outlined" style="color: {BTN_GENERAL}; font-size: 24px; font-variation-settings: 'FILL' 0, 'wght' 400;">search</span>
-    </div>
-    """, unsafe_allow_html=True)
-with search_col_input:
-    search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
+# BARRA DE BÚSQUEDA PROFESIONAL EN UNA SOLA LÍNEA CON LUPA OUTLINE INTERNA
+st.markdown(f"""
+<div class="search-bar-wrapper">
+    <span class="material-symbols-outlined" style="color: {BTN_GENERAL}; font-size: 24px; margin-right: 10px; font-variation-settings: 'FILL' 0, 'wght' 400;">search</span>
+    <div style="flex-grow: 1;">
+""", unsafe_allow_html=True)
+
+search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
+
+st.markdown("</div></div>", unsafe_allow_html=True)
 
 st.write("---")
 
@@ -649,10 +662,10 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE EN #FF4500
+    # FAB FLOTANTE EN #FF4500 CON ICONO OUTLINE
     if total_items > 0:
         st.button(
-            "Ver Carrito (" + str(total_items) + ")",
+            ":material/shopping_cart: Ver Carrito (" + str(total_items) + ")",
             type="primary",
             on_click=go_to_cart,
             key="native_floating_fab"
@@ -661,10 +674,10 @@ if st.session_state.nav_view == "catalogo":
 elif st.session_state.nav_view == "carrito":
     st.markdown('<div id="top-cart-anchor"></div>', unsafe_allow_html=True)
     
-    if st.button("Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
         go_to_catalogo()
         
-    st.markdown("### Carrito de Compras y Pedido")
+    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -686,14 +699,14 @@ elif st.session_state.nav_view == "carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button("Quitar", key=f"del_cart_{item_id}", use_container_width=True):
+                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
+        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
         
-        st.subheader("Datos de Entrega")
+        st.subheader(":material/local_shipping: Datos de Entrega")
         customer_name = st.text_input("Nombre del cliente (Obligatorio)", placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias (Obligatorio)", placeholder="Calle, número, colonia...")
         customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
@@ -852,5 +865,5 @@ def admin_modal():
 # Botón de Admin ubicado discretamente hasta el fondo en el pie de página
 col_foot1, col_foot_admin, col_foot2 = st.columns(3)
 with col_foot_admin:
-    if st.button("Admin", use_container_width=True, key="admin_footer_btn"):
+    if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
         admin_modal()
