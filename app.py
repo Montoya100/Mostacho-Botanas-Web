@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import urllib.parse
@@ -195,7 +194,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos y OCULTAR COMPLETAMENTE LA MARCA DE AGUA Y FOOTER
+# 3. Colores dinámicos y OCULTAR DEFINITIVAMENTE EL MENÚ Y MARCA DE AGUA
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#f8f7f4"
@@ -209,16 +208,14 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR COMPLETAMENTE MENÚ SUPERIOR, GITHUB BADGE Y FOOTER DE STREAMLIT */
-    #MainMenu {{ visibility: hidden !important; display: none !important; }}
-    header {{ visibility: hidden !important; display: none !important; height: 0px !important; }}
-    footer {{ visibility: hidden !important; display: none !important; }}
-    .stDeployButton {{ display: none !important; visibility: hidden !important; }}
-    [data-testid="stHeader"] {{ display: none !important; visibility: hidden !important; height: 0px !important; }}
-    [data-testid="stToolbar"] {{ display: none !important; visibility: hidden !important; }}
-    [data-testid="stStatusWidget"] {{ display: none !important; visibility: hidden !important; }}
-    [data-testid="stDecoration"] {{ display: none !important; visibility: hidden !important; }}
-    .viewerBadge_container__1QSob {{ display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }}
+    /* ELIMINAR 100% MARCA DE AGUA, HEADER, FOOTER Y GITHUB BADGE */
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], footer[data-testid="stFooter"], .viewerBadge_container__1QSob {{
+        display: none !important;
+        visibility: hidden !important;
+        height: 0px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }}
     
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
@@ -262,7 +259,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB NATIVO: TONO NARANJA PROFUNDO/VIBRANTE CON BORDE BLANCO Y SOMBRA ELEGANTE (ARMONIOSO Y LLAMATIVO) */
+    /* FAB NATIVO: NARANJA VIBRANTE SIN BORDE BLANCO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -271,27 +268,27 @@ st.markdown(f"""
         width: auto !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
-        background: linear-gradient(135deg, #ff4500 0%, #ff6b35 100%) !important;
+        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
         color: #ffffff !important;
         padding: 14px 28px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
         font-size: 1.1rem !important;
-        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5) !important;
-        border: 2px solid #ffffff !important;
+        box-shadow: 0 8px 25px rgba(255, 82, 0, 0.5) !important;
+        border: none !important;
         min-height: 56px !important;
         animation: pulseOrange 2s infinite;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
         transform: scale(1.06) !important;
-        background: linear-gradient(135deg, #e03d00 0%, #ff4500 100%) !important;
-        box-shadow: 0 10px 30px rgba(255, 69, 0, 0.7) !important;
+        background: linear-gradient(135deg, #e04800 0%, #ff5200 100%) !important;
+        box-shadow: 0 10px 30px rgba(255, 82, 0, 0.7) !important;
     }}
 
     @keyframes pulseOrange {{
-        0% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.5); }}
-        70% {{ box-shadow: 0 0 0 14px rgba(255, 69, 0, 0); }}
-        100% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }}
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.5); }}
+        70% {{ box-shadow: 0 0 0 14px rgba(255, 82, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }}
     }}
 
     .whatsapp-btn-disabled {{
@@ -332,19 +329,20 @@ st.markdown(f"""
         font-size: 1rem !important;
     }}
 
+    /* BOTONES GENERALES EN NARANJA SUAVE/PASTEL CÁLIDO (ESTILO DE LA REFERENCIA) */
     button, .stButton > button, div[data-testid="stButton"] > button {{
-        background-color: #ff5200 !important;
+        background-color: #ff9f68 !important;
         color: #ffffff !important;
         border: none !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        box-shadow: 0 2px 6px rgba(255, 82, 0, 0.25) !important;
+        box-shadow: 0 2px 6px rgba(255, 159, 104, 0.25) !important;
         transition: all 0.2s ease-in-out !important;
     }}
     button:hover, .stButton > button:hover {{
-        background-color: #e04800 !important;
+        background-color: #ff8542 !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(255, 82, 0, 0.35) !important;
+        box-shadow: 0 4px 12px rgba(255, 159, 104, 0.35) !important;
         color: #ffffff !important;
     }}
     button p, .stButton > button p, button span {{
@@ -374,8 +372,8 @@ st.markdown(f"""
         box-shadow: none !important;
     }}
     input:focus, textarea:focus, div[data-baseweb="input"]:focus-within {{
-        border-color: #ff5200 !important;
-        box-shadow: 0 0 0 3px rgba(255,82,0,0.18) !important;
+        border-color: #ff9f68 !important;
+        box-shadow: 0 0 0 3px rgba(255,159,104,0.18) !important;
     }}
     input::placeholder, textarea::placeholder {{
         color: #94a3b8 !important;
@@ -461,7 +459,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. HEADER SUPERIOR
+# 4. ESTRUCTURA ESTILO APP (ENCABEZADO + CARRITO + BÚSQUEDA)
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -478,12 +476,26 @@ with col_title:
 
 with col_cart_btn:
     st.write("")
-    cart_btn_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
-    if st.button(":material/shopping_cart: " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
+    cart_btn_label = f"({total_items})" if total_items > 0 else ""
+    # BOTÓN DEL CARRITO EN EL ENCABEZADO (CON EL NARANJA CORPORATIVO PRINCIPAL)
+    if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         if st.session_state.nav_view != "carrito":
             go_to_cart()
         else:
             go_to_catalogo()
+
+st.write("")
+
+# BARRA DE BÚSQUEDA ESTILIZADA CON RECUADRO NARANJA Y LUPA (COMO EN LA IMAGEN DE REFERENCIA)
+search_col1, search_col2 = st.columns([0.1, 3.9])
+with search_col1:
+    st.markdown("""
+    <div style="background-color: #ff9f68; border-radius: 12px; height: 46px; display: flex; align-items: center; justify-content: center; margin-top: 2px; box-shadow: 0 2px 6px rgba(255,159,104,0.3);">
+        <span class="material-symbols-outlined" style="color: white; font-size: 24px;">search</span>
+    </div>
+    """, unsafe_allow_html=True)
+with search_col2:
+    search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
 
 st.write("---")
 
@@ -496,7 +508,7 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR PRINCIPAL
+    # BANNER RECTANGULAR FIJO
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
@@ -504,10 +516,7 @@ if st.session_state.nav_view == "catalogo":
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. BARRA DE BÚSQUEDA
-    search_query = st.text_input("Buscar productos...", placeholder="Escribe el nombre del producto...", label_visibility="collapsed")
-
-    # 2. PRODUCTOS POPULARES
+    # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -545,7 +554,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. SECCIÓN DE CATEGORÍAS
+    # 2. SECCIÓN DE CATEGORÍAS
     st.markdown("### Categorías")
     category_options = ["Todo", "Individual", "Para compartir"]
 
@@ -561,14 +570,14 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 4. LISTADO DE PRODUCTOS GENERALES FILTRADOS
+    # 3. LISTADO DE PRODUCTOS GENERALES FILTRADOS
     try:
         current_products_list = st.session_state.products
         
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category", "Individual") == st.session_state.selected_cat]
+            cat_filtered = [p for p in current_products_list if p.get("category", "Individual"] == st.session_state.selected_cat] # type: ignore
 
         filtered_products = [
             p for p in cat_filtered 
@@ -616,7 +625,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE EN TONO NARANJA ARMONIOSO Y BRILLANTE
+    # FAB FLOTANTE EN NARANJA VIBRANTE SIN BORDE BLANCO
     if total_items > 0:
         st.button(
             f":material/shopping_cart: Ver Carrito ({total_items})",
@@ -626,7 +635,6 @@ if st.session_state.nav_view == "catalogo":
         )
 
 elif st.session_state.nav_view == "carrito":
-    # ANCLAJE SUPERIOR Y SCROLL AUTOMÁTICO AL INICIO DE LA VISTA
     st.markdown('<div id="top-cart-anchor"></div>', unsafe_allow_html=True)
     
     if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
