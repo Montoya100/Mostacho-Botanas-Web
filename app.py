@@ -4,7 +4,6 @@ import urllib.parse
 import requests
 import json
 import os
-import streamlit.components.v1 as components
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -218,23 +217,6 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR ELEMENTOS DE STREAMLIT */
-    #MainMenu, header, footer, 
-    [data-testid="stHeader"], 
-    [data-testid="stToolbar"], 
-    [data-testid="stDecoration"], 
-    [data-testid="stStatusWidget"], 
-    footer[data-testid="stFooter"], 
-    .viewerBadge_container__1QSob,
-    div[class*="viewerBadge"],
-    a[href*="streamlit.io/cloud"] {{
-        display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }}
-    
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
         max-width: 1400px !important;
@@ -277,11 +259,12 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB NATIVO: #FF4500 */
+    /* FAB FLOTANTE MOVIDO AL LADO IZQUIERDO PARA EVITAR LA MARCA DE AGUA */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
-        right: 24px !important;
+        left: 24px !important;
+        right: auto !important;
         z-index: 99999999 !important;
         width: auto !important;
     }}
@@ -382,7 +365,7 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* FORZAR CONTORNO NARANJA INTENSO Y VISIBLE EN LA BARRA DE BÚSQUEDA */
+    /* FORZAR CONTORNO NARANJA INTENSO EN LA BARRA DE BÚSQUEDA */
     div[data-baseweb="input"], [data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
@@ -536,7 +519,7 @@ if st.session_state.nav_view == "catalogo":
     # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
-    st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
+    st.caption("Toca cualquier producto popular para agregarlo directo à tu carrito:")
 
     popular_products = st.session_state.popular_items
     if not popular_products:
@@ -642,7 +625,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB FLOTANTE EN #FF4500
+    # FAB FLOTANTE EN #FF4500 (AHORA EN EL LADO IZQUIERDO)
     if total_items > 0:
         st.button(
             ":material/shopping_cart: Ver Carrito (" + str(total_items) + ")",
