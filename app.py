@@ -206,7 +206,7 @@ input_bg = "#ffffff" if not is_dark else "#1e293b"
 input_text_color = "#222222" if not is_dark else "#f1f5f9"
 
 # TONOS SOLICITADOS:
-# #FE8330 -> Botones generales
+# #FE8330 -> Botones generales y contorno de barra de búsqueda
 # #FF4500 -> Carrito y FAB
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
@@ -381,30 +381,17 @@ st.markdown(f"""
         margin-top: 10px;
     }}
 
-    /* BARRA DE BÚSQUEDA EN UNA SOLA LÍNEA CON LUPA OUTLINE (SIN FONDO NEGRO FORZADO) */
+    /* BARRA DE BÚSQUEDA CON CONTORNO NARANJA INTENSO Y DISTINTIVO (#FE8330) */
     div[data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
-        border: 2px solid {BTN_GENERAL} !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(254, 131, 48, 0.15) !important;
-        display: flex !important;
-        align-items: center !important;
-        padding-left: 8px !important;
+        border: 2.5px solid {BTN_GENERAL} !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.2) !important;
     }}
     div[data-baseweb="input"]:focus-within {{
         border-color: {BTN_GENERAL_HOVER} !important;
-        box-shadow: 0 0 0 3px rgba(254, 131, 48, 0.25) !important;
-    }}
-    div[data-baseweb="input"]::before {{
-        content: "search";
-        font-family: 'Material Symbols Outlined' !important;
-        font-size: 22px !important;
-        color: {BTN_GENERAL} !important;
-        display: flex;
-        align-items: center;
-        margin-right: 6px;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        box-shadow: 0 0 0 4px rgba(254, 131, 48, 0.3) !important;
     }}
     input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
         background-color: transparent !important;
@@ -497,7 +484,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA NATIVA EN UNA SOLA LÍNEA CON LUPA OUTLINE
+# 4. ENCABEZADO Y BÚSQUEDA NATIVA CON CONTORNO NARANJA
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
 
@@ -523,7 +510,7 @@ with col_cart_btn:
 
 st.write("")
 
-# CAMPO DE BÚSQUEDA NATIVO EN UNA SOLA LÍNEA CON LUPA OUTLINE INTEGRADA
+# CAMPO DE BÚSQUEDA CON CONTORNO NARANJA DESTACADO
 search_query = st.text_input("Buscar productos...", placeholder="Buscar snack, pistaches, mix...", label_visibility="collapsed")
 
 st.write("---")
