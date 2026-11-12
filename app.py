@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import urllib.parse
@@ -208,14 +209,16 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR 100% MARCA DE AGUA, HEADER Y FOOTER DE STREAMLIT CLOUD */
-    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], footer[data-testid="stFooter"], .viewerBadge_container__1QSob {{
-        display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }}
+    /* OCULTAR COMPLETAMENTE MENÚ SUPERIOR, GITHUB BADGE Y FOOTER DE STREAMLIT */
+    #MainMenu {{ visibility: hidden !important; display: none !important; }}
+    header {{ visibility: hidden !important; display: none !important; height: 0px !important; }}
+    footer {{ visibility: hidden !important; display: none !important; }}
+    .stDeployButton {{ display: none !important; visibility: hidden !important; }}
+    [data-testid="stHeader"] {{ display: none !important; visibility: hidden !important; height: 0px !important; }}
+    [data-testid="stToolbar"] {{ display: none !important; visibility: hidden !important; }}
+    [data-testid="stStatusWidget"] {{ display: none !important; visibility: hidden !important; }}
+    [data-testid="stDecoration"] {{ display: none !important; visibility: hidden !important; }}
+    .viewerBadge_container__1QSob {{ display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }}
     
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
@@ -259,7 +262,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB NATIVO FIJO EN ESQUINA INFERIOR DERECHA */
+    /* FAB NATIVO: TONO NARANJA PROFUNDO/VIBRANTE CON BORDE BLANCO Y SOMBRA ELEGANTE (ARMONIOSO Y LLAMATIVO) */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -268,15 +271,27 @@ st.markdown(f"""
         width: auto !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
-        background: linear-gradient(135deg, #ff5200 0%, #ff7300 100%) !important;
+        background: linear-gradient(135deg, #ff4500 0%, #ff6b35 100%) !important;
         color: #ffffff !important;
-        padding: 14px 26px !important;
+        padding: 14px 28px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 1.05rem !important;
-        box-shadow: 0 6px 22px rgba(255, 82, 0, 0.65) !important;
-        border: none !important;
-        min-height: 54px !important;
+        font-size: 1.1rem !important;
+        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5) !important;
+        border: 2px solid #ffffff !important;
+        min-height: 56px !important;
+        animation: pulseOrange 2s infinite;
+    }}
+    div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
+        transform: scale(1.06) !important;
+        background: linear-gradient(135deg, #e03d00 0%, #ff4500 100%) !important;
+        box-shadow: 0 10px 30px rgba(255, 69, 0, 0.7) !important;
+    }}
+
+    @keyframes pulseOrange {{
+        0% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.5); }}
+        70% {{ box-shadow: 0 0 0 14px rgba(255, 69, 0, 0); }}
+        100% {{ box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }}
     }}
 
     .whatsapp-btn-disabled {{
@@ -481,7 +496,7 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR USANDO EL MISMO DISEÑO HTML DE LAS TARJETAS POPULARES (GARANTIZADO QUE SÍ SE VE)
+    # BANNER RECTANGULAR PRINCIPAL
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
@@ -601,7 +616,7 @@ if st.session_state.nav_view == "catalogo":
                             st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB NATIVO (MANTIENE EL CARRITO Y CAMBIA DE VISTA)
+    # FAB FLOTANTE EN TONO NARANJA ARMONIOSO Y BRILLANTE
     if total_items > 0:
         st.button(
             f":material/shopping_cart: Ver Carrito ({total_items})",
@@ -611,12 +626,14 @@ if st.session_state.nav_view == "catalogo":
         )
 
 elif st.session_state.nav_view == "carrito":
-    # El título se coloca inmediatamente arriba para garantizar que al abrir el carrito aparezca en la parte superior
-    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
-    st.caption(f"Artículos seleccionados: {total_items}")
+    # ANCLAJE SUPERIOR Y SCROLL AUTOMÁTICO AL INICIO DE LA VISTA
+    st.markdown('<div id="top-cart-anchor"></div>', unsafe_allow_html=True)
     
     if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
         go_to_catalogo()
+        
+    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
+    st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
         st.info("Tu carrito está vacío. Agrega productos desde el catálogo.")
