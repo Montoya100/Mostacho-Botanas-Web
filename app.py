@@ -40,10 +40,10 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# LIGAS POR DEFECTO
+# LIGAS POR DEFECTO CON TU IMAGEN DE IMGUR
 # ==========================================
 DEFAULT_BANNER = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/banner.jpg"
-DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.jpg"
+DEFAULT_PRODUCT_IMG = "https://i.imgur.com/Tba2QJm.jpeg" # Tu enlace de Imgur por defecto
 
 def load_saved_banner():
     if os.path.exists(BANNER_FILE):
@@ -124,8 +124,8 @@ def fetch_loyverse_products():
     if not products_list:
         products_list = [
             {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": DEFAULT_PRODUCT_IMG},
-            {"id": "p2", "name": "Fritura de Harina (Con Chile)", "category": "Para compartir", "price": 25.0, "description": "Crujientes frituras artesanales.", "image": DEFAULT_PRODUCT_IMG},
-            {"id": "p3", "name": "Fritura de Harina (Sin Chile)", "category": "Para compartir", "price": 25.0, "description": "Ideales para toda la familia.", "image": DEFAULT_PRODUCT_IMG}
+            {"id": "p2", "name": "Fritura (Con Chile)", "category": "Para compartir", "price": 25.0, "description": "Crujientes frituras artesanales.", "image": DEFAULT_PRODUCT_IMG},
+            {"id": "p3", "name": "Fritura (Sin Chile)", "category": "Para compartir", "price": 25.0, "description": "Ideales para toda la familia.", "image": DEFAULT_PRODUCT_IMG}
         ]
     return products_list
 
@@ -146,14 +146,13 @@ def load_saved_products():
                             item["description"] = str(item.get("description", "")) if pd.notna(item.get("description")) else ""
                             img_val = item.get("image", "")
                             
-                            if not img_val or str(img_val).strip() == "" or str(img_val).strip() == "nan":
+                            if not img_val or str(img_val).strip() == "" or str(img_val).strip() == "nan" or "placeholder" in str(img_val):
                                 item["image"] = DEFAULT_PRODUCT_IMG
                             else:
                                 item["image"] = str(img_val).strip()
                                 
                             cleaned.append(item)
                     if cleaned:
-                        # Ordenar alfabéticamente por nombre
                         cleaned = sorted(cleaned, key=lambda x: str(x.get("name", "")).lower())
                         return cleaned
         except:
@@ -165,7 +164,6 @@ def load_saved_products():
 
 def save_products_to_file(prod_list):
     try:
-        # Asegurar orden alfabético al guardar
         prod_list = sorted(prod_list, key=lambda x: str(x.get("name", "")).lower())
         with open(DATA_FILE, "w", encoding="utf-8") as f:
             json.dump(prod_list, f, ensure_ascii=False, indent=4)
@@ -183,7 +181,7 @@ def load_saved_populares():
             pass
     default_pops = [
         {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": DEFAULT_PRODUCT_IMG},
-        {"id": "p2", "name": "Fritura de Harina (Con Chile)", "price": 25.0, "image": DEFAULT_PRODUCT_IMG}
+        {"id": "p2", "name": "Fritura (Con Chile)", "price": 25.0, "image": DEFAULT_PRODUCT_IMG}
     ]
     save_populares_to_file(default_pops)
     return default_pops
@@ -204,7 +202,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Con margen superior para que no corte títulos ni botones)
+# 3. Colores y estilos (Forzando doble columna estricta en móvil y web)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#ffffff"
@@ -234,7 +232,6 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* Margen superior para evitar cortes de la barra de Streamlit */
     .block-container {{
         padding-top: 2rem !important;
         padding-bottom: 6rem !important;
@@ -255,6 +252,12 @@ st.markdown(f"""
     div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {{
         background-color: transparent !important;
         color: {text_color} !important;
+    }}
+
+    /* FORZAR DOBLE COLUMNA EN MÓVIL Y WEB */
+    div[data-testid="column"] {{
+        flex: 1 1 45% !important;
+        min-width: 200px !important;
     }}
 
     .app-title {{
@@ -435,7 +438,6 @@ st.markdown(f"""
         color: {BTN_GENERAL} !important;
     }}
 
-    /* PROMO BANNER CLásico (Como antes, con carrito e icono) */
     .promo-banner {{
         background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
         color: white;
@@ -488,7 +490,7 @@ def variants_modal(base_name, variants_list):
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
         v_img = var.get("image", DEFAULT_PRODUCT_IMG)
-        if not v_img or str(v_img).strip() == "" or str(v_img) == "nan":
+        if not v_img or str(v_img).strip() == "" or str(v_img) == "nan" or "placeholder" in str(v_img):
             v_img = DEFAULT_PRODUCT_IMG
             
         col_v1, col_v2, col_v3 = st.columns([1, 2.5, 1.5])
@@ -567,7 +569,7 @@ if st.session_state.nav_view == "catalogo":
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
             p_img = pop_p.get('image', DEFAULT_PRODUCT_IMG)
-            if not p_img or str(p_img).strip() == "" or str(p_img) == "nan":
+            if not p_img or str(p_img).strip() == "" or str(p_img) == "nan" or "placeholder" in str(p_img):
                 p_img = DEFAULT_PRODUCT_IMG
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
@@ -609,7 +611,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS AGRUPADOS Y ORDENADOS ALFABÉTICAMENTE EN DOBLE COLUMNA
+    # 3. LISTADO DE PRODUCTOS AGRUPADOS (SIN DUPLICADOS) Y ORDENADOS ALFABÉTICAMENTE
     try:
         current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
@@ -638,7 +640,7 @@ if st.session_state.nav_view == "catalogo":
 
         group_items_list = list(grouped_dict.items())
         
-        # RENDERIZADO EN DOBLE COLUMNA
+        # RENDERIZADO EN DOBLE COLUMNA FORZADA
         for i in range(0, len(group_items_list), 2):
             cols = st.columns(2)
             for j in range(2):
@@ -653,7 +655,7 @@ if st.session_state.nav_view == "catalogo":
                         col_img, col_info = st.columns([1, 2])
                         with col_img:
                             img_src = representative.get("image")
-                            if not img_src or str(img_src).strip() == "" or str(img_src) == "nan":
+                            if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src):
                                 img_src = DEFAULT_PRODUCT_IMG
                             st.image(img_src, use_container_width=True)
                             
@@ -672,7 +674,8 @@ if st.session_state.nav_view == "catalogo":
                         
                         st.write("")
                         if len(items_group) > 1:
-                            if st.button("Ver Opciones 🏷️", key=f"variants_btn_{pid}", use_container_width=True):
+                            # SI TIENE MÁS DE UNA VARIANTE, SOLO MUESTRA EL BOTÓN DE VER OPCIONES (SIN DUPLICAR)
+                            if st.button("Ver Opciones 🏷️", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
                                 variants_modal(base_name, items_group)
                         else:
                             qty_in_cart = st.session_state.cart.get(pid, 0)
@@ -794,7 +797,7 @@ def admin_modal():
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
-            st.info("💡 Para activar el **Pop-up de Variantes**, escribe el mismo nombre base seguido de la variante entre paréntesis (Ej: `Fritura (Con Chile)` y `Fritura (Sin Chile)`). Los productos se ordenan alfabéticamente en automático.")
+            st.info("💡 Para agrupar variantes (ej. Frituras con/sin chile), pon el mismo nombre base seguido de la variante entre paréntesis. Los productos se ordenan alfabéticamente en automático.")
             
             uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
             if uploaded_excel is not None:
@@ -812,7 +815,7 @@ def admin_modal():
                             r_img = row.get("image", DEFAULT_PRODUCT_IMG)
                             
                             desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
-                            img_val = str(r_img).strip() if pd.notna(r_img) and str(r_img).strip() != "nan" and str(r_img).strip() != "" else DEFAULT_PRODUCT_IMG
+                            img_val = str(r_img).strip() if pd.notna(r_img) and str(r_img).strip() != "nan" and str(r_img).strip() != "" and "placeholder" not in str(r_img) else DEFAULT_PRODUCT_IMG
                             
                             new_loaded_list.append({
                                 "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
@@ -822,7 +825,6 @@ def admin_modal():
                                 "description": desc_val,
                                 "image": img_val
                             })
-                        # Ordenar alfabéticamente
                         new_loaded_list = sorted(new_loaded_list, key=lambda x: str(x.get("name", "")).lower())
                         st.session_state.products = new_loaded_list
                         save_products_to_file(new_loaded_list)
@@ -835,7 +837,6 @@ def admin_modal():
 
             st.write("---")
             
-            # Ordenar alfabéticamente el DataFrame antes de mostrarlo en el editor
             current_sorted_products = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
             df_current = pd.DataFrame(current_sorted_products)
             
@@ -864,7 +865,7 @@ def admin_modal():
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
                     
                     raw_img = row.get("image")
-                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" and str(raw_img).strip() != "nan" else DEFAULT_PRODUCT_IMG
+                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" and str(raw_img).strip() != "nan" and "placeholder" not in str(raw_img) else DEFAULT_PRODUCT_IMG
                     
                     raw_desc = row.get("description")
                     prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
@@ -878,7 +879,6 @@ def admin_modal():
                         "image": prod_img
                     })
                     
-                # Ordenar alfabéticamente al guardar
                 updated_list = sorted(updated_list, key=lambda x: str(x.get("name", "")).lower())
                 st.session_state.products = updated_list
                 save_products_to_file(updated_list)
