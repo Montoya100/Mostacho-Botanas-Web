@@ -180,7 +180,7 @@ def load_saved_populares():
                     for p in data:
                         if isinstance(p, dict):
                             p_img = str(p.get("image", "")).strip()
-                            if not p_img or p_img.lower() == "nan" or "imgur" in p_img:
+                            if not p_img or p_img.lower() == "nan" or "imgur" in p_img or "placeholder" in p_img:
                                 p["image"] = DEFAULT_PRODUCT_IMG
                             cleaned_pops.append(p)
                     if cleaned_pops:
@@ -606,7 +606,7 @@ if st.session_state.nav_view == "catalogo":
             
             if matched_prod and matched_prod.get("image"):
                 cand_img = str(matched_prod.get("image")).strip()
-                if cand_img != "" and cand_img.lower() != "nan" and "imgur" not in cand_img:
+                if cand_img != "" and cand_img.lower() != "nan" and "imgur" not in cand_img and "placeholder" not in cand_img:
                     p_img = cand_img
                 else:
                     p_img = DEFAULT_PRODUCT_IMG
