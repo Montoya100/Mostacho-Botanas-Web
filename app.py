@@ -36,6 +36,15 @@ if "selected_cat" not in st.session_state:
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
+if "show_variants_modal" not in st.session_state:
+    st.session_state.show_variants_modal = False
+
+if "current_modal_base" not in st.session_state:
+    st.session_state.current_modal_base = ""
+
+if "current_modal_items" not in st.session_state:
+    st.session_state.current_modal_items = []
+
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
@@ -210,7 +219,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Tema Claro Forzado, Modal con Scroll Estricto y Cuadrícula Web de 3 Columnas)
+# 3. Colores y estilos (Ocultar la 'X' superior del modal nativo para forzar el botón Listo)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#f8fafc" if not is_dark else "#121824"
@@ -223,14 +232,18 @@ input_text_color = "#1e293b" if not is_dark else "#f1f5f9"
 
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
-BTN_CART_FAB = "#FF4500"        # Rojo-naranja distintivo
+BTN_CART_FAB = "#FF4500"        
 BTN_CART_FAB_HOVER = "#d93800"
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FORZAR TEMA CLARO ABSOLUTO EN EL MODAL DE VARIANTES Y SCROLL FIJO */
+    /* OCULTAR LA 'X' SUPERIOR DEL MODAL PARA QUE OBLIGATORIAMENTE USEN EL BOTÓN LISTO */
+    div[data-baseweb="modal"] button[aria-label="Close"] {{
+        display: none !important;
+    }}
+
     div[data-baseweb="modal"] {{
         background-color: rgba(0, 0, 0, 0.6) !important;
     }}
@@ -243,7 +256,6 @@ st.markdown(f"""
         padding: 16px !important;
     }}
     
-    /* CONTENEDOR CON SCROLL ACTIVO ESTRICTO PARA VER TODAS LAS VARIANTES */
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"] {{
         max-height: 55vh !important;
         overflow-y: scroll !important;
@@ -286,7 +298,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB FLOTANTE EN LADO IZQUIERDO */
+    /* FAB FLOTANTE ÚNICO EN LADO IZQUIERDO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -311,8 +323,6 @@ st.markdown(f"""
         background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
     }}
 
-    /* BOTÓN DE CARRITO EN ENCABEZADO */
-    div[data-testid="column"]:has(button[key*="header_cart_btn"]) button,
     button[key="header_cart_btn"] {{
         background-color: {BTN_CART_FAB} !important;
     }}
@@ -320,7 +330,6 @@ st.markdown(f"""
         background-color: {BTN_CART_FAB_HOVER} !important;
     }}
 
-    /* BOTÓN "VER OPCIONES" CON EL COLOR ROJO-NARANJA DISTINTIVO */
     button[key*="variants_btn_"] {{
         background-color: {BTN_CART_FAB} !important;
         box-shadow: 0 2px 6px rgba(255, 69, 0, 0.3) !important;
@@ -368,7 +377,6 @@ st.markdown(f"""
         font-size: 0.95rem !important;
     }}
 
-    /* BOTONES GENERALES */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: {BTN_GENERAL} !important;
         color: #ffffff !important;
@@ -396,7 +404,6 @@ st.markdown(f"""
         margin-top: 6px;
     }}
 
-    /* BARRA DE BÚSQUEDA */
     div[data-baseweb="input"], [data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
@@ -491,10 +498,10 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# POP-UP DE VARIANTES (TEMA CLARO, SCROLL ESTRICTO Y BOTÓN LISTO)
+# MODAL DE VARIANTES CONTROLADO POR ESTADO (SIN CERRARSE AL SUMAR)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
-def variants_modal(base_name, variants_list):
+def variants_modal_dialog(base_name, variants_list):
     st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 2px;'>{base_name}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
     st.write("---")
@@ -520,18 +527,20 @@ def variants_modal(base_name, variants_list):
             with sub_cv1:
                 if st.button("-", key=f"modal_minus_{v_id}_{idx}", use_container_width=True):
                     remove_from_cart(v_id)
-                    st.rerun()
             with sub_cv2:
                 st.markdown(f"<div class='qty-number' style='color: #1e293b !important;'>{qty_val}</div>", unsafe_allow_html=True)
             with sub_cv3:
                 if st.button("+", key=f"modal_plus_{v_id}_{idx}", use_container_width=True):
                     add_to_cart(v_id)
-                    st.rerun()
         st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
     if st.button("Listo (Cerrar y confirmar)", type="primary", use_container_width=True, key="close_modal_btn"):
+        st.session_state.show_variants_modal = False
         st.rerun()
+
+if st.session_state.show_variants_modal:
+    variants_modal_dialog(st.session_state.current_modal_base, st.session_state.current_modal_items)
 
 # ==========================================
 # 4. ENCABEZADO Y BÚSQUEDA
@@ -574,7 +583,7 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER PRINCIPAL CON HTML SEGURO
+    # BANNER PRINCIPAL SEGURO
     banner_to_show = str(st.session_state.banner_url).strip()
     if not banner_to_show or banner_to_show.lower() == "nan":
         banner_to_show = DEFAULT_BANNER
@@ -697,14 +706,14 @@ if st.session_state.nav_view == "catalogo":
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
                 if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[name_raw]):
-                    grouped_dict[name_raw].append(p)
+                    grouped_dict[base_name].append(p)
 
         group_items_list = list(grouped_dict.items())
         
         # ORDENAR LA JERARQUÍA: LOS QUE TIENEN VARIANTES (>1 OPCIÓN) VAN HASTA ARRIBA
         group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
         
-        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS CON HTML SEGURO (LÍNEA 723 BLINDADA)
+        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS SEGURO
         for i in range(0, len(group_items_list), 3):
             cols = st.columns(3)
             for j in range(3):
@@ -733,7 +742,10 @@ if st.session_state.nav_view == "catalogo":
                         st.write("")
                         if len(items_group) > 1:
                             if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
-                                variants_modal(base_name, items_group)
+                                st.session_state.current_modal_base = base_name
+                                st.session_state.current_modal_items = items_group
+                                st.session_state.show_variants_modal = True
+                                st.rerun()
                         else:
                             qty_in_cart = st.session_state.cart.get(pid, 0)
                             if qty_in_cart == 0:
