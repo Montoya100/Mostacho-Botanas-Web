@@ -650,12 +650,19 @@ if st.session_state.nav_view == "catalogo":
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = [p for p in current_products_list if p.get("category", "Individual") == st.session_state.selected_cat]
+            cat_filtered = []
+            for p in current_products_list:
+                c_val = str(p.get("category", "Individual")).strip()
+                if c_val == st.session_state.selected_cat:
+                    cat_filtered.append(p)
 
-        filtered_products = [
-            p for p in cat_filtered 
-            if isinstance(p, dict) and (search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower())
-        ]
+        filtered_products = []
+        for p in cat_filtered:
+            if isinstance(p, dict):
+                p_name = str(p.get("name", "")).lower()
+                p_desc = str(p.get("description", "")).lower()
+                if search_query.lower() in p_name or search_query.lower() in p_desc:
+                    filtered_products.append(p)
     except:
         filtered_products = []
 
@@ -675,8 +682,8 @@ if st.session_state.nav_view == "catalogo":
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
-                if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
-                    grouped_dict[base_name].append(p)
+                if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
+                    grouped_dict[name_raw].append(p)
 
         group_items_list = list(grouped_dict.items())
         
