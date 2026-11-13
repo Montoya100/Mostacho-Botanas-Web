@@ -202,43 +202,55 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Cuadrícula responsive y Scroll en Modales)
+# 3. Colores y estilos (Tema Claro Forzado, Modal con Scroll, Cuadrícula Real y Botón Rojo-Naranja)
 is_dark = st.session_state.dark_mode
 
-bg_color = "#121824" if is_dark else "#ffffff"
-text_color = "#f1f5f9" if is_dark else "#222222"
-sub_text_color = "#94a3b8" if is_dark else "#4a5568"
-card_bg = "#1e293b" if is_dark else "#ffffff"
-border_color = "#334155" if is_dark else "#e2e8f0"
+bg_color = "#f8fafc" if not is_dark else "#121824"
+text_color = "#1e293b" if not is_dark else "#f1f5f9"
+sub_text_color = "#64748b" if not is_dark else "#94a3b8"
+card_bg = "#ffffff" if not is_dark else "#1e293b"
+border_color = "#e2e8f0" if not is_dark else "#334155"
 input_bg = "#ffffff" if not is_dark else "#1e293b"
-input_text_color = "#222222" if not is_dark else "#f1f5f9"
+input_text_color = "#1e293b" if not is_dark else "#f1f5f9"
 
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
-BTN_CART_FAB = "#FF4500"
+BTN_CART_FAB = "#FF4500"        # Rojo-naranja distintivo
 BTN_CART_FAB_HOVER = "#d93800"
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* MODAL CON SCROLL Y TAMAÑO RESPONSIVE */
+    /* FORZAR TEMA CLARO Y SCROLL EN EL MODAL DE VARIANTES */
+    div[data-baseweb="modal"] {{
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }}
     div[data-baseweb="modal"] > div {{
-        width: 95vw !important;
-        max-width: 800px !important;
-        max-height: 85vh !important;
-        overflow-y: auto !important;
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        width: 92vw !important;
+        max-width: 650px !important;
         border-radius: 20px !important;
+        padding: 10px !important;
     }}
     
+    /* CONTENEDOR INTERNO DEL MODAL CON SCROLL ACTIVO PARA TODAS LAS VARIANTES */
+    div[data-baseweb="modal"] div[data-testid="stVerticalBlock"] {{
+        max-height: 65vh !important;
+        overflow-y: auto !important;
+        padding-right: 8px !important;
+    }}
+
     .stApp {{
         background-color: {bg_color} !important;
         color: {text_color} !important;
     }}
 
     .block-container {{
-        padding-top: 2rem !important;
+        padding-top: 1.5rem !important;
         padding-bottom: 6rem !important;
+        max-width: 100% !important;
     }}
 
     body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
@@ -251,28 +263,37 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* CUADRÍCULA RESPONSIVE VERTICAL Y ADAPTATIVA */
+    /* CUADRÍCULA RESPONSIVE ADAPTATIVA (ESCRITORIO Y MÓVIL) */
     [data-testid="stHorizontalBlock"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 12px !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
     }}
+    
     div[data-testid="column"] {{
-        flex: 1 1 50% !important;
-        min-width: 0 !important;
-        max-width: 50% !important;
+        flex: 1 1 48% !important;
+        min-width: 140px !important;
+        max-width: 49% !important;
+    }}
+
+    @media (max-width: 768px) {{
+        div[data-testid="column"] {{
+            flex: 1 1 47% !important;
+            min-width: 135px !important;
+            max-width: 48% !important;
+        }}
     }}
 
     .app-title {{
-        font-size: 2.3rem !important;
+        font-size: 2rem !important;
         font-weight: 900 !important;
         color: {text_color} !important;
         margin: 0 !important;
-        line-height: 1.0 !important;
+        line-height: 1.1 !important;
     }}
     .app-subtitle {{
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
         color: {sub_text_color} !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
@@ -283,7 +304,7 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
-        left: 24px !important;
+        left: 20px !important;
         right: auto !important;
         z-index: 99999999 !important;
         width: auto !important;
@@ -291,16 +312,16 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
-        padding: 14px 28px !important;
+        padding: 12px 24px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 1.1rem !important;
-        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.6) !important;
+        font-size: 1rem !important;
+        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5) !important;
         border: none !important;
-        min-height: 56px !important;
+        min-height: 50px !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
-        transform: scale(1.06) !important;
+        transform: scale(1.05) !important;
         background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
     }}
 
@@ -313,14 +334,24 @@ st.markdown(f"""
         background-color: {BTN_CART_FAB_HOVER} !important;
     }}
 
+    /* BOTÓN "VER OPCIONES" CON EL COLOR ROJO-NARANJA DEL FAB */
+    button[key*="variants_btn_"] {{
+        background-color: {BTN_CART_FAB} !important;
+        box-shadow: 0 2px 6px rgba(255, 69, 0, 0.3) !important;
+    }}
+    button[key*="variants_btn_"]:hover {{
+        background-color: {BTN_CART_FAB_HOVER} !important;
+        box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4) !important;
+    }}
+
     .whatsapp-btn-disabled {{
-        background-color: {"#334155" if is_dark else "#cbd5e1"} !important;
-        color: {"#94a3b8" if is_dark else "#475569"} !important;
+        background-color: #cbd5e1 !important;
+        color: #475569 !important;
         padding: 14px;
         border-radius: 14px;
         text-align: center;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         margin-top: 10px;
         display: block;
         width: 100%;
@@ -333,7 +364,7 @@ st.markdown(f"""
         border-radius: 14px;
         text-align: center;
         font-weight: 800;
-        font-size: 1.05rem;
+        font-size: 1rem;
         margin-top: 10px;
         display: block;
         width: 100%;
@@ -348,7 +379,7 @@ st.markdown(f"""
     label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {{
         color: {text_color} !important;
         font-weight: 700 !important;
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
     }}
 
     /* BOTONES GENERALES */
@@ -358,13 +389,13 @@ st.markdown(f"""
         border: none !important;
         border-radius: 12px !important;
         font-weight: 700 !important;
-        box-shadow: 0 2px 6px rgba(254, 131, 48, 0.25) !important;
+        box-shadow: 0 2px 6px rgba(254, 131, 48, 0.2) !important;
         transition: all 0.2s ease-in-out !important;
     }}
     button:hover, .stButton > button:hover {{
         background-color: {BTN_GENERAL_HOVER} !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.35) !important;
+        box-shadow: 0 4px 10px rgba(254, 131, 48, 0.3) !important;
         color: #ffffff !important;
     }}
     button p, .stButton > button p, button span {{
@@ -375,7 +406,7 @@ st.markdown(f"""
         font-size: 1.1rem !important;
         font-weight: 900 !important;
         text-align: center;
-        color: {text_color} !important;
+        color: #1e293b !important;
         margin-top: 6px;
     }}
 
@@ -383,13 +414,9 @@ st.markdown(f"""
     div[data-baseweb="input"], [data-baseweb="input"] {{
         background-color: {input_bg} !important;
         color: {input_text_color} !important;
-        border: 3px solid {BTN_GENERAL} !important;
+        border: 2px solid {BTN_GENERAL} !important;
         border-radius: 14px !important;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.25) !important;
-    }}
-    div[data-baseweb="input"]:focus-within, [data-baseweb="input"]:focus-within {{
-        border-color: {BTN_GENERAL_HOVER} !important;
-        box-shadow: 0 0 0 4px rgba(254, 131, 48, 0.4) !important;
+        box-shadow: 0 4px 10px rgba(254, 131, 48, 0.15) !important;
     }}
     input, textarea, select, div[data-baseweb="base-input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {{
         background-color: transparent !important;
@@ -405,37 +432,36 @@ st.markdown(f"""
 
     .material-symbols-outlined {{
         font-family: 'Material Symbols Outlined' !important;
-        font-size: 22px !important;
+        font-size: 20px !important;
         vertical-align: middle;
         line-height: 1;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }}
 
     .product-card {{
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
-        border-radius: 16px;
-        padding: 12px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        border-radius: 14px;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
     }}
     .product-title {{
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 800;
         margin-bottom: 2px;
-        color: {text_color} !important;
+        color: #1e293b !important;
     }}
     .product-desc {{
         font-size: 0.75rem;
-        color: {sub_text_color} !important;
+        color: #64748b !important;
         margin-bottom: 4px;
     }}
     .product-price {{
-        font-size: 1.15rem !important;
+        font-size: 1.1rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
@@ -443,13 +469,13 @@ st.markdown(f"""
     .promo-banner {{
         background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
         color: white;
-        padding: 14px 18px;
-        border-radius: 16px;
+        padding: 12px 16px;
+        border-radius: 14px;
         text-align: center;
         font-weight: 700;
-        font-size: 0.95rem;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.2);
+        font-size: 0.9rem;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 10px rgba(254, 131, 48, 0.2);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -480,12 +506,12 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# POP-UP DE VARIANTES (CON SCROLL Y SUMA CONTINUA)
+# POP-UP DE VARIANTES (TEMA CLARO, SCROLL Y SUMA CONTINUA)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal(base_name, variants_list):
-    st.markdown(f"### {base_name}")
-    st.caption("Escoge la figura y el sabor que deseas:")
+    st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 4px;'>{base_name}</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
     
     for var in variants_list:
         v_id = var.get("id")
@@ -499,7 +525,7 @@ def variants_modal(base_name, variants_list):
         with col_v1:
             st.image(v_img, width=45)
         with col_v2:
-            st.markdown(f"**{v_name}**")
+            st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem;'>{v_name}</span>", unsafe_allow_html=True)
             st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             qty_val = st.session_state.cart.get(v_id, 0)
@@ -508,11 +534,11 @@ def variants_modal(base_name, variants_list):
                 if st.button("-", key=f"modal_minus_{v_id}", use_container_width=True):
                     remove_from_cart(v_id)
             with sub_cv2:
-                st.markdown(f"<div class='qty-number'>{qty_val}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='qty-number' style='color: #1e293b !important;'>{qty_val}</div>", unsafe_allow_html=True)
             with sub_cv3:
                 if st.button("+", key=f"modal_plus_{v_id}", use_container_width=True):
                     add_to_cart(v_id)
-        st.write("---")
+        st.markdown("<hr style='margin: 4px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
 
 # ==========================================
 # 4. ENCABEZADO Y BÚSQUEDA
@@ -521,8 +547,8 @@ col_title, col_cart_btn = st.columns([3, 1])
 
 with col_title:
     st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="{LOGO_URL}" style="width: 58px; height: 58px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="{LOGO_URL}" style="width: 52px; height: 52px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
         <div>
             <h1 class="app-title">Mostacho Botanas</h1>
             <span class="app-subtitle">Catálogo y pedidos en línea</span>
@@ -558,8 +584,8 @@ if st.session_state.nav_view == "catalogo":
     # BANNER PRINCIPAL
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
     st.markdown(f"""
-    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
-        <img src="{banner_to_show}" style="width: 100%; height: 260px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
+    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 10px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;">
+        <img src="{banner_to_show}" style="width: 100%; height: 220px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
     </div>
     """, unsafe_allow_html=True)
 
@@ -582,9 +608,9 @@ if st.session_state.nav_view == "catalogo":
                 p_img = DEFAULT_PRODUCT_IMG
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{p_img}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
-                <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p.get('name', 'Producto')}</div>
-                <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1.05rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
+                <img src="{p_img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px;" />
+                <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{pop_p.get('name', 'Producto')}</div>
+                <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
             if st.button("Agregar +", key=f"quick_add_{pop_p.get('id', idx)}", use_container_width=True):
@@ -657,7 +683,7 @@ if st.session_state.nav_view == "catalogo":
 
         group_items_list = list(grouped_dict.items())
         
-        # RENDERIZADO EN CUADRÍCULA VERTICAL RESPONSIVE
+        # RENDERIZADO EN CUADRÍCULA VERTICAL RESPONSIVE REAL
         for i in range(0, len(group_items_list), 2):
             cols = st.columns(2)
             for j in range(2):
@@ -683,7 +709,6 @@ if st.session_state.nav_view == "catalogo":
                             if desc_text and desc_text.lower() != "nan":
                                 st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
                             
-                            # SIN EL "DESDE", MUESTRA EL PRECIO DIRECTO
                             prices = [float(it.get("price", 0)) for it in items_group]
                             st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
                         
