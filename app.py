@@ -299,7 +299,7 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* ÚNICO FAB FLOTANTE ESTABLE */
+    /* FAB FLOTANTE ÚNICO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -471,6 +471,18 @@ st.markdown(f"""
         margin-bottom: 14px;
         box-shadow: 0 4px 10px rgba(254, 131, 48, 0.2);
     }}
+
+    /* MEDIA QUERY PARA HACER EL BANNER LIGERAMENTE MÁS ALTO EN COMPUTADORA (WEB) */
+    @media (min-width: 768px) {{
+        .desktop-banner-img {{
+            height: 220px !important;
+        }}
+    }}
+    @media (max-width: 767px) {{
+        .desktop-banner-img {{
+            height: 160px !important;
+        }}
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -536,7 +548,7 @@ def variants_modal_dialog(base_name, variants_list):
         st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
-    if st.button("Listo (Cerrar y confirmar)", type="primary", use_container_width=True, key="close_modal_btn"):
+    if st.button(":material/check_circle: Listo", type="primary", use_container_width=True, key="close_modal_btn"):
         st.session_state.show_variants_modal = False
         st.rerun()
 
@@ -583,18 +595,18 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER PRINCIPAL CON TAMAÑO ORIGINAL Y COMPACTO
+    # BANNER ADAPTABLE (MÓVIL PERFECTO Y WEB UN POQUITO MÁS ALTO)
     banner_to_show = str(st.session_state.banner_url).strip()
     if not banner_to_show or banner_to_show.lower() == "nan":
         banner_to_show = DEFAULT_BANNER
 
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 6px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;">
-        <img src="{banner_to_show}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
+        <img src="{banner_to_show}" class="desktop-banner-img" style="width: 100%; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. PRODUCTOS POPULARES CON TARJETA ESTÉTICA Y TAMAÑO ADECUADO
+    # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -667,7 +679,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
+    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS (AGRUPACIÓN Y VARIANTES COMPLETAS)
     try:
         current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
@@ -701,6 +713,7 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
+                # Evitar duplicados exactos por id
                 if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[base_name]):
                     grouped_dict[base_name].append(p)
             else:
