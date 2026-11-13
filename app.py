@@ -42,7 +42,10 @@ WHATSAPP_PHONE = "522381174698"
 # ==========================================
 # GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR
 # ==========================================
-DEFAULT_BANNER = "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=1000"
+# 1200 x 500 píxeles recomendados
+DEFAULT_BANNER = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/banner.jpg"
+DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.jpg"
+PROMO_BANNER_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/promo.jpg"
 
 def load_saved_banner():
     if os.path.exists(BANNER_FILE):
@@ -91,7 +94,7 @@ def fetch_loyverse_products():
                     
                 variants = item.get("variants", [])
                 item_name = item.get("item_name", "Producto")
-                desc = item.get("description", "Snack seleccionado de alta calidad.")
+                desc = item.get("description", "")
                 
                 if variants:
                     for var in variants:
@@ -115,16 +118,16 @@ def fetch_loyverse_products():
                             "category": category_mapped,
                             "price": price,
                             "description": desc,
-                            "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"
+                            "image": DEFAULT_PRODUCT_IMG
                         })
     except:
         pass
 
     if not products_list:
         products_list = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-            {"id": "p3", "name": "Cacahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "Cacahuates crujientes tradicionales.", "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": DEFAULT_PRODUCT_IMG},
+            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": DEFAULT_PRODUCT_IMG},
+            {"id": "p3", "name": "Cacahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "", "image": DEFAULT_PRODUCT_IMG}
         ]
     return products_list
 
@@ -142,9 +145,9 @@ def load_saved_products():
                             item["name"] = str(item.get("name", "Sin nombre"))
                             item["category"] = str(item.get("category", "Individual"))
                             item["price"] = float(item.get("price", 0.0))
-                            item["description"] = str(item.get("description", ""))
+                            item["description"] = str(item.get("description", "")) if pd.notna(item.get("description")) else ""
                             img_val = item.get("image", "")
-                            item["image"] = str(img_val).strip() if pd.notna(img_val) and str(img_val).strip() != "" else "https://via.placeholder.com/300"
+                            item["image"] = str(img_val).strip() if pd.notna(img_val) and str(img_val).strip() != "" else DEFAULT_PRODUCT_IMG
                             cleaned.append(item)
                     if cleaned:
                         return cleaned
@@ -171,9 +174,9 @@ def load_saved_populares():
         except:
             pass
     default_pops = [
-        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1536591375315-1b83681e5929?w=300"},
-        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"},
-        {"id": "p3", "name": "Cacahuates Japoneses (200g)", "price": 25.0, "image": "https://images.unsplash.com/photo-1508061252966-173859db501d?w=300"}
+        {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": DEFAULT_PRODUCT_IMG},
+        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": DEFAULT_PRODUCT_IMG},
+        {"id": "p3", "name": "Cacahuates Japoneses (200g)", "price": 25.0, "image": DEFAULT_PRODUCT_IMG}
     ]
     save_populares_to_file(default_pops)
     return default_pops
@@ -194,10 +197,10 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores dinámicos y estilos optimizados con degradado inicial
+# 3. Colores y estilos (Fondo completamente BLANCO sin degradados)
 is_dark = st.session_state.dark_mode
 
-bg_color = "#121824" if is_dark else "#f8f7f4"
+bg_color = "#121824" if is_dark else "#ffffff"
 text_color = "#f1f5f9" if is_dark else "#222222"
 sub_text_color = "#94a3b8" if is_dark else "#4a5568"
 card_bg = "#1e293b" if is_dark else "#ffffff"
@@ -219,9 +222,8 @@ st.markdown(f"""
         max-width: 1400px !important;
     }}
     
-    /* DEGRADADO DE FONDO: Naranja superior hacia blanco/fondo general */
     .stApp {{
-        background: linear-gradient(180deg, rgba(254, 131, 48, 0.18) 0%, {bg_color} 25%, {bg_color} 100%) !important;
+        background-color: {bg_color} !important;
         color: {text_color} !important;
     }}
 
@@ -238,6 +240,7 @@ st.markdown(f"""
     }}
 
     body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+        background-color: {bg_color} !important;
         color: {text_color} !important;
     }}
 
@@ -417,10 +420,10 @@ st.markdown(f"""
         color: {sub_text_color} !important;
         margin-bottom: 6px;
     }}
+    /* PRECIO MÁS GRANDE Y DESTACADO */
     .product-price {{
-        print-color: exact;
-        font-size: 1.15rem;
-        font-weight: bold;
+        font-size: 1.35rem !important;
+        font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
 
@@ -476,14 +479,14 @@ def variants_modal(base_name, variants_list):
         v_id = var.get("id")
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
-        v_img = var.get("image", "https://via.placeholder.com/300")
+        v_img = var.get("image", DEFAULT_PRODUCT_IMG)
         
         col_v1, col_v2, col_v3 = st.columns([1, 2.5, 1.5])
         with col_v1:
             st.image(v_img, width=60)
         with col_v2:
             st.markdown(f"**{v_name}**")
-            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: bold;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 1.1rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             qty_val = st.session_state.cart.get(v_id, 0)
             if st.button(f"Agregar ({qty_val})", key=f"modal_add_{v_id}", use_container_width=True):
@@ -531,11 +534,11 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR FIJO
+    # BANNER RECTANGULAR FIJO (Usa banner.jpg por defecto)
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
-        <img src="{banner_to_show}" style="width: 100%; height: 260px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600';" />
+        <img src="{banner_to_show}" style="width: 100%; height: 260px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
     </div>
     """, unsafe_allow_html=True)
 
@@ -547,17 +550,20 @@ if st.session_state.nav_view == "catalogo":
     popular_products = st.session_state.popular_items
     if not popular_products:
         popular_products = [
-            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300"}
+            {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": DEFAULT_PRODUCT_IMG}
         ]
 
     pop_cols = st.columns(len(popular_products))
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
+            p_img = pop_p.get('image', DEFAULT_PRODUCT_IMG)
+            if not p_img or str(p_img).strip() == "" or str(p_img) == "nan":
+                p_img = DEFAULT_PRODUCT_IMG
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{pop_p.get('image', 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300')}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
+                <img src="{p_img}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px;" />
                 <div style="font-weight: 800; font-size: 0.9rem; margin-top: 6px; color: {text_color};">{pop_p.get('name', 'Producto')}</div>
-                <div style="color: {BTN_GENERAL}; font-weight: bold; font-size: 0.95rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
+                <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1.05rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
             if st.button("Agregar +", key=f"quick_add_{pop_p.get('id', idx)}", use_container_width=True):
@@ -568,8 +574,8 @@ if st.session_state.nav_view == "catalogo":
                         "name": pop_p.get('name'),
                         "category": "Individual",
                         "price": pop_p.get('price'),
-                        "description": "Producto popular seleccionado.",
-                        "image": pop_p.get('image', 'https://via.placeholder.com/300')
+                        "description": "",
+                        "image": p_img
                     })
                     save_products_to_file(st.session_state.products)
                 add_to_cart(prod_id)
@@ -593,7 +599,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS AGRUPADOS POR NOMBRE BASE (PARA MANEJO DE VARIANTES/GRAMAJES)
+    # 3. LISTADO DE PRODUCTOS AGRUPADOS
     try:
         current_products_list = st.session_state.products
         
@@ -612,11 +618,9 @@ if st.session_state.nav_view == "catalogo":
     if not filtered_products:
         st.info("No se encontraron productos en esta categoría.")
     else:
-        # Agrupar variantes por nombre base (ej. "Frituras Adobadas") si tienen variantes o gramajes
         grouped_dict = {}
         for p in filtered_products:
             name_raw = p.get("name", "Producto")
-            # Extraer nombre base antes del paréntesis de variante si lo hubiera
             base_name = name_raw.split("(")[0].strip() if "(" in name_raw else name_raw
             if base_name not in grouped_dict:
                 grouped_dict[base_name] = []
@@ -631,17 +635,21 @@ if st.session_state.nav_view == "catalogo":
             
             with col_img:
                 img_src = representative.get("image")
-                if not img_src or str(img_src).strip() == "":
-                    img_src = "https://via.placeholder.com/300"
+                if not img_src or str(img_src).strip() == "" or str(img_src) == "nan":
+                    img_src = DEFAULT_PRODUCT_IMG
                 st.image(img_src, use_container_width=True)
                 
             with col_info:
                 st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="product-desc">{representative.get("description")}</div>', unsafe_allow_html=True)
+                
+                # DESCRIPCIÓN OPCIONAL: Solo se muestra si tiene texto válido
+                desc_text = str(representative.get("description", "")).strip()
+                if desc_text and desc_text.lower() != "nan":
+                    st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
                 
                 if len(items_group) > 1:
                     prices = [float(it.get("price", 0)) for it in items_group]
-                    st.markdown(f'<div class="product-price">Varias presentaciones (${min(prices):.2f} - ${max(prices):.2f})</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="product-price">Desde ${min(prices):.2f} - ${max(prices):.2f}</div>', unsafe_allow_html=True)
                 else:
                     st.markdown(f'<div class="product-price">${float(representative.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
                 
@@ -769,8 +777,9 @@ def admin_modal():
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
+            st.info("💡 Tamaños recomendados: Artículos (600x600 px) | Banner Principal (1200x500 px)")
             
-            # Opción para Cargar Archivo de Excel / CSV
+            # Carga de archivo de Excel / CSV segura
             uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
             if uploaded_excel is not None:
                 try:
@@ -783,13 +792,19 @@ def admin_modal():
                         new_loaded_list = []
                         for idx, row in df_uploaded.iterrows():
                             r_id = str(row.get("id", f"excel_{idx}"))
+                            r_desc = row.get("description", "")
+                            r_img = row.get("image", DEFAULT_PRODUCT_IMG)
+                            
+                            desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
+                            img_val = str(r_img).strip() if pd.notna(r_img) and str(r_img).strip() != "nan" and str(r_img).strip() != "" else DEFAULT_PRODUCT_IMG
+                            
                             new_loaded_list.append({
                                 "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
                                 "name": str(row.get("name", "Producto")),
                                 "category": str(row.get("category", "Individual")),
                                 "price": float(row.get("price", 0.0)),
-                                "description": str(row.get("description", "")),
-                                "image": str(row.get("image", "https://via.placeholder.com/300"))
+                                "description": desc_val,
+                                "image": img_val
                             })
                         st.session_state.products = new_loaded_list
                         save_products_to_file(new_loaded_list)
@@ -828,14 +843,17 @@ def admin_modal():
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
                     
                     raw_img = row.get("image")
-                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" else "https://via.placeholder.com/300"
+                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" and str(raw_img).strip() != "nan" else DEFAULT_PRODUCT_IMG
+                    
+                    raw_desc = row.get("description")
+                    prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
                     
                     updated_list.append({
                         "id": prod_id,
                         "name": str(row.get("name", "Nuevo producto")),
                         "category": str(row.get("category", "Individual")),
                         "price": float(row.get("price", 0.0)),
-                        "description": str(row.get("description", "")),
+                        "description": prod_desc,
                         "image": prod_img
                     })
                     
@@ -859,7 +877,7 @@ def admin_modal():
                         "id": p_id,
                         "name": p_name,
                         "price": prod.get("price"),
-                        "image": prod.get("image", "https://via.placeholder.com/300")
+                        "image": prod.get("image", DEFAULT_PRODUCT_IMG)
                     })
             
             if st.button("Guardar Productos Populares"):
@@ -873,7 +891,7 @@ def admin_modal():
 
         with tab_banner:
             st.markdown("### Cambiar Imagen Rectangular del Banner")
-            st.caption("Actualiza el enlace de la imagen fija principal:")
+            st.caption("Tamaño recomendado: 1200 x 500 px. Actualiza el enlace de la imagen principal:")
             new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
             if st.button("Guardar Banner"):
                 if new_banner_url.strip():
@@ -884,6 +902,7 @@ def admin_modal():
 
         with tab_upload:
             st.markdown("### Subir Imagen Directamente")
+            st.caption("Tamaño recomendado: Artículos (600x600 px)")
             uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
                 file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
