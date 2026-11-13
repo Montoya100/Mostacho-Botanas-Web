@@ -569,7 +569,7 @@ if st.session_state.nav_view == "catalogo":
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. PRODUCTOS POPULARES (CON IMAGEN SINCRONIZADA AL CATÁLOGO)
+    # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -583,7 +583,6 @@ if st.session_state.nav_view == "catalogo":
     pop_cols = st.columns(len(popular_products))
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
-            # Buscar si el producto popular existe en el catálogo general para heredar su imagen oficial
             matched_prod = next((p for p in st.session_state.products if p.get("id") == pop_p.get("id") or str(p.get("name")).lower().strip() == str(pop_p.get("name")).lower().strip()), None)
             
             if matched_prod and matched_prod.get("image") and "imgur" not in str(matched_prod.get("image")):
@@ -660,12 +659,13 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
+                # CORRECCIÓN DE SINTAXIS DEL PARÉNTESIS AQUÍ
                 if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
                     grouped_dict[base_name].append(p)
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
-                if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
+                if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
                     grouped_dict[base_name].append(p)
 
         group_items_list = list(grouped_dict.items())
