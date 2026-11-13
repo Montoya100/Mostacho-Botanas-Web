@@ -40,11 +40,10 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# LIGAS POR DEFECTO ACTUALIZADAS
+# LIGAS POR DEFECTO
 # ==========================================
 DEFAULT_BANNER = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/banner.jpg"
 DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.jpg"
-PROMO_BANNER_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/promo.jpg"
 
 def load_saved_banner():
     if os.path.exists(BANNER_FILE):
@@ -147,7 +146,6 @@ def load_saved_products():
                             item["description"] = str(item.get("description", "")) if pd.notna(item.get("description")) else ""
                             img_val = item.get("image", "")
                             
-                            # Forzar imagen por defecto si está vacía
                             if not img_val or str(img_val).strip() == "" or str(img_val).strip() == "nan":
                                 item["image"] = DEFAULT_PRODUCT_IMG
                             else:
@@ -155,15 +153,20 @@ def load_saved_products():
                                 
                             cleaned.append(item)
                     if cleaned:
+                        # Ordenar alfabéticamente por nombre
+                        cleaned = sorted(cleaned, key=lambda x: str(x.get("name", "")).lower())
                         return cleaned
         except:
             pass
     initial_products = fetch_loyverse_products()
+    initial_products = sorted(initial_products, key=lambda x: str(x.get("name", "")).lower())
     save_products_to_file(initial_products)
     return initial_products
 
 def save_products_to_file(prod_list):
     try:
+        # Asegurar orden alfabético al guardar
+        prod_list = sorted(prod_list, key=lambda x: str(x.get("name", "")).lower())
         with open(DATA_FILE, "w", encoding="utf-8") as f:
             json.dump(prod_list, f, ensure_ascii=False, indent=4)
     except:
@@ -201,7 +204,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Fondo BLANCO limpio)
+# 3. Colores y estilos (Con margen superior para que no corte títulos ni botones)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#ffffff"
@@ -231,8 +234,9 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
+    /* Margen superior para evitar cortes de la barra de Streamlit */
     .block-container {{
-        padding-top: 1rem !important;
+        padding-top: 2rem !important;
         padding-bottom: 6rem !important;
         background-color: transparent !important;
         animation: fadeIn 0.3s ease-in-out;
@@ -361,7 +365,7 @@ st.markdown(f"""
     }}
 
     .qty-number {{
-        font-size: 1.3rem !important;
+        font-size: 1.2rem !important;
         font-weight: 900 !important;
         text-align: center;
         color: {text_color} !important;
@@ -404,44 +408,44 @@ st.markdown(f"""
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
         border-radius: 16px;
-        padding: 14px;
+        padding: 12px;
         margin-bottom: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+        height: 100%;
     }}
     .product-card:hover {{
         transform: translateY(-3px);
         box-shadow: 0 6px 16px rgba(0,0,0,0.07);
     }}
     .product-title {{
-        font-size: 1.15rem;
+        font-size: 1.05rem;
         font-weight: 800;
         margin-bottom: 2px;
         color: {text_color} !important;
     }}
     .product-desc {{
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: {sub_text_color} !important;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }}
-    /* PRECIO MÁS GRANDE Y DESTACADO */
     .product-price {{
-        font-size: 1.35rem !important;
+        font-size: 1.2rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
 
+    /* PROMO BANNER CLásico (Como antes, con carrito e icono) */
     .promo-banner {{
-        background: url('{PROMO_BANNER_IMG}') center/cover no-repeat;
+        background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
         color: white;
-        padding: 22px 18px;
+        padding: 14px 18px;
         border-radius: 16px;
         text-align: center;
-        font-weight: 800;
-        font-size: 1.05rem;
+        font-weight: 700;
+        font-size: 0.95rem;
         margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.25);
-        text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.2);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -536,7 +540,7 @@ st.write("---")
 # ==========================================
 if st.session_state.nav_view == "catalogo":
     st.markdown(
-        f'<div class="promo-banner">¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        f'<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
@@ -605,9 +609,9 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS AGRUPADOS
+    # 3. LISTADO DE PRODUCTOS AGRUPADOS Y ORDENADOS ALFABÉTICAMENTE EN DOBLE COLUMNA
     try:
-        current_products_list = st.session_state.products
+        current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
@@ -632,55 +636,63 @@ if st.session_state.nav_view == "catalogo":
                 grouped_dict[base_name] = []
             grouped_dict[base_name].append(p)
 
-        for base_name, items_group in grouped_dict.items():
-            representative = items_group[0]
-            pid = representative.get("id")
-            
-            st.markdown('<div class="product-card">', unsafe_allow_html=True)
-            col_img, col_info, col_action = st.columns([1, 2.5, 1.5])
-            
-            with col_img:
-                img_src = representative.get("image")
-                if not img_src or str(img_src).strip() == "" or str(img_src) == "nan":
-                    img_src = DEFAULT_PRODUCT_IMG
-                st.image(img_src, use_container_width=True)
-                
-            with col_info:
-                st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
-                
-                desc_text = str(representative.get("description", "")).strip()
-                if desc_text and desc_text.lower() != "nan":
-                    st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
-                
-                if len(items_group) > 1:
-                    prices = [float(it.get("price", 0)) for it in items_group]
-                    st.markdown(f'<div class="product-price">Desde ${min(prices):.2f} - ${max(prices):.2f}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="product-price">${float(representative.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
-                
-            with col_action:
-                if len(items_group) > 1:
-                    if st.button("Ver Opciones 🏷️", key=f"variants_btn_{pid}", use_container_width=True):
-                        variants_modal(base_name, items_group)
-                else:
-                    qty_in_cart = st.session_state.cart.get(pid, 0)
-                    if qty_in_cart == 0:
-                        if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
-                            add_to_cart(pid)
-                            st.rerun()
-                    else:
-                        sub_c1, sub_c2, sub_c3 = st.columns([1, 1, 1])
-                        with sub_c1:
-                            if st.button("-", key=f"minus_{pid}", use_container_width=True):
-                                remove_from_cart(pid)
-                                st.rerun()
-                        with sub_c2:
-                            st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
-                        with sub_c3:
-                            if st.button("+", key=f"plus_{pid}", use_container_width=True):
-                                add_to_cart(pid)
-                                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        group_items_list = list(grouped_dict.items())
+        
+        # RENDERIZADO EN DOBLE COLUMNA
+        for i in range(0, len(group_items_list), 2):
+            cols = st.columns(2)
+            for j in range(2):
+                if i + j < len(group_items_list):
+                    base_name, items_group = group_items_list[i + j]
+                    representative = items_group[0]
+                    pid = representative.get("id")
+                    
+                    with cols[j]:
+                        st.markdown('<div class="product-card">', unsafe_allow_html=True)
+                        
+                        col_img, col_info = st.columns([1, 2])
+                        with col_img:
+                            img_src = representative.get("image")
+                            if not img_src or str(img_src).strip() == "" or str(img_src) == "nan":
+                                img_src = DEFAULT_PRODUCT_IMG
+                            st.image(img_src, use_container_width=True)
+                            
+                        with col_info:
+                            st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
+                            
+                            desc_text = str(representative.get("description", "")).strip()
+                            if desc_text and desc_text.lower() != "nan":
+                                st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
+                            
+                            if len(items_group) > 1:
+                                prices = [float(it.get("price", 0)) for it in items_group]
+                                st.markdown(f'<div class="product-price">Desde ${min(prices):.2f}</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown(f'<div class="product-price">${float(representative.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
+                        
+                        st.write("")
+                        if len(items_group) > 1:
+                            if st.button("Ver Opciones 🏷️", key=f"variants_btn_{pid}", use_container_width=True):
+                                variants_modal(base_name, items_group)
+                        else:
+                            qty_in_cart = st.session_state.cart.get(pid, 0)
+                            if qty_in_cart == 0:
+                                if st.button("Agregar al Carrito", key=f"add_{pid}", use_container_width=True):
+                                    add_to_cart(pid)
+                                    st.rerun()
+                            else:
+                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
+                                with sub_c1:
+                                    if st.button("-", key=f"minus_{pid}", use_container_width=True):
+                                        remove_from_cart(pid)
+                                        st.rerun()
+                                with sub_c2:
+                                    st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                                with sub_c3:
+                                    if st.button("+", key=f"plus_{pid}", use_container_width=True):
+                                        add_to_cart(pid)
+                                        st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
         st.button(
@@ -782,7 +794,7 @@ def admin_modal():
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
-            st.info("💡 Tamaños recomendados: Artículos (600x600 px) | Banner Principal (1200x500 px)")
+            st.info("💡 Para activar el **Pop-up de Variantes**, escribe el mismo nombre base seguido de la variante entre paréntesis (Ej: `Fritura (Con Chile)` y `Fritura (Sin Chile)`). Los productos se ordenan alfabéticamente en automático.")
             
             uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
             if uploaded_excel is not None:
@@ -810,9 +822,11 @@ def admin_modal():
                                 "description": desc_val,
                                 "image": img_val
                             })
+                        # Ordenar alfabéticamente
+                        new_loaded_list = sorted(new_loaded_list, key=lambda x: str(x.get("name", "")).lower())
                         st.session_state.products = new_loaded_list
                         save_products_to_file(new_loaded_list)
-                        st.success("¡Catálogo cargado y actualizado desde el archivo correctamente!")
+                        st.success("¡Catálogo cargado y ordenado alfabéticamente desde el archivo!")
                         st.rerun()
                     else:
                         st.error("El archivo debe contener al menos las columnas 'name' y 'price'.")
@@ -820,7 +834,10 @@ def admin_modal():
                     st.error(f"Error al procesar el archivo: {e}")
 
             st.write("---")
-            df_current = pd.DataFrame(st.session_state.products)
+            
+            # Ordenar alfabéticamente el DataFrame antes de mostrarlo en el editor
+            current_sorted_products = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
+            df_current = pd.DataFrame(current_sorted_products)
             
             column_config = {
                 "id": None,
@@ -861,9 +878,11 @@ def admin_modal():
                         "image": prod_img
                     })
                     
+                # Ordenar alfabéticamente al guardar
+                updated_list = sorted(updated_list, key=lambda x: str(x.get("name", "")).lower())
                 st.session_state.products = updated_list
                 save_products_to_file(updated_list)
-                st.success("¡Productos guardados!")
+                st.success("¡Productos guardados y ordenados alfabéticamente!")
                 st.rerun()
 
         with tab_pop:
