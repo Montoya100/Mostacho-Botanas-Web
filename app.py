@@ -572,7 +572,7 @@ if st.session_state.nav_view == "catalogo":
     # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
-    st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
+    st.caption("Toca cualquier producto popular para agregarlo directo à tu carrito:")
 
     popular_products = st.session_state.popular_items
     if not popular_products:
@@ -659,14 +659,13 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
-                # CORRECCIÓN DE SINTAXIS DEL PARÉNTESIS AQUÍ
                 if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
                     grouped_dict[base_name].append(p)
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
                 if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
-                    grouped_dict[base_name].append(p)
+                    grouped_dict[name_raw].append(p)
 
         group_items_list = list(grouped_dict.items())
         
