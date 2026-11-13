@@ -51,8 +51,8 @@ def load_saved_banner():
             with open(BANNER_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    url = data.get("url", "").strip()
-                    if url:
+                    url = str(data.get("url", "")).strip()
+                    if url and url.lower() != "nan" and "imgur" not in url:
                         return url
         except:
             pass
@@ -175,8 +175,16 @@ def load_saved_populares():
         try:
             with open(POPULAR_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                if isinstance(data, list):
-                    return data
+                if isinstance(data, list) and len(data) > 0:
+                    cleaned_pops = []
+                    for p in data:
+                        if isinstance(p, dict):
+                            p_img = str(p.get("image", "")).strip()
+                            if not p_img or p_img.lower() == "nan" or "imgur" in p_img:
+                                p["image"] = DEFAULT_PRODUCT_IMG
+                            cleaned_pops.append(p)
+                    if cleaned_pops:
+                        return cleaned_pops
         except:
             pass
     default_pops = [
@@ -566,8 +574,11 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER PRINCIPAL
-    banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
+    # BANNER PRINCIPAL SEGURO
+    banner_to_show = str(st.session_state.banner_url).strip()
+    if not banner_to_show or banner_to_show.lower() == "nan" or "imgur" in banner_to_show:
+        banner_to_show = DEFAULT_BANNER
+
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 10px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;">
         <img src="{banner_to_show}" style="width: 100%; height: 220px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
@@ -588,7 +599,10 @@ if st.session_state.nav_view == "catalogo":
     pop_cols = st.columns(len(popular_products))
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
-            matched_prod = next((p for p in st.session_state.products if p.get("id") == pop_p.get("id") or str(p.get("name")).lower().strip() == str(pop_p.get("name")).lower().strip()), None)
+            p_id = str(pop_p.get("id", ""))
+            p_name = str(pop_p.get("name", "")).lower().strip()
+            
+            matched_prod = next((p for p in st.session_state.products if str(p.get("id", "")) == p_id or str(p.get("name", "")).lower().strip() == p_name), None)
             
             if matched_prod and matched_prod.get("image"):
                 cand_img = str(matched_prod.get("image")).strip()
@@ -610,9 +624,9 @@ if st.session_state.nav_view == "catalogo":
                 <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button("Agregar +", key=f"quick_add_{pop_p.get('id', idx)}", use_container_width=True):
-                prod_id = pop_p.get('id', str(idx))
-                if not any(p.get("id") == prod_id for p in st.session_state.products):
+            if st.button("Agregar +", key=f"quick_add_{p_id}_{idx}", use_container_width=True):
+                prod_id = p_id if p_id else str(idx)
+                if not any(str(p.get("id")) == prod_id for p in st.session_state.products):
                     st.session_state.products.append({
                         "id": prod_id,
                         "name": pop_p.get('name'),
@@ -677,12 +691,12 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
-                if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
+                if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[base_name]):
                     grouped_dict[base_name].append(p)
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
-                if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
+                if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[name_raw]):
                     grouped_dict[name_raw].append(p)
 
         group_items_list = list(grouped_dict.items())
@@ -765,7 +779,7 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("---")
         for item_id, qty in list(st.session_state.cart.items()):
-            p = next((item for item in st.session_state.products if item.get("id") == item_id), None)
+            p = next((item for item in st.session_state.products if str(item.get("id")) == str(item_id)), None)
             if p:
                 subtotal = float(p.get("price", 0)) * qty
                 total_price += subtotal
@@ -930,12 +944,12 @@ def admin_modal():
 
         with tab_pop:
             st.markdown("### Seleccionar Productos Populares")
-            current_pop_ids = [p.get("id") for p in st.session_state.popular_items]
+            current_pop_ids = [str(p.get("id")) for p in st.session_state.popular_items]
             
             selected_populares_new = []
             for prod in st.session_state.products:
-                p_id = prod.get("id")
-                p_name = prod.get("name")
+                p_id = str(prod.get("id"))
+                p_name = str(prod.get("name"))
                 is_currently_pop = p_id in current_pop_ids
                 
                 if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
