@@ -238,10 +238,10 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
+    /* FORZAR TEMA CLARO ABSOLUTO EN EL MODAL Y QUITAR LA 'X' */
     div[data-baseweb="modal"] button[aria-label="Close"] {{
         display: none !important;
     }}
-
     div[data-baseweb="modal"] {{
         background-color: rgba(0, 0, 0, 0.6) !important;
     }}
@@ -253,11 +253,14 @@ st.markdown(f"""
         border-radius: 20px !important;
         padding: 16px !important;
     }}
-    
+    div[data-baseweb="modal"] * {{
+        color: #1e293b !important;
+    }}
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"] {{
         max-height: 55vh !important;
         overflow-y: scroll !important;
         padding-right: 10px !important;
+        background-color: #ffffff !important;
     }}
 
     .stApp {{
@@ -296,6 +299,7 @@ st.markdown(f"""
         display: block;
     }}
 
+    /* ÚNICO FAB FLOTANTE ESTABLE */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -579,17 +583,18 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER PRINCIPAL CON ST.IMAGE NATIVO
+    # BANNER PRINCIPAL CON TAMAÑO ORIGINAL Y COMPACTO
     banner_to_show = str(st.session_state.banner_url).strip()
     if not banner_to_show or banner_to_show.lower() == "nan":
         banner_to_show = DEFAULT_BANNER
 
-    try:
-        st.image(banner_to_show, use_container_width=True)
-    except:
-        st.image(DEFAULT_BANNER, use_container_width=True)
+    st.markdown(f"""
+    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 6px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;">
+        <img src="{banner_to_show}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
+    </div>
+    """, unsafe_allow_html=True)
 
-    # 1. PRODUCTOS POPULARES (LÍNEA 709 BLINDADA)
+    # 1. PRODUCTOS POPULARES CON TARJETA ESTÉTICA Y TAMAÑO ADECUADO
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -622,15 +627,12 @@ if st.session_state.nav_view == "catalogo":
                     p_img = DEFAULT_PRODUCT_IMG
 
             st.markdown(f"""
-            <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
+            <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                <img src="{p_img}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null;this.src='{DEFAULT_PRODUCT_IMG}';" />
                 <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{pop_p.get('name', 'Producto')}</div>
                 <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
-            try:
-                st.image(p_img, width=100)
-            except:
-                st.image(DEFAULT_PRODUCT_IMG, width=100)
 
             if st.button("Agregar +", key=f"quick_add_{p_id}_{idx}", use_container_width=True):
                 prod_id = p_id if p_id else str(idx)
@@ -765,6 +767,7 @@ if st.session_state.nav_view == "catalogo":
                                         st.rerun()
                         st.markdown('</div>', unsafe_allow_html=True)
 
+    # FAB ÚNICO Y LIMPIO PARA EL CARRITO
     if total_items > 0:
         st.button(
             ":material/shopping_cart: Ver Carrito (" + str(total_items) + ")",
