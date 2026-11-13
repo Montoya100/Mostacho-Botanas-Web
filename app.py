@@ -40,9 +40,8 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# GESTIÓN DE LA IMAGEN DE BANNER RECTANGULAR
+# LIGAS POR DEFECTO ACTUALIZADAS
 # ==========================================
-# 1200 x 500 píxeles recomendados
 DEFAULT_BANNER = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/banner.jpg"
 DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.jpg"
 PROMO_BANNER_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/promo.jpg"
@@ -87,7 +86,7 @@ def fetch_loyverse_products():
                     cat_name = "Individual"
                 
                 cat_lower = cat_name.lower()
-                if "compartir" in cat_lower or "familiar" in cat_lower:
+                if "compartir" in cat_lower or "familiar" in cat_lower or "fritura" in cat_lower:
                     category_mapped = "Para compartir"
                 else:
                     category_mapped = "Individual"
@@ -126,8 +125,8 @@ def fetch_loyverse_products():
     if not products_list:
         products_list = [
             {"id": "p1", "name": "Pistaches Salados (90g)", "category": "Individual", "price": 35.0, "description": "Pistaches tostados con sal de mar.", "image": DEFAULT_PRODUCT_IMG},
-            {"id": "p2", "name": "Mix Botanero (1kg)", "category": "Para compartir", "price": 180.0, "description": "Mix ideal para reuniones.", "image": DEFAULT_PRODUCT_IMG},
-            {"id": "p3", "name": "Cacahuates Japoneses (200g)", "category": "Individual", "price": 25.0, "description": "", "image": DEFAULT_PRODUCT_IMG}
+            {"id": "p2", "name": "Fritura de Harina (Con Chile)", "category": "Para compartir", "price": 25.0, "description": "Crujientes frituras artesanales.", "image": DEFAULT_PRODUCT_IMG},
+            {"id": "p3", "name": "Fritura de Harina (Sin Chile)", "category": "Para compartir", "price": 25.0, "description": "Ideales para toda la familia.", "image": DEFAULT_PRODUCT_IMG}
         ]
     return products_list
 
@@ -147,7 +146,13 @@ def load_saved_products():
                             item["price"] = float(item.get("price", 0.0))
                             item["description"] = str(item.get("description", "")) if pd.notna(item.get("description")) else ""
                             img_val = item.get("image", "")
-                            item["image"] = str(img_val).strip() if pd.notna(img_val) and str(img_val).strip() != "" else DEFAULT_PRODUCT_IMG
+                            
+                            # Forzar imagen por defecto si está vacía
+                            if not img_val or str(img_val).strip() == "" or str(img_val).strip() == "nan":
+                                item["image"] = DEFAULT_PRODUCT_IMG
+                            else:
+                                item["image"] = str(img_val).strip()
+                                
                             cleaned.append(item)
                     if cleaned:
                         return cleaned
@@ -175,8 +180,7 @@ def load_saved_populares():
             pass
     default_pops = [
         {"id": "p1", "name": "Pistaches Salados (90g)", "price": 35.0, "image": DEFAULT_PRODUCT_IMG},
-        {"id": "p2", "name": "Mix Botanero (1kg)", "price": 180.0, "image": DEFAULT_PRODUCT_IMG},
-        {"id": "p3", "name": "Cacahuates Japoneses (200g)", "price": 25.0, "image": DEFAULT_PRODUCT_IMG}
+        {"id": "p2", "name": "Fritura de Harina (Con Chile)", "price": 25.0, "image": DEFAULT_PRODUCT_IMG}
     ]
     save_populares_to_file(default_pops)
     return default_pops
@@ -197,7 +201,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Fondo completamente BLANCO sin degradados)
+# 3. Colores y estilos (Fondo BLANCO limpio)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#ffffff"
@@ -428,15 +432,16 @@ st.markdown(f"""
     }}
 
     .promo-banner {{
-        background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
+        background: url('{PROMO_BANNER_IMG}') center/cover no-repeat;
         color: white;
-        padding: 14px 18px;
+        padding: 22px 18px;
         border-radius: 16px;
         text-align: center;
-        font-weight: 700;
-        font-size: 0.95rem;
+        font-weight: 800;
+        font-size: 1.05rem;
         margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.2);
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.25);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.6);
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -460,7 +465,6 @@ def go_to_catalogo():
     st.session_state.nav_view = "catalogo"
     st.rerun()
 
-# Limpiar carrito si algún producto fue eliminado
 keys_to_delete = [pid for pid in st.session_state.cart if not any(p.get("id") == pid for p in st.session_state.products)]
 for k in keys_to_delete:
     del st.session_state.cart[k]
@@ -473,14 +477,16 @@ total_items = sum(st.session_state.cart.values())
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal(base_name, variants_list):
     st.markdown(f"### {base_name}")
-    st.caption("Elige la presentación, gramaje o variante deseada:")
+    st.caption("Elige la presentación, gramaje o variedad deseada:")
     
     for var in variants_list:
         v_id = var.get("id")
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
         v_img = var.get("image", DEFAULT_PRODUCT_IMG)
-        
+        if not v_img or str(v_img).strip() == "" or str(v_img) == "nan":
+            v_img = DEFAULT_PRODUCT_IMG
+            
         col_v1, col_v2, col_v3 = st.columns([1, 2.5, 1.5])
         with col_v1:
             st.image(v_img, width=60)
@@ -530,11 +536,11 @@ st.write("---")
 # ==========================================
 if st.session_state.nav_view == "catalogo":
     st.markdown(
-        f'<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        f'<div class="promo-banner">¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
-    # BANNER RECTANGULAR FIJO (Usa banner.jpg por defecto)
+    # BANNER PRINCIPAL
     banner_to_show = st.session_state.banner_url if st.session_state.banner_url else DEFAULT_BANNER
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
@@ -642,7 +648,6 @@ if st.session_state.nav_view == "catalogo":
             with col_info:
                 st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
                 
-                # DESCRIPCIÓN OPCIONAL: Solo se muestra si tiene texto válido
                 desc_text = str(representative.get("description", "")).strip()
                 if desc_text and desc_text.lower() != "nan":
                     st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
@@ -779,7 +784,6 @@ def admin_modal():
             st.markdown("### Inventario de Productos")
             st.info("💡 Tamaños recomendados: Artículos (600x600 px) | Banner Principal (1200x500 px)")
             
-            # Carga de archivo de Excel / CSV segura
             uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
             if uploaded_excel is not None:
                 try:
