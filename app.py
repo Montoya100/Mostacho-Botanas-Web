@@ -202,7 +202,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Forzando cuadrícula estricta de 2 columnas en móviles y web)
+# 3. Colores y estilos (Cuadrícula responsive y Scroll en Modales)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#ffffff"
@@ -222,9 +222,13 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
+    /* MODAL CON SCROLL Y TAMAÑO RESPONSIVE */
     div[data-baseweb="modal"] > div {{
         width: 95vw !important;
-        max-width: 1400px !important;
+        max-width: 800px !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        border-radius: 20px !important;
     }}
     
     .stApp {{
@@ -235,7 +239,6 @@ st.markdown(f"""
     .block-container {{
         padding-top: 2rem !important;
         padding-bottom: 6rem !important;
-        background-color: transparent !important;
     }}
 
     body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
@@ -248,12 +251,12 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* FORZAR CUADRÍCULA DE 2 COLUMNAS REAL EN MÓVIL Y ESCRITORIO */
+    /* CUADRÍCULA RESPONSIVE VERTICAL Y ADAPTATIVA */
     [data-testid="stHorizontalBlock"] {{
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 8px !important;
+        gap: 12px !important;
     }}
     div[data-testid="column"] {{
         flex: 1 1 50% !important;
@@ -369,7 +372,7 @@ st.markdown(f"""
     }}
 
     .qty-number {{
-        font-size: 1.2rem !important;
+        font-size: 1.1rem !important;
         font-weight: 900 !important;
         text-align: center;
         color: {text_color} !important;
@@ -412,13 +415,16 @@ st.markdown(f"""
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
         border-radius: 16px;
-        padding: 10px;
-        margin-bottom: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         height: 100%;
     }}
     .product-title {{
-        font-size: 0.95rem;
+        font-size: 1rem;
         font-weight: 800;
         margin-bottom: 2px;
         color: {text_color} !important;
@@ -429,7 +435,7 @@ st.markdown(f"""
         margin-bottom: 4px;
     }}
     .product-price {{
-        font-size: 1.1rem !important;
+        font-size: 1.15rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
@@ -474,7 +480,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# POP-UP DE VARIANTES / PRESENTACIONES (CON + Y -)
+# POP-UP DE VARIANTES (CON SCROLL Y SUMA CONTINUA)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal(base_name, variants_list):
@@ -491,23 +497,21 @@ def variants_modal(base_name, variants_list):
             
         col_v1, col_v2, col_v3 = st.columns([1, 2, 2])
         with col_v1:
-            st.image(v_img, width=50)
+            st.image(v_img, width=45)
         with col_v2:
             st.markdown(f"**{v_name}**")
-            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             qty_val = st.session_state.cart.get(v_id, 0)
             sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1, 1])
             with sub_cv1:
                 if st.button("-", key=f"modal_minus_{v_id}", use_container_width=True):
                     remove_from_cart(v_id)
-                    st.rerun()
             with sub_cv2:
-                st.markdown(f"<div class='qty-number' style='font-size: 1rem !important;'>{qty_val}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='qty-number'>{qty_val}</div>", unsafe_allow_html=True)
             with sub_cv3:
                 if st.button("+", key=f"modal_plus_{v_id}", use_container_width=True):
                     add_to_cart(v_id)
-                    st.rerun()
         st.write("---")
 
 # ==========================================
@@ -643,7 +647,6 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
-                # Añadir variante asegurando que no se duplique por ID
                 if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
                     grouped_dict[base_name].append(p)
             else:
@@ -654,7 +657,7 @@ if st.session_state.nav_view == "catalogo":
 
         group_items_list = list(grouped_dict.items())
         
-        # RENDERIZADO EN CUADRÍCULA ESTRICTA DE 2 COLUMNAS REALES
+        # RENDERIZADO EN CUADRÍCULA VERTICAL RESPONSIVE
         for i in range(0, len(group_items_list), 2):
             cols = st.columns(2)
             for j in range(2):
@@ -680,11 +683,9 @@ if st.session_state.nav_view == "catalogo":
                             if desc_text and desc_text.lower() != "nan":
                                 st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
                             
-                            if len(items_group) > 1:
-                                prices = [float(it.get("price", 0)) for it in items_group]
-                                st.markdown(f'<div class="product-price">Desde ${min(prices):.2f}</div>', unsafe_allow_html=True)
-                            else:
-                                st.markdown(f'<div class="product-price">${float(representative.get("price", 0)):.2f} MXN</div>', unsafe_allow_html=True)
+                            # SIN EL "DESDE", MUESTRA EL PRECIO DIRECTO
+                            prices = [float(it.get("price", 0)) for it in items_group]
+                            st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
                         
                         st.write("")
                         if len(items_group) > 1:
