@@ -219,7 +219,6 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Ocultar la 'X' superior del modal nativo para forzar el botón Listo)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#f8fafc" if not is_dark else "#121824"
@@ -239,7 +238,6 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* OCULTAR LA 'X' SUPERIOR DEL MODAL PARA QUE OBLIGATORIAMENTE USEN EL BOTÓN LISTO */
     div[data-baseweb="modal"] button[aria-label="Close"] {{
         display: none !important;
     }}
@@ -298,7 +296,6 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB FLOTANTE ÚNICO EN LADO IZQUIERDO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -498,7 +495,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# MODAL DE VARIANTES CONTROLADO POR ESTADO (SIN CERRARSE AL SUMAR)
+# MODAL DE VARIANTES CONTROLADO POR ESTADO
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -512,12 +509,12 @@ def variants_modal_dialog(base_name, variants_list):
         v_price = float(var.get("price", 0))
         
         v_img = str(var.get("image", "")).strip()
-        if not v_img or v_img == "" or v_img.lower() == "nan" or "placeholder" in v_img:
+        if not v_img or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
         col_v1, col_v2, col_v3 = st.columns([1, 2.2, 1.8])
         with col_v1:
-            st.markdown(f'<img src="{v_img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;" onerror="this.onerror=null;this.src=\'{DEFAULT_PRODUCT_IMG}\';" />', unsafe_allow_html=True)
+            st.image(v_img, width=45)
         with col_v2:
             st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem;'>{v_name}</span>", unsafe_allow_html=True)
             st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
@@ -569,7 +566,6 @@ with col_cart_btn:
 
 st.write("")
 
-# BÚSQUEDA MEXICANA
 search_query = st.text_input("Buscar productos...", placeholder="Buscar semillas, cacahuates, pistaches...", label_visibility="collapsed")
 
 st.write("---")
@@ -583,18 +579,17 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER PRINCIPAL SEGURO
+    # BANNER PRINCIPAL CON ST.IMAGE NATIVO
     banner_to_show = str(st.session_state.banner_url).strip()
     if not banner_to_show or banner_to_show.lower() == "nan":
         banner_to_show = DEFAULT_BANNER
 
-    st.markdown(f"""
-    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 10px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;">
-        <img src="{banner_to_show}" style="width: 100%; height: 220px; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
-    </div>
-    """, unsafe_allow_html=True)
+    try:
+        st.image(banner_to_show, use_container_width=True)
+    except:
+        st.image(DEFAULT_BANNER, use_container_width=True)
 
-    # 1. PRODUCTOS POPULARES
+    # 1. PRODUCTOS POPULARES (LÍNEA 709 BLINDADA)
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -628,11 +623,15 @@ if st.session_state.nav_view == "catalogo":
 
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{p_img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null;this.src='{DEFAULT_PRODUCT_IMG}';" />
                 <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{pop_p.get('name', 'Producto')}</div>
                 <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
+            try:
+                st.image(p_img, width=100)
+            except:
+                st.image(DEFAULT_PRODUCT_IMG, width=100)
+
             if st.button("Agregar +", key=f"quick_add_{p_id}_{idx}", use_container_width=True):
                 prod_id = p_id if p_id else str(idx)
                 if not any(str(p.get("id")) == prod_id for p in st.session_state.products):
@@ -706,14 +705,11 @@ if st.session_state.nav_view == "catalogo":
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
                 if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[name_raw]):
-                    grouped_dict[base_name].append(p)
+                    grouped_dict[name_raw].append(p)
 
         group_items_list = list(grouped_dict.items())
-        
-        # ORDENAR LA JERARQUÍA: LOS QUE TIENEN VARIANTES (>1 OPCIÓN) VAN HASTA ARRIBA
         group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
         
-        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS SEGURO
         for i in range(0, len(group_items_list), 3):
             cols = st.columns(3)
             for j in range(3):
@@ -726,10 +722,13 @@ if st.session_state.nav_view == "catalogo":
                         st.markdown('<div class="product-card">', unsafe_allow_html=True)
                         
                         img_src = str(representative.get("image", "")).strip()
-                        if not img_src or img_src == "" or img_src.lower() == "nan" or "placeholder" in img_src:
+                        if not img_src or img_src.lower() == "nan" or "placeholder" in img_src:
                             img_src = DEFAULT_PRODUCT_IMG
                         
-                        st.markdown(f'<img src="{img_src}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null;this.src=\'{DEFAULT_PRODUCT_IMG}\';" />', unsafe_allow_html=True)
+                        try:
+                            st.image(img_src, use_container_width=True)
+                        except:
+                            st.image(DEFAULT_PRODUCT_IMG, use_container_width=True)
                         
                         st.markdown(f'<div class="product-title" style="margin-top: 8px;">{base_name}</div>', unsafe_allow_html=True)
                         desc_text = str(representative.get("description", "")).strip()
