@@ -202,7 +202,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Tema Claro Forzado, Modal con Scroll, Cuadrícula Real y Botón Rojo-Naranja)
+# 3. Colores y estilos (Tema Claro Forzado, Modal con Scroll Estricto y Botón Rojo-Naranja)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#f8fafc" if not is_dark else "#121824"
@@ -222,24 +222,24 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FORZAR TEMA CLARO Y SCROLL EN EL MODAL DE VARIANTES */
+    /* FORZAR TEMA CLARO ABSOLUTO EN EL MODAL DE VARIANTES Y SCROLL FIJO */
     div[data-baseweb="modal"] {{
-        background-color: rgba(0, 0, 0, 0.5) !important;
+        background-color: rgba(0, 0, 0, 0.6) !important;
     }}
     div[data-baseweb="modal"] > div {{
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 92vw !important;
-        max-width: 650px !important;
+        max-width: 600px !important;
         border-radius: 20px !important;
-        padding: 10px !important;
+        padding: 16px !important;
     }}
     
-    /* CONTENEDOR INTERNO DEL MODAL CON SCROLL ACTIVO PARA TODAS LAS VARIANTES */
+    /* CONTENEDOR CON SCROLL ACTIVO ESTRICTO PARA VER TODAS LAS VARIANTES */
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"] {{
-        max-height: 65vh !important;
-        overflow-y: auto !important;
-        padding-right: 8px !important;
+        max-height: 55vh !important;
+        overflow-y: scroll !important;
+        padding-right: 10px !important;
     }}
 
     .stApp {{
@@ -261,28 +261,6 @@ st.markdown(f"""
     div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {{
         background-color: transparent !important;
         color: {text_color} !important;
-    }}
-
-    /* CUADRÍCULA RESPONSIVE ADAPTATIVA (ESCRITORIO Y MÓVIL) */
-    [data-testid="stHorizontalBlock"] {{
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-    }}
-    
-    div[data-testid="column"] {{
-        flex: 1 1 48% !important;
-        min-width: 140px !important;
-        max-width: 49% !important;
-    }}
-
-    @media (max-width: 768px) {{
-        div[data-testid="column"] {{
-            flex: 1 1 47% !important;
-            min-width: 135px !important;
-            max-width: 48% !important;
-        }}
     }}
 
     .app-title {{
@@ -334,7 +312,7 @@ st.markdown(f"""
         background-color: {BTN_CART_FAB_HOVER} !important;
     }}
 
-    /* BOTÓN "VER OPCIONES" CON EL COLOR ROJO-NARANJA DEL FAB */
+    /* BOTÓN "VER OPCIONES" CON EL COLOR ROJO-NARANJA DISTINTIVO */
     button[key*="variants_btn_"] {{
         background-color: {BTN_CART_FAB} !important;
         box-shadow: 0 2px 6px rgba(255, 69, 0, 0.3) !important;
@@ -441,27 +419,23 @@ st.markdown(f"""
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
         border-radius: 14px;
-        padding: 10px;
-        margin-bottom: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
     }}
     .product-title {{
-        font-size: 0.95rem;
+        font-size: 1rem;
         font-weight: 800;
         margin-bottom: 2px;
         color: #1e293b !important;
     }}
     .product-desc {{
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: #64748b !important;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }}
     .product-price {{
-        font-size: 1.1rem !important;
+        font-size: 1.15rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
@@ -482,7 +456,6 @@ st.markdown(f"""
 
 def add_to_cart(product_id):
     st.session_state.cart[product_id] = st.session_state.cart.get(product_id, 0) + 1
-    st.toast("Producto añadido al carrito", icon="🛒")
 
 def remove_from_cart(product_id):
     if product_id in st.session_state.cart:
@@ -506,14 +479,15 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# POP-UP DE VARIANTES (TEMA CLARO, SCROLL Y SUMA CONTINUA)
+# POP-UP DE VARIANTES (TEMA CLARO, SCROLL ESTRICTO Y BOTÓN LISTO)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal(base_name, variants_list):
-    st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 4px;'>{base_name}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 2px;'>{base_name}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
+    st.write("---")
     
-    for var in variants_list:
+    for idx, var in enumerate(variants_list):
         v_id = var.get("id")
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
@@ -521,7 +495,7 @@ def variants_modal(base_name, variants_list):
         if not v_img or str(v_img).strip() == "" or str(v_img) == "nan" or "placeholder" in str(v_img) or "imgur" in str(v_img):
             v_img = DEFAULT_PRODUCT_IMG
             
-        col_v1, col_v2, col_v3 = st.columns([1, 2, 2])
+        col_v1, col_v2, col_v3 = st.columns([1, 2.2, 1.8])
         with col_v1:
             st.image(v_img, width=45)
         with col_v2:
@@ -531,14 +505,20 @@ def variants_modal(base_name, variants_list):
             qty_val = st.session_state.cart.get(v_id, 0)
             sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1, 1])
             with sub_cv1:
-                if st.button("-", key=f"modal_minus_{v_id}", use_container_width=True):
+                if st.button("-", key=f"modal_minus_{v_id}_{idx}", use_container_width=True):
                     remove_from_cart(v_id)
+                    st.rerun()
             with sub_cv2:
                 st.markdown(f"<div class='qty-number' style='color: #1e293b !important;'>{qty_val}</div>", unsafe_allow_html=True)
             with sub_cv3:
-                if st.button("+", key=f"modal_plus_{v_id}", use_container_width=True):
+                if st.button("+", key=f"modal_plus_{v_id}_{idx}", use_container_width=True):
                     add_to_cart(v_id)
-        st.markdown("<hr style='margin: 4px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+                    st.rerun()
+        st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+    
+    st.write("")
+    if st.button("Listo (Cerrar y confirmar)", type="primary", use_container_width=True, key="close_modal_btn"):
+        st.rerun()
 
 # ==========================================
 # 4. ENCABEZADO Y BÚSQUEDA
@@ -589,7 +569,7 @@ if st.session_state.nav_view == "catalogo":
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. PRODUCTOS POPULARES
+    # 1. PRODUCTOS POPULARES (CON IMAGEN SINCRONIZADA AL CATÁLOGO)
     st.write("")
     st.markdown("### Productos Populares")
     st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
@@ -603,9 +583,16 @@ if st.session_state.nav_view == "catalogo":
     pop_cols = st.columns(len(popular_products))
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
-            p_img = pop_p.get('image', DEFAULT_PRODUCT_IMG)
-            if not p_img or str(p_img).strip() == "" or str(p_img) == "nan" or "placeholder" in str(p_img) or "imgur" in str(p_img):
-                p_img = DEFAULT_PRODUCT_IMG
+            # Buscar si el producto popular existe en el catálogo general para heredar su imagen oficial
+            matched_prod = next((p for p in st.session_state.products if p.get("id") == pop_p.get("id") or str(p.get("name")).lower().strip() == str(pop_p.get("name")).lower().strip()), None)
+            
+            if matched_prod and matched_prod.get("image") and "imgur" not in str(matched_prod.get("image")):
+                p_img = matched_prod.get("image")
+            else:
+                p_img = pop_p.get('image', DEFAULT_PRODUCT_IMG)
+                if not p_img or str(p_img).strip() == "" or str(p_img) == "nan" or "placeholder" in str(p_img) or "imgur" in str(p_img):
+                    p_img = DEFAULT_PRODUCT_IMG
+
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
                 <img src="{p_img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px;" />
@@ -646,7 +633,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS AGRUPADOS Y ORDENADOS ALFABÉTICAMENTE
+    # 3. LISTADO DE PRODUCTOS EN LISTA (ORDENADOS: PRODUCTOS CON OPCIONES PRIMERO)
     try:
         current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
@@ -678,63 +665,61 @@ if st.session_state.nav_view == "catalogo":
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
-                if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
-                    grouped_dict[name_raw].append(p)
+                if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
+                    grouped_dict[base_name].append(p)
 
         group_items_list = list(grouped_dict.items())
         
-        # RENDERIZADO EN CUADRÍCULA VERTICAL RESPONSIVE REAL
-        for i in range(0, len(group_items_list), 2):
-            cols = st.columns(2)
-            for j in range(2):
-                if i + j < len(group_items_list):
-                    base_name, items_group = group_items_list[i + j]
-                    representative = items_group[0]
-                    pid = representative.get("id")
-                    
-                    with cols[j]:
-                        st.markdown('<div class="product-card">', unsafe_allow_html=True)
-                        
-                        col_img, col_info = st.columns([1, 2])
-                        with col_img:
-                            img_src = representative.get("image")
-                            if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src):
-                                img_src = DEFAULT_PRODUCT_IMG
-                            st.image(img_src, use_container_width=True)
-                            
-                        with col_info:
-                            st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
-                            
-                            desc_text = str(representative.get("description", "")).strip()
-                            if desc_text and desc_text.lower() != "nan":
-                                st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
-                            
-                            prices = [float(it.get("price", 0)) for it in items_group]
-                            st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
-                        
-                        st.write("")
-                        if len(items_group) > 1:
-                            if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
-                                variants_modal(base_name, items_group)
-                        else:
-                            qty_in_cart = st.session_state.cart.get(pid, 0)
-                            if qty_in_cart == 0:
-                                if st.button("Agregar al Carrito", key=f"add_{pid}", use_container_width=True):
-                                    add_to_cart(pid)
-                                    st.rerun()
-                            else:
-                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
-                                with sub_c1:
-                                    if st.button("-", key=f"minus_{pid}", use_container_width=True):
-                                        remove_from_cart(pid)
-                                        st.rerun()
-                                with sub_c2:
-                                    st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
-                                with sub_c3:
-                                    if st.button("+", key=f"plus_{pid}", use_container_width=True):
-                                        add_to_cart(pid)
-                                        st.rerun()
-                        st.markdown('</div>', unsafe_allow_html=True)
+        # ORDENAR LA JERARQUÍA: LOS QUE TIENEN VARIANTES (>1 OPCIÓN) VAN HASTA ARRIBA
+        group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
+        
+        # RENDERIZADO EN LISTA VERTICAL ORDENADA
+        for base_name, items_group in group_items_list:
+            representative = items_group[0]
+            pid = representative.get("id")
+            
+            st.markdown('<div class="product-card">', unsafe_allow_html=True)
+            col_img, col_info, col_action = st.columns([1, 3, 2])
+            
+            with col_img:
+                img_src = representative.get("image")
+                if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src):
+                    img_src = DEFAULT_PRODUCT_IMG
+                st.image(img_src, width=70)
+                
+            with col_info:
+                st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
+                desc_text = str(representative.get("description", "")).strip()
+                if desc_text and desc_text.lower() != "nan":
+                    st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
+                
+                prices = [float(it.get("price", 0)) for it in items_group]
+                st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
+                
+            with col_action:
+                st.write("")
+                if len(items_group) > 1:
+                    if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
+                        variants_modal(base_name, items_group)
+                else:
+                    qty_in_cart = st.session_state.cart.get(pid, 0)
+                    if qty_in_cart == 0:
+                        if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
+                            add_to_cart(pid)
+                            st.rerun()
+                    else:
+                        sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
+                        with sub_c1:
+                            if st.button("-", key=f"minus_{pid}", use_container_width=True):
+                                remove_from_cart(pid)
+                                st.rerun()
+                        with sub_c2:
+                            st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                        with sub_c3:
+                            if st.button("+", key=f"plus_{pid}", use_container_width=True):
+                                add_to_cart(pid)
+                                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
         st.button(
