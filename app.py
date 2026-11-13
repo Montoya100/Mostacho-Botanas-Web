@@ -144,12 +144,12 @@ def load_saved_products():
                             item["category"] = str(item.get("category", "Individual"))
                             item["price"] = float(item.get("price", 0.0))
                             item["description"] = str(item.get("description", "")) if pd.notna(item.get("description")) else ""
-                            img_val = item.get("image", "")
+                            img_val = str(item.get("image", "")).strip()
                             
-                            if not img_val or str(img_val).strip() == "" or str(img_val).strip() == "nan" or "placeholder" in str(img_val) or "imgur" in str(img_val):
+                            if not img_val or img_val == "" or img_val.lower() == "nan" or "placeholder" in img_val or "imgur" in img_val:
                                 item["image"] = DEFAULT_PRODUCT_IMG
                             else:
-                                item["image"] = str(img_val).strip()
+                                item["image"] = img_val
                                 
                             cleaned.append(item)
                     if cleaned:
@@ -495,8 +495,9 @@ def variants_modal(base_name, variants_list):
         v_id = var.get("id")
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
-        v_img = var.get("image", DEFAULT_PRODUCT_IMG)
-        if not v_img or str(v_img).strip() == "" or str(v_img) == "nan" or "placeholder" in str(v_img) or "imgur" in str(v_img):
+        
+        v_img = str(var.get("image", "")).strip()
+        if not v_img or v_img == "" or v_img.lower() == "nan" or "placeholder" in v_img or "imgur" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
         col_v1, col_v2, col_v3 = st.columns([1, 2.2, 1.8])
@@ -589,11 +590,17 @@ if st.session_state.nav_view == "catalogo":
         with pop_cols[idx]:
             matched_prod = next((p for p in st.session_state.products if p.get("id") == pop_p.get("id") or str(p.get("name")).lower().strip() == str(pop_p.get("name")).lower().strip()), None)
             
-            if matched_prod and matched_prod.get("image") and "imgur" not in str(matched_prod.get("image")):
-                p_img = matched_prod.get("image")
+            if matched_prod and matched_prod.get("image"):
+                cand_img = str(matched_prod.get("image")).strip()
+                if cand_img != "" and cand_img.lower() != "nan" and "imgur" not in cand_img:
+                    p_img = cand_img
+                else:
+                    p_img = DEFAULT_PRODUCT_IMG
             else:
-                p_img = pop_p.get('image', DEFAULT_PRODUCT_IMG)
-                if not p_img or str(p_img).strip() == "" or str(p_img) == "nan" or "placeholder" in str(p_img) or "imgur" in str(p_img):
+                cand_pop = str(pop_p.get("image", "")).strip()
+                if cand_pop != "" and cand_pop.lower() != "nan" and "imgur" not in cand_pop and "placeholder" not in cand_pop:
+                    p_img = cand_pop
+                else:
                     p_img = DEFAULT_PRODUCT_IMG
 
             st.markdown(f"""
@@ -676,7 +683,7 @@ if st.session_state.nav_view == "catalogo":
         # ORDENAR LA JERARQUÍA: LOS QUE TIENEN VARIANTES (>1 OPCIÓN) VAN HASTA ARRIBA
         group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
         
-        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS
+        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS SEGURO
         for i in range(0, len(group_items_list), 3):
             cols = st.columns(3)
             for j in range(3):
@@ -688,9 +695,10 @@ if st.session_state.nav_view == "catalogo":
                     with cols[j]:
                         st.markdown('<div class="product-card">', unsafe_allow_html=True)
                         
-                        img_src = representative.get("image")
-                        if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src):
+                        img_src = str(representative.get("image", "")).strip()
+                        if not img_src or img_src == "" or img_src.lower() == "nan" or "placeholder" in img_src or "imgur" in img_src:
                             img_src = DEFAULT_PRODUCT_IMG
+                        
                         st.image(img_src, use_container_width=True)
                         
                         st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
@@ -840,10 +848,10 @@ def admin_modal():
                         for idx, row in df_uploaded.iterrows():
                             r_id = str(row.get("id", f"excel_{idx}"))
                             r_desc = row.get("description", "")
-                            r_img = row.get("image", DEFAULT_PRODUCT_IMG)
+                            r_img = str(row.get("image", "")).strip()
                             
                             desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
-                            img_val = str(r_img).strip() if pd.notna(r_img) and str(r_img).strip() != "nan" and str(r_img).strip() != "" and "placeholder" not in str(r_img) and "imgur" not in str(r_img) else DEFAULT_PRODUCT_IMG
+                            img_val = r_img if r_img != "" and r_img.lower() != "nan" and "placeholder" not in r_img and "imgur" not in r_img else DEFAULT_PRODUCT_IMG
                             
                             new_loaded_list.append({
                                 "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
@@ -892,8 +900,8 @@ def admin_modal():
                     raw_id = row.get("id")
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
                     
-                    raw_img = row.get("image")
-                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" and str(raw_img).strip() != "nan" and "placeholder" not in str(raw_img) and "imgur" not in str(raw_img) else DEFAULT_PRODUCT_IMG
+                    raw_img = str(row.get("image", "")).strip()
+                    prod_img = raw_img if raw_img != "" and raw_img.lower() != "nan" and "placeholder" not in raw_img and "imgur" not in raw_img else DEFAULT_PRODUCT_IMG
                     
                     raw_desc = row.get("description")
                     prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
