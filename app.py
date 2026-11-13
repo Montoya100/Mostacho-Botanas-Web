@@ -236,12 +236,6 @@ st.markdown(f"""
         padding-top: 2rem !important;
         padding-bottom: 6rem !important;
         background-color: transparent !important;
-        animation: fadeIn 0.3s ease-in-out;
-    }}
-
-    @keyframes fadeIn {{
-        from {{ opacity: 0; }}
-        to {{ opacity: 1; }}
     }}
 
     body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
@@ -254,17 +248,17 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* FORZAR CUADRÍCULA ESTRICTA DE 2 COLUMNAS EN MÓVIL Y ESCRITORIO */
+    /* FORZAR CUADRÍCULA DE 2 COLUMNAS REAL EN MÓVIL Y ESCRITORIO */
     [data-testid="stHorizontalBlock"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 10px !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
     }}
     div[data-testid="column"] {{
-        flex: 1 1 45% !important;
-        min-width: 140px !important;
-        max-width: 48% !important;
+        flex: 1 1 50% !important;
+        min-width: 0 !important;
+        max-width: 50% !important;
     }}
 
     .app-title {{
@@ -418,29 +412,24 @@ st.markdown(f"""
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
         border-radius: 16px;
-        padding: 12px;
-        margin-bottom: 12px;
+        padding: 10px;
+        margin-bottom: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
         height: 100%;
     }}
-    .product-card:hover {{
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.07);
-    }}
     .product-title {{
-        font-size: 1.05rem;
+        font-size: 0.95rem;
         font-weight: 800;
         margin-bottom: 2px;
         color: {text_color} !important;
     }}
     .product-desc {{
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: {sub_text_color} !important;
         margin-bottom: 4px;
     }}
     .product-price {{
-        font-size: 1.2rem !important;
+        font-size: 1.1rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
@@ -485,12 +474,12 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# POP-UP DE VARIANTES / PRESENTACIONES
+# POP-UP DE VARIANTES / PRESENTACIONES (CON + Y -)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal(base_name, variants_list):
     st.markdown(f"### {base_name}")
-    st.caption("Elige la presentación, gramaje o variedad deseada:")
+    st.caption("Escoge la figura y el sabor que deseas:")
     
     for var in variants_list:
         v_id = var.get("id")
@@ -500,17 +489,25 @@ def variants_modal(base_name, variants_list):
         if not v_img or str(v_img).strip() == "" or str(v_img) == "nan" or "placeholder" in str(v_img) or "imgur" in str(v_img):
             v_img = DEFAULT_PRODUCT_IMG
             
-        col_v1, col_v2, col_v3 = st.columns([1, 2.5, 1.5])
+        col_v1, col_v2, col_v3 = st.columns([1, 2, 2])
         with col_v1:
-            st.image(v_img, width=60)
+            st.image(v_img, width=50)
         with col_v2:
             st.markdown(f"**{v_name}**")
-            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 1.1rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             qty_val = st.session_state.cart.get(v_id, 0)
-            if st.button(f"Agregar ({qty_val})", key=f"modal_add_{v_id}", use_container_width=True):
-                add_to_cart(v_id)
-                st.rerun()
+            sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1, 1])
+            with sub_cv1:
+                if st.button("-", key=f"modal_minus_{v_id}", use_container_width=True):
+                    remove_from_cart(v_id)
+                    st.rerun()
+            with sub_cv2:
+                st.markdown(f"<div class='qty-number' style='font-size: 1rem !important;'>{qty_val}</div>", unsafe_allow_html=True)
+            with sub_cv3:
+                if st.button("+", key=f"modal_plus_{v_id}", use_container_width=True):
+                    add_to_cart(v_id)
+                    st.rerun()
         st.write("---")
 
 # ==========================================
@@ -646,16 +643,18 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
-                grouped_dict[base_name].append(p)
+                # Añadir variante asegurando que no se duplique por ID
+                if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
+                    grouped_dict[base_name].append(p)
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
-                if not any(it.get("name") == name_raw for it in grouped_dict[name_raw]):
+                if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
                     grouped_dict[name_raw].append(p)
 
         group_items_list = list(grouped_dict.items())
         
-        # RENDERIZADO EN CUADRÍCULA ESTRICTA DE 2 COLUMNAS
+        # RENDERIZADO EN CUADRÍCULA ESTRICTA DE 2 COLUMNAS REALES
         for i in range(0, len(group_items_list), 2):
             cols = st.columns(2)
             for j in range(2):
@@ -689,7 +688,6 @@ if st.session_state.nav_view == "catalogo":
                         
                         st.write("")
                         if len(items_group) > 1:
-                            # BOTÓN DE OPCIONES CON TEXTO PLANO (SIN HTML COMPLEJO)
                             if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
                                 variants_modal(base_name, items_group)
                         else:
