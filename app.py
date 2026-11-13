@@ -238,7 +238,6 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FORZAR TEMA CLARO ABSOLUTO EN EL MODAL Y QUITAR LA 'X' */
     div[data-baseweb="modal"] button[aria-label="Close"] {{
         display: none !important;
     }}
@@ -299,7 +298,6 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FAB FLOTANTE ÚNICO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -472,7 +470,6 @@ st.markdown(f"""
         box-shadow: 0 4px 10px rgba(254, 131, 48, 0.2);
     }}
 
-    /* MEDIA QUERY PARA HACER EL BANNER LIGERAMENTE MÁS ALTO EN COMPUTADORA (WEB) */
     @media (min-width: 768px) {{
         .desktop-banner-img {{
             height: 220px !important;
@@ -511,7 +508,7 @@ for k in keys_to_delete:
 total_items = sum(st.session_state.cart.values())
 
 # ==========================================
-# MODAL DE VARIANTES CONTROLADO POR ESTADO
+# MODAL DE VARIANTES CON TIEMPO REAL Y TODAS LAS VARIANTES
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -519,8 +516,9 @@ def variants_modal_dialog(base_name, variants_list):
     st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
     st.write("---")
     
+    # Asegurar que se muestren absolutamente todas las variantes sin recortes
     for idx, var in enumerate(variants_list):
-        v_id = var.get("id")
+        v_id = str(var.get("id"))
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
         
@@ -535,20 +533,23 @@ def variants_modal_dialog(base_name, variants_list):
             st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem;'>{v_name}</span>", unsafe_allow_html=True)
             st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
+            # Lectura directa y reactiva del carrito en tiempo real
             qty_val = st.session_state.cart.get(v_id, 0)
             sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1, 1])
             with sub_cv1:
-                if st.button("-", key=f"modal_minus_{v_id}_{idx}", use_container_width=True):
+                if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                     remove_from_cart(v_id)
+                    st.rerun()
             with sub_cv2:
                 st.markdown(f"<div class='qty-number' style='color: #1e293b !important;'>{qty_val}</div>", unsafe_allow_html=True)
             with sub_cv3:
-                if st.button("+", key=f"modal_plus_{v_id}_{idx}", use_container_width=True):
+                if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                     add_to_cart(v_id)
+                    st.rerun()
         st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
-    if st.button(":material/check_circle: Listo", type="primary", use_container_width=True, key="close_modal_btn"):
+    if st.button("Listo", type="primary", use_container_width=True, key="close_modal_btn"):
         st.session_state.show_variants_modal = False
         st.rerun()
 
@@ -595,7 +596,6 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER ADAPTABLE (MÓVIL PERFECTO Y WEB UN POQUITO MÁS ALTO)
     banner_to_show = str(st.session_state.banner_url).strip()
     if not banner_to_show or banner_to_show.lower() == "nan":
         banner_to_show = DEFAULT_BANNER
@@ -679,7 +679,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS (AGRUPACIÓN Y VARIANTES COMPLETAS)
+    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
     try:
         current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
@@ -713,7 +713,6 @@ if st.session_state.nav_view == "catalogo":
                 base_name = name_raw.split("(")[0].strip()
                 if base_name not in grouped_dict:
                     grouped_dict[base_name] = []
-                # Evitar duplicados exactos por id
                 if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[base_name]):
                     grouped_dict[base_name].append(p)
             else:
@@ -780,7 +779,6 @@ if st.session_state.nav_view == "catalogo":
                                         st.rerun()
                         st.markdown('</div>', unsafe_allow_html=True)
 
-    # FAB ÚNICO Y LIMPIO PARA EL CARRITO
     if total_items > 0:
         st.button(
             ":material/shopping_cart: Ver Carrito (" + str(total_items) + ")",
