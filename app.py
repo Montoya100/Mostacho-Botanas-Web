@@ -52,7 +52,7 @@ def load_saved_banner():
                 data = json.load(f)
                 if isinstance(data, dict):
                     url = str(data.get("url", "")).strip()
-                    if url and url.lower() != "nan" and "imgur" not in url:
+                    if url and url.lower() != "nan":
                         return url
         except:
             pass
@@ -146,7 +146,7 @@ def load_saved_products():
                             item["description"] = str(item.get("description", "")) if pd.notna(item.get("description")) else ""
                             img_val = str(item.get("image", "")).strip()
                             
-                            if not img_val or img_val == "" or img_val.lower() == "nan" or "placeholder" in img_val or "imgur" in img_val:
+                            if not img_val or img_val == "" or img_val.lower() == "nan" or "placeholder" in img_val:
                                 item["image"] = DEFAULT_PRODUCT_IMG
                             else:
                                 item["image"] = img_val
@@ -180,7 +180,7 @@ def load_saved_populares():
                     for p in data:
                         if isinstance(p, dict):
                             p_img = str(p.get("image", "")).strip()
-                            if not p_img or p_img.lower() == "nan" or "imgur" in p_img or "placeholder" in p_img:
+                            if not p_img or p_img.lower() == "nan" or "placeholder" in p_img:
                                 p["image"] = DEFAULT_PRODUCT_IMG
                             cleaned_pops.append(p)
                     if cleaned_pops:
@@ -505,12 +505,12 @@ def variants_modal(base_name, variants_list):
         v_price = float(var.get("price", 0))
         
         v_img = str(var.get("image", "")).strip()
-        if not v_img or v_img == "" or v_img.lower() == "nan" or "placeholder" in v_img or "imgur" in v_img:
+        if not v_img or v_img == "" or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
         col_v1, col_v2, col_v3 = st.columns([1, 2.2, 1.8])
         with col_v1:
-            st.image(v_img, width=45)
+            st.markdown(f'<img src="{v_img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;" onerror="this.onerror=null;this.src=\'{DEFAULT_PRODUCT_IMG}\';" />', unsafe_allow_html=True)
         with col_v2:
             st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem;'>{v_name}</span>", unsafe_allow_html=True)
             st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
@@ -574,9 +574,9 @@ if st.session_state.nav_view == "catalogo":
         unsafe_allow_html=True
     )
     
-    # BANNER PRINCIPAL SEGURO
+    # BANNER PRINCIPAL CON HTML SEGURO
     banner_to_show = str(st.session_state.banner_url).strip()
-    if not banner_to_show or banner_to_show.lower() == "nan" or "imgur" in banner_to_show:
+    if not banner_to_show or banner_to_show.lower() == "nan":
         banner_to_show = DEFAULT_BANNER
 
     st.markdown(f"""
@@ -606,20 +606,20 @@ if st.session_state.nav_view == "catalogo":
             
             if matched_prod and matched_prod.get("image"):
                 cand_img = str(matched_prod.get("image")).strip()
-                if cand_img != "" and cand_img.lower() != "nan" and "imgur" not in cand_img and "placeholder" not in cand_img:
+                if cand_img != "" and cand_img.lower() != "nan" and "placeholder" not in cand_img:
                     p_img = cand_img
                 else:
                     p_img = DEFAULT_PRODUCT_IMG
             else:
                 cand_pop = str(pop_p.get("image", "")).strip()
-                if cand_pop != "" and cand_pop.lower() != "nan" and "imgur" not in cand_pop and "placeholder" not in cand_pop:
+                if cand_pop != "" and cand_pop.lower() != "nan" and "placeholder" not in cand_pop:
                     p_img = cand_pop
                 else:
                     p_img = DEFAULT_PRODUCT_IMG
 
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <img src="{p_img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px;" />
+                <img src="{p_img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null;this.src='{DEFAULT_PRODUCT_IMG}';" />
                 <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{pop_p.get('name', 'Producto')}</div>
                 <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
@@ -704,7 +704,7 @@ if st.session_state.nav_view == "catalogo":
         # ORDENAR LA JERARQUÍA: LOS QUE TIENEN VARIANTES (>1 OPCIÓN) VAN HASTA ARRIBA
         group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
         
-        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS SEGURO
+        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS CON HTML SEGURO (LÍNEA 723 BLINDADA)
         for i in range(0, len(group_items_list), 3):
             cols = st.columns(3)
             for j in range(3):
@@ -717,12 +717,12 @@ if st.session_state.nav_view == "catalogo":
                         st.markdown('<div class="product-card">', unsafe_allow_html=True)
                         
                         img_src = str(representative.get("image", "")).strip()
-                        if not img_src or img_src == "" or img_src.lower() == "nan" or "placeholder" in img_src or "imgur" in img_src:
+                        if not img_src or img_src == "" or img_src.lower() == "nan" or "placeholder" in img_src:
                             img_src = DEFAULT_PRODUCT_IMG
                         
-                        st.image(img_src, use_container_width=True)
+                        st.markdown(f'<img src="{img_src}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null;this.src=\'{DEFAULT_PRODUCT_IMG}\';" />', unsafe_allow_html=True)
                         
-                        st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="product-title" style="margin-top: 8px;">{base_name}</div>', unsafe_allow_html=True)
                         desc_text = str(representative.get("description", "")).strip()
                         if desc_text and desc_text.lower() != "nan":
                             st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
@@ -872,7 +872,7 @@ def admin_modal():
                             r_img = str(row.get("image", "")).strip()
                             
                             desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
-                            img_val = r_img if r_img != "" and r_img.lower() != "nan" and "placeholder" not in r_img and "imgur" not in r_img else DEFAULT_PRODUCT_IMG
+                            img_val = r_img if r_img != "" and r_img.lower() != "nan" and "placeholder" not in r_img else DEFAULT_PRODUCT_IMG
                             
                             new_loaded_list.append({
                                 "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
@@ -922,7 +922,7 @@ def admin_modal():
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
                     
                     raw_img = str(row.get("image", "")).strip()
-                    prod_img = raw_img if raw_img != "" and raw_img.lower() != "nan" and "placeholder" not in raw_img and "imgur" not in raw_img else DEFAULT_PRODUCT_IMG
+                    prod_img = raw_img if raw_img != "" and raw_img.lower() != "nan" and "placeholder" not in raw_img else DEFAULT_PRODUCT_IMG
                     
                     raw_desc = row.get("description")
                     prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
