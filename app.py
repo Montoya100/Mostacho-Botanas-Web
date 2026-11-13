@@ -202,7 +202,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Tema Claro Forzado, Modal con Scroll Estricto y Botón Rojo-Naranja)
+# 3. Colores y estilos (Tema Claro Forzado, Modal con Scroll Estricto y Cuadrícula Web de 3 Columnas)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#f8fafc" if not is_dark else "#121824"
@@ -422,20 +422,24 @@ st.markdown(f"""
         padding: 12px;
         margin-bottom: 12px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
     }}
     .product-title {{
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 800;
         margin-bottom: 2px;
         color: #1e293b !important;
     }}
     .product-desc {{
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #64748b !important;
         margin-bottom: 6px;
     }}
     .product-price {{
-        font-size: 1.15rem !important;
+        font-size: 1.1rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
     }}
@@ -572,7 +576,7 @@ if st.session_state.nav_view == "catalogo":
     # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
-    st.caption("Toca cualquier producto popular para agregarlo directo à tu carrito:")
+    st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
 
     popular_products = st.session_state.popular_items
     if not popular_products:
@@ -632,7 +636,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS EN LISTA (ORDENADOS: PRODUCTOS CON OPCIONES PRIMERO)
+    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
     try:
         current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
@@ -664,61 +668,62 @@ if st.session_state.nav_view == "catalogo":
             else:
                 if name_raw not in grouped_dict:
                     grouped_dict[name_raw] = []
-                if not any(it.get("id") == p.get("id") for it in grouped_dict[name_raw]):
-                    grouped_dict[name_raw].append(p)
+                if not any(it.get("id") == p.get("id") for it in grouped_dict[base_name]):
+                    grouped_dict[base_name].append(p)
 
         group_items_list = list(grouped_dict.items())
         
         # ORDENAR LA JERARQUÍA: LOS QUE TIENEN VARIANTES (>1 OPCIÓN) VAN HASTA ARRIBA
         group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
         
-        # RENDERIZADO EN LISTA VERTICAL ORDENADA
-        for base_name, items_group in group_items_list:
-            representative = items_group[0]
-            pid = representative.get("id")
-            
-            st.markdown('<div class="product-card">', unsafe_allow_html=True)
-            col_img, col_info, col_action = st.columns([1, 3, 2])
-            
-            with col_img:
-                img_src = representative.get("image")
-                if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src):
-                    img_src = DEFAULT_PRODUCT_IMG
-                st.image(img_src, width=70)
-                
-            with col_info:
-                st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
-                desc_text = str(representative.get("description", "")).strip()
-                if desc_text and desc_text.lower() != "nan":
-                    st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
-                
-                prices = [float(it.get("price", 0)) for it in items_group]
-                st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
-                
-            with col_action:
-                st.write("")
-                if len(items_group) > 1:
-                    if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
-                        variants_modal(base_name, items_group)
-                else:
-                    qty_in_cart = st.session_state.cart.get(pid, 0)
-                    if qty_in_cart == 0:
-                        if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
-                            add_to_cart(pid)
-                            st.rerun()
-                    else:
-                        sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
-                        with sub_c1:
-                            if st.button("-", key=f"minus_{pid}", use_container_width=True):
-                                remove_from_cart(pid)
-                                st.rerun()
-                        with sub_c2:
-                            st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
-                        with sub_c3:
-                            if st.button("+", key=f"plus_{pid}", use_container_width=True):
-                                add_to_cart(pid)
-                                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        # RENDERIZADO EN CUADRÍCULA DE 3 COLUMNAS
+        for i in range(0, len(group_items_list), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                if i + j < len(group_items_list):
+                    base_name, items_group = group_items_list[i + j]
+                    representative = items_group[0]
+                    pid = representative.get("id")
+                    
+                    with cols[j]:
+                        st.markdown('<div class="product-card">', unsafe_allow_html=True)
+                        
+                        img_src = representative.get("image")
+                        if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src):
+                            img_src = DEFAULT_PRODUCT_IMG
+                        st.image(img_src, use_container_width=True)
+                        
+                        st.markdown(f'<div class="product-title">{base_name}</div>', unsafe_allow_html=True)
+                        desc_text = str(representative.get("description", "")).strip()
+                        if desc_text and desc_text.lower() != "nan":
+                            st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
+                        
+                        prices = [float(it.get("price", 0)) for it in items_group]
+                        st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
+                        
+                        st.write("")
+                        if len(items_group) > 1:
+                            if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
+                                variants_modal(base_name, items_group)
+                        else:
+                            qty_in_cart = st.session_state.cart.get(pid, 0)
+                            if qty_in_cart == 0:
+                                if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
+                                    add_to_cart(pid)
+                                    st.rerun()
+                            else:
+                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
+                                with sub_c1:
+                                    if st.button("-", key=f"minus_{pid}", use_container_width=True):
+                                        remove_from_cart(pid)
+                                        st.rerun()
+                                with sub_c2:
+                                    st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                                with sub_c3:
+                                    if st.button("+", key=f"plus_{pid}", use_container_width=True):
+                                        add_to_cart(pid)
+                                        st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
         st.button(
