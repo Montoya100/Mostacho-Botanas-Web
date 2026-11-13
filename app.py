@@ -40,7 +40,7 @@ LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# LIGAS POR DEFECTO CON TU IMAGEN RAW DE GITHUB
+# LIGAS POR DEFECTO CON TU IMAGEN DE GITHUB
 # ==========================================
 DEFAULT_BANNER = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/banner.jpg"
 DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.jpg"
@@ -202,7 +202,7 @@ if "popular_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# 3. Colores y estilos (Forzando cuadrícula estricta de doble columna)
+# 3. Colores y estilos (Forzando cuadrícula estricta de 2 columnas en móviles y web)
 is_dark = st.session_state.dark_mode
 
 bg_color = "#121824" if is_dark else "#ffffff"
@@ -254,15 +254,17 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* FORZAR CUADRÍCULA ESTRICTA DE 2 COLUMNAS EN MÓVIL Y WEB */
-    [data-testid="horizontal-container"], div.row-widget {{
+    /* FORZAR CUADRÍCULA ESTRICTA DE 2 COLUMNAS EN MÓVIL Y ESCRITORIO */
+    [data-testid="stHorizontalBlock"] {{
         display: flex !important;
+        flex-direction: row !important;
         flex-wrap: wrap !important;
+        gap: 10px !important;
     }}
     div[data-testid="column"] {{
-        flex: 1 1 46% !important;
+        flex: 1 1 45% !important;
+        min-width: 140px !important;
         max-width: 48% !important;
-        min-width: 150px !important;
     }}
 
     .app-title {{
@@ -495,7 +497,7 @@ def variants_modal(base_name, variants_list):
         v_name = var.get("name")
         v_price = float(var.get("price", 0))
         v_img = var.get("image", DEFAULT_PRODUCT_IMG)
-        if not v_img or str(v_img).strip() == "" or str(v_img) == "nan" or "placeholder" in str(v_img) or "imgur" in str(v_img) or "blob" in str(v_img):
+        if not v_img or str(v_img).strip() == "" or str(v_img) == "nan" or "placeholder" in str(v_img) or "imgur" in str(v_img):
             v_img = DEFAULT_PRODUCT_IMG
             
         col_v1, col_v2, col_v3 = st.columns([1, 2.5, 1.5])
@@ -538,7 +540,7 @@ with col_cart_btn:
 
 st.write("")
 
-# BÚSQUEDA MEXICANA ACTUALIZADA
+# BÚSQUEDA MEXICANA
 search_query = st.text_input("Buscar productos...", placeholder="Buscar semillas, cacahuates, pistaches...", label_visibility="collapsed")
 
 st.write("---")
@@ -563,7 +565,7 @@ if st.session_state.nav_view == "catalogo":
     # 1. PRODUCTOS POPULARES
     st.write("")
     st.markdown("### Productos Populares")
-    st.caption("Toca cualquier producto popular para agregarlo directo à tu carrito:")
+    st.caption("Toca cualquier producto popular para agregarlo directo a tu carrito:")
 
     popular_products = st.session_state.popular_items
     if not popular_products:
@@ -575,7 +577,7 @@ if st.session_state.nav_view == "catalogo":
     for idx, pop_p in enumerate(popular_products):
         with pop_cols[idx]:
             p_img = pop_p.get('image', DEFAULT_PRODUCT_IMG)
-            if not p_img or str(p_img).strip() == "" or str(p_img) == "nan" or "placeholder" in str(p_img) or "imgur" in str(p_img) or "blob" in str(p_img):
+            if not p_img or str(p_img).strip() == "" or str(p_img) == "nan" or "placeholder" in str(p_img) or "imgur" in str(p_img):
                 p_img = DEFAULT_PRODUCT_IMG
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 10px;">
@@ -668,7 +670,7 @@ if st.session_state.nav_view == "catalogo":
                         col_img, col_info = st.columns([1, 2])
                         with col_img:
                             img_src = representative.get("image")
-                            if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src) or "blob" in str(img_src):
+                            if not img_src or str(img_src).strip() == "" or str(img_src) == "nan" or "placeholder" in str(img_src) or "imgur" in str(img_src):
                                 img_src = DEFAULT_PRODUCT_IMG
                             st.image(img_src, use_container_width=True)
                             
@@ -687,8 +689,8 @@ if st.session_state.nav_view == "catalogo":
                         
                         st.write("")
                         if len(items_group) > 1:
-                            # BOTÓN DE OPCIONES CON ICONO OUTLINE (SIN EMOJIS)
-                            if st.button('<span class="material-symbols-outlined" style="vertical-align: -4px; font-size: 18px; margin-right: 4px;">tune</span> Ver Opciones', key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
+                            # BOTÓN DE OPCIONES CON TEXTO PLANO (SIN HTML COMPLEJO)
+                            if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
                                 variants_modal(base_name, items_group)
                         else:
                             qty_in_cart = st.session_state.cart.get(pid, 0)
@@ -828,7 +830,7 @@ def admin_modal():
                             r_img = row.get("image", DEFAULT_PRODUCT_IMG)
                             
                             desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
-                            img_val = str(r_img).strip() if pd.notna(r_img) and str(r_img).strip() != "nan" and str(r_img).strip() != "" and "placeholder" not in str(r_img) and "imgur" not in str(r_img) and "blob" not in str(r_img) else DEFAULT_PRODUCT_IMG
+                            img_val = str(r_img).strip() if pd.notna(r_img) and str(r_img).strip() != "nan" and str(r_img).strip() != "" and "placeholder" not in str(r_img) and "imgur" not in str(r_img) else DEFAULT_PRODUCT_IMG
                             
                             new_loaded_list.append({
                                 "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
@@ -878,7 +880,7 @@ def admin_modal():
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
                     
                     raw_img = row.get("image")
-                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" and str(raw_img).strip() != "nan" and "placeholder" not in str(raw_img) and "imgur" not in str(raw_img) and "blob" not in str(raw_img) else DEFAULT_PRODUCT_IMG
+                    prod_img = str(raw_img).strip() if pd.notna(raw_img) and str(raw_img).strip() != "" and str(raw_img).strip() != "nan" and "placeholder" not in str(raw_img) and "imgur" not in str(raw_img) else DEFAULT_PRODUCT_IMG
                     
                     raw_desc = row.get("description")
                     prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
