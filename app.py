@@ -352,7 +352,7 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) CON ALTURA LIGERAMENTE MAYOR Y PERFECTAMENTE ALINEADO */
+    /* BOTÓN FLOTANTE (FAB) MÁS "GORDITO" Y CÓMODO EN MÓVIL Y WEB */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 22px !important;
@@ -365,24 +365,24 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
-        padding: 10px 18px !important;
+        padding: 12px 22px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 0.9rem !important;
+        font-size: 0.95rem !important;
         box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        height: 42px !important;
+        height: 48px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 6px !important;
+        gap: 8px !important;
         white-space: nowrap !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button p,
     div[data-testid="stButton"]:has(button[kind="primary"]) > button span {{
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        font-size: 0.9rem !important;
+        font-size: 0.95rem !important;
         font-weight: 800 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -565,7 +565,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON CONTROLES ROBUSTOS EN FILA
+# MODAL DE VARIANTES CON NUEVA FILA DEDICADA PARA LOS BOTONES
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -584,27 +584,27 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura limpia de dos columnas: Info a la izquierda, y los controles en columna derecha garantizada
-        col_info, col_controls = st.columns([2.2, 1.8])
+        # FILA 1: Imagen, Nombre y Precio ocupando todo el ancho superior de forma limpia
+        col_img, col_info = st.columns([0.6, 3.4])
+        with col_img:
+            st.image(v_img, width=42)
         with col_info:
-            sub_c1, sub_c2 = st.columns([1, 2.5])
-            with sub_c1:
-                st.image(v_img, width=40)
-            with sub_c2:
-                st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.85rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
-        with col_controls:
-            btn_minus_col, num_col, btn_plus_col = st.columns([1, 1, 1])
-            with btn_minus_col:
-                if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
-                    remove_from_cart(v_id)
-                    st.rerun()
-            with num_col:
-                st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.1rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
-            with btn_plus_col:
-                if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
-                    add_to_cart(v_id)
-                    st.rerun()
-        st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
+        
+        # FILA 2: Controles de cantidad (- , número, +) en su propia fila dedicada con columnas espaciosas
+        c_space, c_minus, c_num, c_plus = st.columns([1.5, 1, 1, 1])
+        with c_minus:
+            if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
+                remove_from_cart(v_id)
+                st.rerun()
+        with c_num:
+            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.15rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+        with c_plus:
+            if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
+                add_to_cart(v_id)
+                st.rerun()
+                
+        st.markdown("<hr style='margin: 12px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
     if st.button("Listo / Ver Carrito", type="primary", use_container_width=True, key="close_modal_btn"):
