@@ -565,7 +565,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON TARJETAS Y FILA INFERIOR DE CONTROLES
+# MODAL DE VARIANTES ROBUSTO (CELDAS INDEPENDIENTES EN FILAS SEPARADAS)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -584,27 +584,27 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Tarjeta visual contenedora para cada variante para ordenar la información y los botones de forma impecable
+        # Tarjeta contenedora individual para aislar cada variante y sus botones sin conflictos de ancho
         st.markdown(f"""
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                <img src="{v_img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 8px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                <img src="{v_img}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
                 <div>
-                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;">{v_name}</span>
-                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;">${v_price:.2f} MXN</span>
+                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.95rem; display: block;">{v_name}</span>
+                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${v_price:.2f} MXN</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
-        # Fila independiente y dedicada exclusiva para los botones de control de cantidad en la web y móvil
-        col_space, c_minus, c_num, c_plus = st.columns([1.5, 1, 1, 1])
-        with c_minus:
+        # Fila de controles exclusiva con tres columnas estándar para garantizar que el botón de incremento (+) y decremento (-) nunca se oculten
+        col_m, col_n, col_p = st.columns(3)
+        with col_m:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
                 st.rerun()
-        with c_num:
-            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.15rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
-        with c_plus:
+        with col_n:
+            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.2rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+        with col_p:
             if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
                 st.rerun()
