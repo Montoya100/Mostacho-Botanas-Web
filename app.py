@@ -471,11 +471,23 @@ st.markdown(f"""
         box-shadow: 0 4px 10px rgba(254, 131, 48, 0.2);
     }}
 
+    .banner-container {{
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 16px;
+        padding: 6px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        text-align: center;
+        width: 100%;
+        overflow: hidden;
+    }}
+
     @media (min-width: 768px) {{
-        .desktop-banner-img {{ height: 220px !important; }}
+        .desktop-banner-img {{ height: 220px !important; width: 100% !important; object-fit: cover !important; border-radius: 12px; display: block; }}
     }}
     @media (max-width: 767px) {{
-        .desktop-banner-img {{ height: 160px !important; }}
+        .desktop-banner-img {{ height: 160px !important; width: 100% !important; object-fit: cover !important; border-radius: 12px; display: block; }}
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -503,6 +515,11 @@ for k in keys_to_delete:
     del st.session_state.cart[k]
 
 total_items = sum(st.session_state.cart.values())
+
+total_cart_amount = sum(
+    float(next((p.get("price", 0) for p in st.session_state.products if str(p.get("id")) == str(pid)), 0)) * qty
+    for pid, qty in st.session_state.cart.items()
+)
 
 # ==========================================
 # MODAL DE VARIANTES
@@ -569,7 +586,7 @@ with col_title:
 
 with col_cart_btn:
     st.write("")
-    cart_btn_label = f"({total_items})" if total_items > 0 else ""
+    cart_btn_label = f"({total_items}) - ${total_cart_amount:.2f}" if total_items > 0 else ""
     if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
         if st.session_state.nav_view != "carrito":
             go_to_cart()
@@ -596,12 +613,35 @@ if st.session_state.nav_view == "catalogo":
         banner_to_show = DEFAULT_BANNER
 
     st.markdown(f"""
-    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 6px; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: center;">
-        <img src="{banner_to_show}" class="desktop-banner-img" style="width: 100%; object-fit: cover; border-radius: 12px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
+    <div class="banner-container">
+        <img src="{banner_to_show}" class="desktop-banner-img" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. CATEGORÍAS
+    # 1. SECCIÓN DE POPULARES (⭐ Populares con icono outline)
+    popular_ids = [str(p.get("id")) for p in st.session_state.popular_items]
+    if popular_ids:
+        st.markdown("### <span class='material-symbols-outlined' style='font-size: 24px; color: #FE8330;'>star</span> Populares", unsafe_allow_html=True)
+        pop_list = [p for p in st.session_state.products if str(p.get("id")) in popular_ids]
+        if pop_list:
+            pop_cols = st.columns(min(len(pop_list), 3))
+            for idx, p in enumerate(pop_list):
+                with pop_cols[idx % len(pop_cols)]:
+                    pid = p.get("id")
+                    st.markdown(f"""
+                    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 14px; padding: 10px; text-align: center; margin-bottom: 10px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                        <div class="popular-badge">⭐ Populares</div>
+                        <img src="{p.get('image', DEFAULT_PRODUCT_IMG)}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px; margin-top: 15px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
+                        <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{p.get('name')}</div>
+                        <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${p.get('price'):.2f} MXN</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if st.button("Agregar +", key=f"pop_add_{pid}_{idx}", use_container_width=True):
+                        add_to_cart(pid)
+                        st.rerun()
+            st.write("---")
+
+    # 2. CATEGORÍAS (Movidas abajo de populares)
     cats = ["Todo", "Individual", "Para compartir"]
     cat_cols = st.columns(len(cats))
     for i, c in enumerate(cats):
@@ -613,29 +653,6 @@ if st.session_state.nav_view == "catalogo":
                 st.rerun()
 
     st.write("---")
-
-    # 2. SECCIÓN DE PRODUCTOS POPULARES ("⭐ Lo más pedido")
-    popular_ids = [str(p.get("id")) for p in st.session_state.popular_items]
-    if popular_ids:
-        st.markdown("### ⭐ Lo más pedido")
-        pop_list = [p for p in st.session_state.products if str(p.get("id")) in popular_ids]
-        if pop_list:
-            pop_cols = st.columns(min(len(pop_list), 3))
-            for idx, p in enumerate(pop_list):
-                with pop_cols[idx % len(pop_cols)]:
-                    pid = p.get("id")
-                    st.markdown(f"""
-                    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 14px; padding: 10px; text-align: center; margin-bottom: 10px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div class="popular-badge">⭐ Lo más pedido</div>
-                        <img src="{p.get('image', DEFAULT_PRODUCT_IMG)}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px; margin-top: 15px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
-                        <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{p.get('name')}</div>
-                        <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${p.get('price'):.2f} MXN</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("Agregar +", key=f"pop_add_{pid}_{idx}", use_container_width=True):
-                        add_to_cart(pid)
-                        st.rerun()
-            st.write("---")
 
     # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
     try:
@@ -727,8 +744,9 @@ if st.session_state.nav_view == "catalogo":
                         st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
+        fab_label = f":material/shopping_cart: Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN"
         st.button(
-            ":material/shopping_cart: Ver Carrito (" + str(total_items) + ")",
+            fab_label,
             type="primary",
             on_click=go_to_cart,
             key="native_floating_fab"
@@ -772,7 +790,7 @@ elif st.session_state.nav_view == "carrito":
         if sugg_id:
             sugg_prod = next((p for p in st.session_state.products if str(p.get("id")) == str(sugg_id)), None)
             if sugg_prod and str(sugg_id) not in st.session_state.cart:
-                st.info(f"💡 **¿Se te antoja algo más?** ¿Quieres agregar unos **{sugg_prod.get('name')}** (${sugg_prod.get('price'):.2f} MXN) a tu pedido?")
+                st.info(f"💡 **¿Se te olvida alguna botanita?** ¡Acompaña tu pedido con unos deliciosos **{sugg_prod.get('name')}** por solo **${sugg_prod.get('price'):.2f} MXN**!")
                 if st.button(f"Agregar {sugg_prod.get('name')} al carrito", key="add_sugg_btn"):
                     add_to_cart(str(sugg_id))
                     st.rerun()
@@ -830,7 +848,7 @@ def admin_modal():
     else:
         st.success("¡Acceso concedido!")
         
-        tab_prod, tab_pop, tab_sugg, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Lo más pedido", "💡 Sugerencia Carrito", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
+        tab_prod, tab_pop, tab_sugg, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "💡 Sugerencia Carrito", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
@@ -923,7 +941,7 @@ def admin_modal():
                 st.rerun()
 
         with tab_pop:
-            st.markdown("### Seleccionar productos que aparecerán como 'Lo más pedido'")
+            st.markdown("### Seleccionar productos que aparecerán en la sección 'Populares'")
             current_pop_ids = [str(p.get("id")) for p in st.session_state.popular_items]
             
             selected_populares_new = []
@@ -940,10 +958,10 @@ def admin_modal():
                         "image": prod.get("image", DEFAULT_PRODUCT_IMG)
                     })
             
-            if st.button("Guardar 'Lo más pedido'"):
+            if st.button("Guardar Populares"):
                 st.session_state.popular_items = selected_populares_new
                 save_populares_to_file(selected_populares_new)
-                st.success("¡Lo más pedido actualizado con éxito!")
+                st.success("¡Populares actualizados con éxito!")
                 st.rerun()
 
         with tab_sugg:
