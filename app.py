@@ -352,10 +352,10 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) ESTILO "ISLA FLOTANTE" (Elegante, ancho y no gigante) */
+    /* BOTÓN FLOTANTE (FAB) ESTILO "ISLA FLOTANTE" (Compacto, elegante, ancho y poco alto) */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
-        bottom: 24px !important;
+        bottom: 20px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         right: auto !important;
@@ -368,13 +368,14 @@ st.markdown(f"""
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        padding: 10px 28px !important;
+        padding: 8px 24px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 0.95rem !important;
-        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4) !important;
+        font-size: 0.9rem !important;
+        box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        min-height: 44px !important;
+        min-height: 38px !important;
+        line-height: 1.2 !important;
         white-space: nowrap !important;
     }}
 
@@ -555,7 +556,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON BOTONES DE CANTIDAD RESTAURADOS Y SIN CORTES
+# MODAL DE VARIANTES CON BOTONES DE CANTIDAD RESTAURADOS Y PERFECTOS
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -574,10 +575,10 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Proporciones exactas de columnas para alojar [Imagen (0.6), Nombre/Precio (3.2), Botón Menos (0.8), Número (0.6), Botón Más (0.8)]
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 3.2, 0.8, 0.6, 0.8])
+        # Estructura limpia y proporcionada: [Imagen (0.5), Nombre y Precio (3.5), Botón Menos (1.0), Número (0.6), Botón Más (1.0)]
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.5, 3.5, 1.0, 0.6, 1.0])
         with col_v1:
-            st.image(v_img, width=42)
+            st.image(v_img, width=40)
         with col_v2:
             st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.88rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
         with col_v3:
