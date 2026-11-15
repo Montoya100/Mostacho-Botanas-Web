@@ -34,20 +34,17 @@ if "nav_view" not in st.session_state:
 if "selected_cat" not in st.session_state:
     st.session_state.selected_cat = "Todo"
 
-if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = False
-
 if "show_variants_modal" not in st.session_state:
     st.session_state.show_variants_modal = False
+
+if "show_admin_modal" not in st.session_state:
+    st.session_state.show_admin_modal = False
 
 if "current_modal_base" not in st.session_state:
     st.session_state.current_modal_base = ""
 
 if "current_modal_items" not in st.session_state:
     st.session_state.current_modal_items = []
-
-if "show_admin_modal" not in st.session_state:
-    st.session_state.show_admin_modal = False
 
 # Memoria para datos recurrentes del cliente
 if "saved_customer_name" not in st.session_state:
@@ -266,9 +263,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    div[data-baseweb="modal"] button[aria-label="Close"] {{
-        display: none !important;
-    }}
+    /* FORZAR FONDO BLANCO Y TEXTO OSCURO EN TODOS LOS MODALES DE STREAMLIT */
     div[data-baseweb="modal"] {{
         background-color: rgba(0, 0, 0, 0.6) !important;
     }}
@@ -278,7 +273,7 @@ st.markdown(f"""
         width: 92vw !important;
         max-width: 600px !important;
         border-radius: 20px !important;
-        padding: 16px !important;
+        padding: 20px !important;
     }}
     div[data-baseweb="modal"] * {{
         color: #1e293b !important;
@@ -288,6 +283,9 @@ st.markdown(f"""
         overflow-y: scroll !important;
         padding-right: 10px !important;
         background-color: #ffffff !important;
+    }}
+    div[data-baseweb="modal"] button[aria-label="Close"] {{
+        display: none !important;
     }}
 
     .stApp {{
@@ -752,9 +750,16 @@ def admin_modal():
                 st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
         
         st.write("---")
-        if st.button("Cerrar Sesión"):
-            st.session_state.admin_authenticated = False
-            st.rerun()
+        col_close_a, col_close_b = st.columns(2)
+        with col_close_a:
+            if st.button("Cerrar Panel", use_container_width=True):
+                st.session_state.show_admin_modal = False
+                st.rerun()
+        with col_close_b:
+            if st.button("Cerrar Sesión Admin", use_container_width=True):
+                st.session_state.admin_authenticated = False
+                st.session_state.show_admin_modal = False
+                st.rerun()
 
 if st.session_state.show_admin_modal:
     admin_modal()
