@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (DISTRIBUCIÓN ROBUSTA)
+# MODAL DE VARIANTES (DISTRIBUCIÓN EQUILIBRADA Y FIJA)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -567,8 +567,8 @@ def variants_modal_dialog(base_name, variants_list):
         if not v_img or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
-        # Distribución balanceada garantizando que los controles quepan perfectamente en PC y Móvil
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.8, 2.4, 1.0, 0.9, 1.0])
+        # Distribución de columnas perfectamente balanceada para que menos (-), número y más (+) queden simétricos
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.8, 2.8, 1.0, 1.0, 1.0])
         with col_v1:
             st.image(v_img, width=45)
         with col_v2:
