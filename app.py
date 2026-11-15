@@ -261,7 +261,7 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* MODALES: FONDO BLANCO, MÁXIMA CAPA (Z-INDEX) Y ANCHO AMPLIO  */
+    /* MODALES: ANCHO AMPLIADO A 900PX, FONDO BLANCO Y Z-INDEX     */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
@@ -274,9 +274,9 @@ st.markdown(f"""
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 95vw !important;
-        max-width: 760px !important;
+        max-width: 900px !important; /* Modal más ancho y espacioso en PC */
         border-radius: 20px !important;
-        padding: 24px !important;
+        padding: 28px !important;
         max-height: 85vh !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         z-index: 1000000000 !important;
@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (ESTRUCTURA DE 5 COLUMNAS PERFECTAS)
+# MODAL DE VARIANTES (3 COLUMNAS AMPLIAS Y ESPACIOSAS)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -567,25 +567,26 @@ def variants_modal_dialog(base_name, variants_list):
         if not v_img or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
-        # Usamos 5 columnas distribuidas de forma exacta: [Imagen, Texto del producto, Botón Menos, Número, Botón Más]
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.8, 3.2, 0.9, 0.9, 0.9])
+        # Estructura de 3 columnas amplias: [Imagen, Nombre/Precio, Controles de cantidad espaciados]
+        col_v1, col_v2, col_v3 = st.columns([0.6, 3.2, 2.2])
         with col_v1:
-            st.image(v_img, width=42)
+            st.image(v_img, width=45)
         with col_v2:
-            st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block; margin-top: 2px;'>{v_name}</span>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.88rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
+            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
         with col_v3:
-            if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
-                remove_from_cart(v_id)
-                st.rerun()
-        with col_v4:
             qty_val = st.session_state.cart.get(v_id, 0)
-            st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; font-size: 1rem;'>{qty_val}</div>", unsafe_allow_html=True)
-        with col_v5:
-            if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
-                add_to_cart(v_id)
-                st.rerun()
-        st.markdown("<hr style='margin: 6px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+            sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1.2, 1])
+            with sub_cv1:
+                if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
+                    remove_from_cart(v_id)
+                    st.rerun()
+            with sub_cv2:
+                st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; text-align: center;'>{qty_val}</div>", unsafe_allow_html=True)
+            with sub_cv3:
+                if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
+                    add_to_cart(v_id)
+                    st.rerun()
+        st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
     if st.button("Listo", type="primary", use_container_width=True, key="close_modal_btn"):
