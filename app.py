@@ -274,7 +274,7 @@ st.markdown(f"""
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 95vw !important;
-        max-width: 900px !important; /* Modal más ancho y espacioso en PC */
+        max-width: 900px !important;
         border-radius: 20px !important;
         padding: 28px !important;
         max-height: 85vh !important;
@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (3 COLUMNAS AMPLIAS Y ESPACIOSAS)
+# MODAL DE VARIANTES (ROBUSTO Y CON BOTONES DE CANTIDAD)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -567,25 +567,31 @@ def variants_modal_dialog(base_name, variants_list):
         if not v_img or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
-        # Estructura de 3 columnas amplias: [Imagen, Nombre/Precio, Controles de cantidad espaciados]
-        col_v1, col_v2, col_v3 = st.columns([0.6, 3.2, 2.2])
+        qty_in_cart = st.session_state.cart.get(v_id, 0)
+        
+        # Estructura de 3 columnas amplias: [Imagen, Nombre/Precio, Controles de cantidad]
+        col_v1, col_v2, col_v3 = st.columns([0.6, 3.0, 2.6])
         with col_v1:
             st.image(v_img, width=45)
         with col_v2:
             st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
         with col_v3:
-            qty_val = st.session_state.cart.get(v_id, 0)
-            sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1.2, 1])
-            with sub_cv1:
-                if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
-                    remove_from_cart(v_id)
-                    st.rerun()
-            with sub_cv2:
-                st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; text-align: center;'>{qty_val}</div>", unsafe_allow_html=True)
-            with sub_cv3:
-                if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
+            if qty_in_cart == 0:
+                if st.button("Agregar", key=f"m_add_{v_id}_{idx}", use_container_width=True):
                     add_to_cart(v_id)
                     st.rerun()
+            else:
+                sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1.2, 1])
+                with sub_cv1:
+                    if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
+                        remove_from_cart(v_id)
+                        st.rerun()
+                with sub_cv2:
+                    st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; text-align: center;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                with sub_cv3:
+                    if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
+                        add_to_cart(v_id)
+                        st.rerun()
         st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
@@ -1027,7 +1033,7 @@ elif st.session_state.nav_view == "admin":
             uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
                 file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
-                with open(file_path, "wb") as f:
+                with open(file_path, "wb", encoding="utf-8") as f:
                     f.write(uploaded_file.getbuffer())
                 
                 st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
