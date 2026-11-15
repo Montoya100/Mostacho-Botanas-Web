@@ -260,29 +260,40 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FORZAR FONDO BLANCO ABSOLUTO Y TEXTO OSCURO EN TODOS LOS MODALES Y DIÁLOGOS */
-    div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"] {{
+    /* ========================================================== */
+    /* FORZAR FONDO BLANCO Y TEXTO OSCURO EN TODOS LOS MODALES    */
+    /* ========================================================== */
+    div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
+    div[data-testid="stModal"], div[data-modal-container="true"] {{
         background-color: rgba(0, 0, 0, 0.6) !important;
     }}
-    div[data-baseweb="modal"] > div, div[role="dialog"] > div {{
+    
+    div[data-baseweb="modal"] > div, div[role="dialog"] > div,
+    section[tabindex="-1"] > div, div[data-testid="stModal"] > div {{
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 92vw !important;
         max-width: 600px !important;
         border-radius: 20px !important;
-        padding: 20px !important;
+        padding: 24px !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
     }}
-    div[data-baseweb="modal"] *, div[role="dialog"] * {{
+
+    /* Asegurar que todos los textos e hijos dentro de CUALQUIER modal sean oscuros */
+    div[data-baseweb="modal"] *, div[role="dialog"] *, section[tabindex="-1"] * {{
         color: #1e293b !important;
-        background-color: transparent !important;
     }}
-    div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], div[role="dialog"] div[data-testid="stVerticalBlock"] {{
-        max-height: 55vh !important;
-        overflow-y: scroll !important;
-        padding-right: 10px !important;
+
+    div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], 
+    div[role="dialog"] div[data-testid="stVerticalBlock"] {{
+        max-height: 60vh !important;
+        overflow-y: auto !important;
+        padding-right: 6px !important;
         background-color: #ffffff !important;
     }}
-    div[data-baseweb="modal"] button[aria-label="Close"], div[role="dialog"] button[aria-label="Close"] {{
+
+    div[data-baseweb="modal"] button[aria-label="Close"], 
+    div[role="dialog"] button[aria-label="Close"] {{
         display: none !important;
     }}
 
@@ -534,7 +545,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (ASEGURADO Y BLANCO)
+# MODAL DE VARIANTES (FONDO BLANCO GARANTIZADO)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
