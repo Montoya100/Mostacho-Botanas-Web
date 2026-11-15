@@ -274,7 +274,7 @@ st.markdown(f"""
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 95vw !important;
-        max-width: 720px !important;
+        max-width: 760px !important;
         border-radius: 20px !important;
         padding: 24px !important;
         max-height: 85vh !important;
@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (DISTRIBUCIÓN EQUILIBRADA Y FIJA)
+# MODAL DE VARIANTES (ESTRUCTURA DE 5 COLUMNAS PERFECTAS)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -567,25 +567,25 @@ def variants_modal_dialog(base_name, variants_list):
         if not v_img or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
-        # Distribución de columnas perfectamente balanceada para que menos (-), número y más (+) queden simétricos
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.8, 2.8, 1.0, 1.0, 1.0])
+        # Usamos 5 columnas distribuidas de forma exacta: [Imagen, Texto del producto, Botón Menos, Número, Botón Más]
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.8, 3.2, 0.9, 0.9, 0.9])
         with col_v1:
-            st.image(v_img, width=45)
+            st.image(v_img, width=42)
         with col_v2:
-            st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.88rem; display: block; margin-top: 4px;'>{v_name}</span>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block; margin-top: 2px;'>{v_name}</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.88rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
                 st.rerun()
         with col_v4:
             qty_val = st.session_state.cart.get(v_id, 0)
-            st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 8px;'>{qty_val}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; font-size: 1rem;'>{qty_val}</div>", unsafe_allow_html=True)
         with col_v5:
             if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
                 st.rerun()
-        st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 6px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
     if st.button("Listo", type="primary", use_container_width=True, key="close_modal_btn"):
