@@ -190,7 +190,7 @@ if "products" not in st.session_state:
 if "popular_items" not in st.session_state:
     st.session_state.popular_items = load_saved_populares()
 
-# PALETA DE DISEÑO REDISEÑADA (CLEAN APP PREMIUM)
+# PALETA DE DISEÑO REDISEÑADA Y FORZADA (BLANCO Y NARANJA)
 bg_color = "#f4f6f9"
 text_color = "#0f172a"
 sub_text_color = "#64748b"
@@ -208,11 +208,12 @@ st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* OCULTAR MARCA DE AGUA Y MENÚS */
+    /* ELIMINAR BARRAS NEGRAS, MENÚS Y FOOTERS DE STREAMLIT */
     #MainMenu {{visibility: hidden !important; display: none !important;}}
     footer {{visibility: hidden !important; display: none !important;}}
     header {{visibility: hidden !important; display: none !important;}}
     .stDeployButton {{display: none !important;}}
+    [data-testid="stHeader"] {{background-color: transparent !important; display: none !important;}}
 
     :root {{
         color-scheme: light !important;
@@ -220,6 +221,8 @@ st.markdown(f"""
 
     html, body, [class*="st"] {{
         font-family: 'Plus Jakarta Sans', sans-serif !important;
+        background-color: {bg_color} !important;
+        color: {text_color} !important;
     }}
 
     div[data-baseweb="modal"] button[aria-label="Close"] {{
@@ -259,17 +262,12 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
-        background-color: {bg_color} !important;
-        color: {text_color} !important;
-    }}
-
     div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {{
         background-color: transparent !important;
         color: {text_color} !important;
     }}
 
-    /* CAMPOS DE TEXTO E INPUTS ULTRA MODERNOS Y REDONDEADOS */
+    /* CAMPOS DE TEXTO E INPUTS ULTRA MODERNOS Y BLANCOS */
     input, textarea, select, 
     div[data-baseweb="input"], div[data-baseweb="base-input"], 
     div[data-baseweb="textarea"], div[data-baseweb="select"],
