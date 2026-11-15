@@ -37,14 +37,14 @@ if "selected_cat" not in st.session_state:
 if "show_variants_modal" not in st.session_state:
     st.session_state.show_variants_modal = False
 
-if "show_admin_modal" not in st.session_state:
-    st.session_state.show_admin_modal = False
-
 if "current_modal_base" not in st.session_state:
     st.session_state.current_modal_base = ""
 
 if "current_modal_items" not in st.session_state:
     st.session_state.current_modal_items = []
+
+if "admin_authenticated" not in st.session_state:
+    st.session_state.admin_authenticated = False
 
 # Memoria para datos recurrentes del cliente
 if "saved_customer_name" not in st.session_state:
@@ -245,9 +245,6 @@ if "products" not in st.session_state:
 if "popular_items" not in st.session_state:
     st.session_state.popular_items = load_saved_populares()
 
-if "admin_authenticated" not in st.session_state:
-    st.session_state.admin_authenticated = False
-
 bg_color = "#f8fafc"
 text_color = "#1e293b"
 sub_text_color = "#64748b"
@@ -263,7 +260,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FORZAR FONDO BLANCO Y TEXTO OSCURO EN TODOS LOS MODALES DE STREAMLIT */
+    /* FORZAR FONDO BLANCO Y TEXTO OSCURO EN MODALES */
     div[data-baseweb="modal"] {{
         background-color: rgba(0, 0, 0, 0.6) !important;
     }}
@@ -518,6 +515,10 @@ def go_to_catalogo():
     st.session_state.nav_view = "catalogo"
     st.rerun()
 
+def go_to_admin():
+    st.session_state.nav_view = "admin"
+    st.rerun()
+
 keys_to_delete = [pid for pid in st.session_state.cart if not any(p.get("id") == pid for p in st.session_state.products)]
 for k in keys_to_delete:
     del st.session_state.cart[k]
@@ -577,10 +578,275 @@ if st.session_state.show_variants_modal:
     variants_modal_dialog(st.session_state.current_modal_base, st.session_state.current_modal_items)
 
 # ==========================================
-# PANEL DE ADMINISTRACIÓN (DIÁLOGO SEGURO)
+# 4. ENCABEZADO Y BÚSQUEDA
 # ==========================================
-@st.dialog("Panel de Administración y Configuración")
-def admin_modal():
+col_title, col_cart_btn = st.columns([3, 1])
+
+with col_title:
+    st.markdown(f"""
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="{LOGO_URL}" style="width: 52px; height: 52px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
+        <div>
+            <h1 class="app-title">Mostacho Botanas</h1>
+            <span class="app-subtitle">Catálogo y pedidos en línea</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_cart_btn:
+    st.write("")
+    cart_btn_label = f"({total_items}) - ${total_cart_amount:.2f}" if total_items > 0 else ""
+    if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
+        if st.session_state.nav_view != "carrito":
+            go_to_cart()
+        else:
+            go_to_catalogo()
+
+st.write("")
+
+if st.session_state.nav_view != "admin":
+    search_query = st.text_input("Buscar productos...", placeholder="Buscar semillas, cacahuates, pistaches...", label_visibility="collapsed")
+    st.write("---")
+
+# ==========================================
+# 5. VISTAS: CATÁLOGO, CARRITO O ADMINISTRACIÓN
+# ==========================================
+if st.session_state.nav_view == "catalogo":
+    st.markdown(
+        f'<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        unsafe_allow_html=True
+    )
+    
+    banner_to_show = str(st.session_state.banner_url).strip()
+    if not banner_to_show or banner_to_show.lower() == "nan":
+        banner_to_show = DEFAULT_BANNER
+
+    st.markdown(f"""
+    <div class="banner-container">
+        <img src="{banner_to_show}" class="desktop-banner-img" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 1. SECCIÓN DE POPULARES
+    popular_ids = [str(p.get("id")) for p in st.session_state.popular_items]
+    if popular_ids:
+        st.markdown("### <span class='material-symbols-outlined' style='font-size: 24px; color: #FE8330;'>local_fire_department</span> Populares", unsafe_allow_html=True)
+        pop_list = [p for p in st.session_state.products if str(p.get("id")) in popular_ids]
+        if pop_list:
+            pop_cols = st.columns(min(len(pop_list), 3))
+            for idx, p in enumerate(pop_list):
+                with pop_cols[idx % len(pop_cols)]:
+                    pid = p.get("id")
+                    st.markdown(f"""
+                    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 14px; padding: 10px; text-align: center; margin-bottom: 10px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                        <div class="popular-badge">🔥 Lo más pedido</div>
+                        <img src="{p.get('image', DEFAULT_PRODUCT_IMG)}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px; margin-top: 15px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
+                        <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{p.get('name')}</div>
+                        <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${p.get('price'):.2f} MXN</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if st.button("Agregar +", key=f"pop_add_{pid}_{idx}", use_container_width=True):
+                        add_to_cart(pid)
+                        st.rerun()
+            st.write("---")
+
+    # 2. CATEGORÍAS
+    cats = ["Todo", "Individual", "Para compartir"]
+    cat_cols = st.columns(len(cats))
+    for i, c in enumerate(cats):
+        with cat_cols[i]:
+            is_active = (st.session_state.selected_cat == c)
+            display_label = f"● {c}" if is_active else c
+            if st.button(display_label, use_container_width=True, key=f"cat_btn_{c}"):
+                st.session_state.selected_cat = c
+                st.rerun()
+
+    st.write("---")
+
+    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
+    try:
+        current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
+        
+        if st.session_state.selected_cat == "Todo":
+            cat_filtered = current_products_list
+        else:
+            cat_filtered = [p for p in current_products_list if str(p.get("category", "Individual")).strip() == st.session_state.selected_cat]
+
+        filtered_products = [p for p in cat_filtered if search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower()]
+    except:
+        filtered_products = []
+
+    if not filtered_products:
+        st.info("No se encontraron productos en esta categoría.")
+    else:
+        grouped_dict = {}
+        for p in filtered_products:
+            name_raw = str(p.get("name", "Producto")).strip()
+            
+            if "(" in name_raw and ")" in name_raw:
+                base_name = name_raw.split("(")[0].strip()
+                if base_name not in grouped_dict:
+                    grouped_dict[base_name] = []
+                if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[base_name]):
+                    grouped_dict[base_name].append(p)
+            else:
+                if name_raw not in grouped_dict:
+                    grouped_dict[name_raw] = []
+                if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[name_raw]):
+                    grouped_dict[name_raw].append(p)
+
+        group_items_list = sorted(list(grouped_dict.items()), key=lambda x: 0 if len(x[1]) > 1 else 1)
+        
+        for i in range(0, len(group_items_list), 3):
+            cols = st.columns(3)
+            for j in range(3):
+                if i + j < len(group_items_list):
+                    base_name, items_group = group_items_list[i + j]
+                    representative = items_group[0]
+                    pid = representative.get("id")
+                    
+                    with cols[j]:
+                        st.markdown('<div class="product-card">', unsafe_allow_html=True)
+                        
+                        img_src = str(representative.get("image", "")).strip()
+                        if not img_src or img_src.lower() == "nan" or "placeholder" in img_src:
+                            img_src = DEFAULT_PRODUCT_IMG
+                        
+                        try:
+                            st.image(img_src, use_container_width=True)
+                        except:
+                            st.image(DEFAULT_PRODUCT_IMG, use_container_width=True)
+                        
+                        st.markdown(f'<div class="product-title" style="margin-top: 8px;">{base_name}</div>', unsafe_allow_html=True)
+                        desc_text = str(representative.get("description", "")).strip()
+                        if desc_text and desc_text.lower() != "nan":
+                            st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
+                        
+                        prices = [float(it.get("price", 0)) for it in items_group]
+                        st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
+                        
+                        st.write("")
+                        if len(items_group) > 1:
+                            if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
+                                st.session_state.current_modal_base = base_name
+                                st.session_state.current_modal_items = items_group
+                                st.session_state.show_variants_modal = True
+                                st.rerun()
+                        else:
+                            qty_in_cart = st.session_state.cart.get(pid, 0)
+                            if qty_in_cart == 0:
+                                if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
+                                    add_to_cart(pid)
+                                    st.rerun()
+                            else:
+                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
+                                with sub_c1:
+                                    if st.button("-", key=f"minus_{pid}", use_container_width=True):
+                                        remove_from_cart(pid)
+                                        st.rerun()
+                                with sub_c2:
+                                    st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
+                                with sub_c3:
+                                    if st.button("+", key=f"plus_{pid}", use_container_width=True):
+                                        add_to_cart(pid)
+                                        st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
+
+    if total_items > 0:
+        fab_label = f":material/shopping_cart: **Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN**"
+        st.button(
+            fab_label,
+            type="primary",
+            on_click=go_to_cart,
+            key="native_floating_fab"
+        )
+
+elif st.session_state.nav_view == "carrito":
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
+        go_to_catalogo()
+        
+    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
+    st.caption(f"Artículos seleccionados: {total_items}")
+    
+    if not st.session_state.cart:
+        st.info("Tu carrito está vacío. Agrega productos desde el catálogo.")
+    else:
+        total_price = 0.0
+        order_summary = []
+        
+        st.write("---")
+        for item_id, qty in list(st.session_state.cart.items()):
+            p = next((item for item in st.session_state.products if str(item.get("id")) == str(item_id)), None)
+            if p:
+                subtotal = float(p.get("price", 0)) * qty
+                total_price += subtotal
+                order_summary.append(f"- {qty}x {p.get('name')} - ${subtotal:.2f} MXN")
+                
+                col_c1, col_c2 = st.columns([3, 1])
+                with col_c1:
+                    st.markdown(f"**{p.get('name')}**")
+                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
+                with col_c2:
+                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
+                        del st.session_state.cart[item_id]
+                        st.rerun()
+                        
+        st.write("---")
+        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
+
+        # SUGERENCIA CONFIGURABLE EN EL CARRITO
+        sugg_id = st.session_state.cart_suggestion.get("id")
+        if sugg_id:
+            sugg_prod = next((p for p in st.session_state.products if str(p.get("id")) == str(sugg_id)), None)
+            if sugg_prod and str(sugg_id) not in st.session_state.cart:
+                st.info(f"💡 **¿Se te olvida alguna botanita?** ¡Acompaña tu pedido con unos deliciosos **{sugg_prod.get('name')}** por solo **${sugg_prod.get('price'):.2f} MXN**!")
+                if st.button(f"Agregar {sugg_prod.get('name')} al carrito", key="add_sugg_btn"):
+                    add_to_cart(str(sugg_id))
+                    st.rerun()
+        
+        st.subheader(":material/local_shipping: Datos de Entrega")
+        
+        customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
+        customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
+        customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
+        
+        st.session_state.saved_customer_name = customer_name
+        st.session_state.saved_customer_address = customer_address
+
+        order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
+        
+        msg_header = f"NUEVO PEDIDO\nFecha: {order_date}\n\n"
+        msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
+        msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
+        msg_customer = f"CLIENTE: {customer_name}\n"
+        msg_address = f"DIRECCION: {customer_address}\n"
+        msg_notes = f"NOTAS: {customer_notes}\n" if customer_notes else ""
+        
+        full_message = msg_header + msg_items + msg_total + msg_customer + msg_address + msg_notes
+        encoded_message = urllib.parse.quote(full_message)
+        whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
+        
+        st.write("")
+        if customer_name.strip() and customer_address.strip():
+            st.markdown(
+                f'''<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">
+                    <span class="material-symbols-outlined" style="vertical-align: -5px; margin-right: 6px; font-size: 24px;">chat</span>
+                    Enviar pedido por WhatsApp
+                </a>''',
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón de envío</div>',
+                unsafe_allow_html=True
+            )
+
+elif st.session_state.nav_view == "admin":
+    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_from_admin"):
+        go_to_catalogo()
+
+    st.markdown("### :material/settings: Panel de Administración y Configuración")
+    
     if not st.session_state.admin_authenticated:
         st.subheader("Acceso Restringido")
         pass_input = st.text_input("Ingresa la contraseña de administrador", type="password", placeholder="Clave de 4 dígitos...")
@@ -750,288 +1016,12 @@ def admin_modal():
                 st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
         
         st.write("---")
-        col_close_a, col_close_b = st.columns(2)
-        with col_close_a:
-            if st.button("Cerrar Panel", use_container_width=True):
-                st.session_state.show_admin_modal = False
-                st.rerun()
-        with col_close_b:
-            if st.button("Cerrar Sesión Admin", use_container_width=True):
-                st.session_state.admin_authenticated = False
-                st.session_state.show_admin_modal = False
-                st.rerun()
-
-if st.session_state.show_admin_modal:
-    admin_modal()
-
-# ==========================================
-# 4. ENCABEZADO Y BÚSQUEDA
-# ==========================================
-col_title, col_cart_btn = st.columns([3, 1])
-
-with col_title:
-    st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="{LOGO_URL}" style="width: 52px; height: 52px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
-        <div>
-            <h1 class="app-title">Mostacho Botanas</h1>
-            <span class="app-subtitle">Catálogo y pedidos en línea</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_cart_btn:
-    st.write("")
-    cart_btn_label = f"({total_items}) - ${total_cart_amount:.2f}" if total_items > 0 else ""
-    if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
-        if st.session_state.nav_view != "carrito":
-            go_to_cart()
-        else:
+        if st.button("Cerrar Sesión Admin", use_container_width=True):
+            st.session_state.admin_authenticated = False
             go_to_catalogo()
 
-st.write("")
-
-search_query = st.text_input("Buscar productos...", placeholder="Buscar semillas, cacahuates, pistaches...", label_visibility="collapsed")
-
-st.write("---")
-
 # ==========================================
-# 5. VISTA DE CATÁLOGO O CARRITO
-# ==========================================
-if st.session_state.nav_view == "catalogo":
-    st.markdown(
-        f'<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
-        unsafe_allow_html=True
-    )
-    
-    banner_to_show = str(st.session_state.banner_url).strip()
-    if not banner_to_show or banner_to_show.lower() == "nan":
-        banner_to_show = DEFAULT_BANNER
-
-    st.markdown(f"""
-    <div class="banner-container">
-        <img src="{banner_to_show}" class="desktop-banner-img" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
-    </div>
-    """, unsafe_allow_html=True)
-
-    # 1. SECCIÓN DE POPULARES (Icono outline local_fire_department + etiqueta con flamita y texto)
-    popular_ids = [str(p.get("id")) for p in st.session_state.popular_items]
-    if popular_ids:
-        st.markdown("### <span class='material-symbols-outlined' style='font-size: 24px; color: #FE8330;'>local_fire_department</span> Populares", unsafe_allow_html=True)
-        pop_list = [p for p in st.session_state.products if str(p.get("id")) in popular_ids]
-        if pop_list:
-            pop_cols = st.columns(min(len(pop_list), 3))
-            for idx, p in enumerate(pop_list):
-                with pop_cols[idx % len(pop_cols)]:
-                    pid = p.get("id")
-                    st.markdown(f"""
-                    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 14px; padding: 10px; text-align: center; margin-bottom: 10px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div class="popular-badge">🔥 Lo más pedido</div>
-                        <img src="{p.get('image', DEFAULT_PRODUCT_IMG)}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px; margin-top: 15px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
-                        <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{p.get('name')}</div>
-                        <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${p.get('price'):.2f} MXN</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("Agregar +", key=f"pop_add_{pid}_{idx}", use_container_width=True):
-                        add_to_cart(pid)
-                        st.rerun()
-            st.write("---")
-
-    # 2. CATEGORÍAS (Ubicadas justo abajo de Populares)
-    cats = ["Todo", "Individual", "Para compartir"]
-    cat_cols = st.columns(len(cats))
-    for i, c in enumerate(cats):
-        with cat_cols[i]:
-            is_active = (st.session_state.selected_cat == c)
-            display_label = f"● {c}" if is_active else c
-            if st.button(display_label, use_container_width=True, key=f"cat_btn_{c}"):
-                st.session_state.selected_cat = c
-                st.rerun()
-
-    st.write("---")
-
-    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
-    try:
-        current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
-        
-        if st.session_state.selected_cat == "Todo":
-            cat_filtered = current_products_list
-        else:
-            cat_filtered = [p for p in current_products_list if str(p.get("category", "Individual")).strip() == st.session_state.selected_cat]
-
-        filtered_products = [p for p in cat_filtered if search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower()]
-    except:
-        filtered_products = []
-
-    if not filtered_products:
-        st.info("No se encontraron productos en esta categoría.")
-    else:
-        grouped_dict = {}
-        for p in filtered_products:
-            name_raw = str(p.get("name", "Producto")).strip()
-            
-            if "(" in name_raw and ")" in name_raw:
-                base_name = name_raw.split("(")[0].strip()
-                if base_name not in grouped_dict:
-                    grouped_dict[base_name] = []
-                if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[base_name]):
-                    grouped_dict[base_name].append(p)
-            else:
-                if name_raw not in grouped_dict:
-                    grouped_dict[name_raw] = []
-                if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[name_raw]):
-                    grouped_dict[name_raw].append(p)
-
-        group_items_list = sorted(list(grouped_dict.items()), key=lambda x: 0 if len(x[1]) > 1 else 1)
-        
-        for i in range(0, len(group_items_list), 3):
-            cols = st.columns(3)
-            for j in range(3):
-                if i + j < len(group_items_list):
-                    base_name, items_group = group_items_list[i + j]
-                    representative = items_group[0]
-                    pid = representative.get("id")
-                    
-                    with cols[j]:
-                        st.markdown('<div class="product-card">', unsafe_allow_html=True)
-                        
-                        img_src = str(representative.get("image", "")).strip()
-                        if not img_src or img_src.lower() == "nan" or "placeholder" in img_src:
-                            img_src = DEFAULT_PRODUCT_IMG
-                        
-                        try:
-                            st.image(img_src, use_container_width=True)
-                        except:
-                            st.image(DEFAULT_PRODUCT_IMG, use_container_width=True)
-                        
-                        st.markdown(f'<div class="product-title" style="margin-top: 8px;">{base_name}</div>', unsafe_allow_html=True)
-                        desc_text = str(representative.get("description", "")).strip()
-                        if desc_text and desc_text.lower() != "nan":
-                            st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
-                        
-                        prices = [float(it.get("price", 0)) for it in items_group]
-                        st.markdown(f'<div class="product-price">${prices[0]:.2f} MXN</div>', unsafe_allow_html=True)
-                        
-                        st.write("")
-                        if len(items_group) > 1:
-                            if st.button("Ver Opciones", key=f"variants_btn_{base_name}_{pid}", use_container_width=True):
-                                st.session_state.current_modal_base = base_name
-                                st.session_state.current_modal_items = items_group
-                                st.session_state.show_variants_modal = True
-                                st.rerun()
-                        else:
-                            qty_in_cart = st.session_state.cart.get(pid, 0)
-                            if qty_in_cart == 0:
-                                if st.button("Agregar", key=f"add_{pid}", use_container_width=True):
-                                    add_to_cart(pid)
-                                    st.rerun()
-                            else:
-                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
-                                with sub_c1:
-                                    if st.button("-", key=f"minus_{pid}", use_container_width=True):
-                                        remove_from_cart(pid)
-                                        st.rerun()
-                                with sub_c2:
-                                    st.markdown(f"<div class='qty-number'>{qty_in_cart}</div>", unsafe_allow_html=True)
-                                with sub_c3:
-                                    if st.button("+", key=f"plus_{pid}", use_container_width=True):
-                                        add_to_cart(pid)
-                                        st.rerun()
-                        st.markdown('</div>', unsafe_allow_html=True)
-
-    if total_items > 0:
-        fab_label = f":material/shopping_cart: **Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN**"
-        st.button(
-            fab_label,
-            type="primary",
-            on_click=go_to_cart,
-            key="native_floating_fab"
-        )
-
-elif st.session_state.nav_view == "carrito":
-    if st.button(":material/arrow_back: Volver al Catálogo", use_container_width=False, key="back_to_cat_btn"):
-        go_to_catalogo()
-        
-    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
-    st.caption(f"Artículos seleccionados: {total_items}")
-    
-    if not st.session_state.cart:
-        st.info("Tu carrito está vacío. Agrega productos desde el catálogo.")
-    else:
-        total_price = 0.0
-        order_summary = []
-        
-        st.write("---")
-        for item_id, qty in list(st.session_state.cart.items()):
-            p = next((item for item in st.session_state.products if str(item.get("id")) == str(item_id)), None)
-            if p:
-                subtotal = float(p.get("price", 0)) * qty
-                total_price += subtotal
-                order_summary.append(f"- {qty}x {p.get('name')} - ${subtotal:.2f} MXN")
-                
-                col_c1, col_c2 = st.columns([3, 1])
-                with col_c1:
-                    st.markdown(f"**{p.get('name')}**")
-                    st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
-                with col_c2:
-                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
-                        del st.session_state.cart[item_id]
-                        st.rerun()
-                        
-        st.write("---")
-        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
-
-        # SUGERENCIA CONFIGURABLE EN EL CARRITO
-        sugg_id = st.session_state.cart_suggestion.get("id")
-        if sugg_id:
-            sugg_prod = next((p for p in st.session_state.products if str(p.get("id")) == str(sugg_id)), None)
-            if sugg_prod and str(sugg_id) not in st.session_state.cart:
-                st.info(f"💡 **¿Se te olvida alguna botanita?** ¡Acompaña tu pedido con unos deliciosos **{sugg_prod.get('name')}** por solo **${sugg_prod.get('price'):.2f} MXN**!")
-                if st.button(f"Agregar {sugg_prod.get('name')} al carrito", key="add_sugg_btn"):
-                    add_to_cart(str(sugg_id))
-                    st.rerun()
-        
-        st.subheader(":material/local_shipping: Datos de Entrega")
-        
-        # Campos de cliente autocompletados con la memoria guardada
-        customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
-        customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
-        customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
-        
-        # Guardar automáticamente en la sesión del cliente
-        st.session_state.saved_customer_name = customer_name
-        st.session_state.saved_customer_address = customer_address
-
-        order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
-        
-        msg_header = f"NUEVO PEDIDO\nFecha: {order_date}\n\n"
-        msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
-        msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
-        msg_customer = f"CLIENTE: {customer_name}\n"
-        msg_address = f"DIRECCION: {customer_address}\n"
-        msg_notes = f"NOTAS: {customer_notes}\n" if customer_notes else ""
-        
-        full_message = msg_header + msg_items + msg_total + msg_customer + msg_address + msg_notes
-        encoded_message = urllib.parse.quote(full_message)
-        whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
-        
-        st.write("")
-        if customer_name.strip() and customer_address.strip():
-            st.markdown(
-                f'''<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">
-                    <span class="material-symbols-outlined" style="vertical-align: -5px; margin-right: 6px; font-size: 24px;">chat</span>
-                    Enviar pedido por WhatsApp
-                </a>''',
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón de envío</div>',
-                unsafe_allow_html=True
-            )
-
-# ==========================================
-# 7. PIE DE PÁGINA Y PANEL DE ADMIN
+# 7. PIE DE PÁGINA Y BOTÓN DE ADMIN
 # ==========================================
 st.write("---")
 st.markdown("<br><br>", unsafe_allow_html=True)
@@ -1039,5 +1029,4 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 col_foot1, col_foot_admin, col_foot2 = st.columns(3)
 with col_foot_admin:
     if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
-        st.session_state.show_admin_modal = True
-        st.rerun()
+        go_to_admin()
