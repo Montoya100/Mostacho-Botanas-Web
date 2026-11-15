@@ -261,7 +261,7 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* MODALES: ANCHO AMPLIO, FONDO BLANCO Y MÁXIMA CAPA (Z-INDEX) */
+    /* MODALES: ANCHO ESTRECHO Y EQUILIBRADO PARA QUE TODO RESALTE */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
@@ -273,10 +273,10 @@ st.markdown(f"""
     section[tabindex="-1"] > div, div[data-testid="stModal"] > div {{
         background-color: #ffffff !important;
         color: #1e293b !important;
-        width: 95vw !important;
-        max-width: 860px !important;
+        width: 90vw !important;
+        max-width: 520px !important;
         border-radius: 20px !important;
-        padding: 24px !important;
+        padding: 20px !important;
         max-height: 85vh !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         z-index: 1000000000 !important;
@@ -290,9 +290,9 @@ st.markdown(f"""
     /* Contenedor interno con scroll para que el botón de cerrar/listo nunca quede cortado */
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], 
     div[role="dialog"] div[data-testid="stVerticalBlock"] {{
-        max-height: 65vh !important;
+        max-height: 62vh !important;
         overflow-y: auto !important;
-        padding-right: 8px !important;
+        padding-right: 6px !important;
         background-color: #ffffff !important;
     }}
 
@@ -565,7 +565,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES ROBUSTO (CELDAS INDEPENDIENTES EN FILAS SEPARADAS)
+# MODAL DE VARIANTES CON ANCHO AJUSTADO Y BOTONES COMPACTOS GARANTIZADOS
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -584,26 +584,26 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Tarjeta contenedora individual para aislar cada variante y sus botones sin conflictos de ancho
+        # Tarjeta compacta optimizada para pantallas de todos los tamaños
         st.markdown(f"""
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px; margin-bottom: 14px;">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                <img src="{v_img}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <img src="{v_img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
                 <div>
-                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.95rem; display: block;">{v_name}</span>
-                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${v_price:.2f} MXN</span>
+                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.88rem; display: block;">{v_name}</span>
+                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.88rem;">${v_price:.2f} MXN</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
-        # Fila de controles exclusiva con tres columnas estándar para garantizar que el botón de incremento (+) y decremento (-) nunca se oculten
-        col_m, col_n, col_p = st.columns(3)
+        # Distribución en 3 columnas angostas y balanceadas para garantizar que (-) número (+) queden siempre visibles
+        col_m, col_n, col_p = st.columns([1, 1, 1])
         with col_m:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
                 st.rerun()
         with col_n:
-            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.2rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.1rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
         with col_p:
             if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
