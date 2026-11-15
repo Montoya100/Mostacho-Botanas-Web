@@ -45,7 +45,6 @@ if "current_modal_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# Datos guardados del cliente para recordar en su siguiente compra
 if "saved_customer_name" not in st.session_state:
     st.session_state.saved_customer_name = ""
 if "saved_customer_address" not in st.session_state:
@@ -191,14 +190,12 @@ if "products" not in st.session_state:
 if "popular_items" not in st.session_state:
     st.session_state.popular_items = load_saved_populares()
 
-# PALETA DE DISEÑO PROFESIONAL "MOSTACHO BOTANAS"
-bg_color = "#f8fafc"
+# PALETA DE DISEÑO REDISEÑADA (CLEAN APP PREMIUM)
+bg_color = "#f4f6f9"
 text_color = "#0f172a"
-sub_text_color = "#475569"
+sub_text_color = "#64748b"
 card_bg = "#ffffff"
 border_color = "#e2e8f0"
-input_bg = "#ffffff"
-input_text_color = "#0f172a"
 
 BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
@@ -207,9 +204,11 @@ BTN_CART_FAB_HOVER = "#d93800"
 
 st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* OCULTAR COMPLETAMENTE MARCA DE AGUA Y MENÚS DE STREAMLIT */
+    /* OCULTAR MARCA DE AGUA Y MENÚS */
     #MainMenu {{visibility: hidden !important; display: none !important;}}
     footer {{visibility: hidden !important; display: none !important;}}
     header {{visibility: hidden !important; display: none !important;}}
@@ -219,21 +218,25 @@ st.markdown(f"""
         color-scheme: light !important;
     }}
 
+    html, body, [class*="st"] {{
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }}
+
     div[data-baseweb="modal"] button[aria-label="Close"] {{
         display: none !important;
     }}
     div[data-baseweb="modal"] {{
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        backdrop-filter: blur(4px);
+        background-color: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(6px);
     }}
     div[data-baseweb="modal"] > div {{
         background-color: #ffffff !important;
         color: #0f172a !important;
         width: 92vw !important;
         max-width: 550px !important;
-        border-radius: 24px !important;
-        padding: 20px !important;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-radius: 28px !important;
+        padding: 24px !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }}
     div[data-baseweb="modal"] * {{
         color: #0f172a !important;
@@ -251,8 +254,8 @@ st.markdown(f"""
     }}
 
     .block-container {{
-        padding-top: 1rem !important;
-        padding-bottom: 7rem !important;
+        padding-top: 1.2rem !important;
+        padding-bottom: 7.5rem !important;
         max-width: 100% !important;
     }}
 
@@ -266,7 +269,7 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* INPUTS LIMPIOS Y BLANCOS */
+    /* CAMPOS DE TEXTO E INPUTS ULTRA MODERNOS Y REDONDEADOS */
     input, textarea, select, 
     div[data-baseweb="input"], div[data-baseweb="base-input"], 
     div[data-baseweb="textarea"], div[data-baseweb="select"],
@@ -275,7 +278,8 @@ st.markdown(f"""
         color: #0f172a !important;
         -webkit-text-fill-color: #0f172a !important;
         border-color: #cbd5e1 !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }}
 
     input::placeholder, textarea::placeholder {{
@@ -283,39 +287,40 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
+    /* ENCABEZADO SUPERIOR ELEGANTE */
     .sticky-header {{
         position: sticky;
         top: 0;
         z-index: 99999;
-        background-color: {bg_color};
-        padding: 10px 0 12px 0;
+        background-color: rgba(244, 246, 249, 0.95);
+        padding: 12px 0 14px 0;
         border-bottom: 1px solid {border_color};
-        margin-bottom: 15px;
-        backdrop-filter: blur(8px);
+        margin-bottom: 18px;
+        backdrop-filter: blur(12px);
     }}
 
     .app-title {{
-        font-size: 1.6rem !important;
+        font-size: 1.7rem !important;
         font-weight: 900 !important;
         color: {text_color} !important;
         margin: 0 !important;
         line-height: 1.1 !important;
-        letter-spacing: -0.5px;
+        letter-spacing: -0.8px;
     }}
     .app-subtitle {{
-        font-size: 0.78rem !important;
+        font-size: 0.75rem !important;
         color: {sub_text_color} !important;
         font-weight: 700 !important;
-        margin-top: 2px !important;
+        margin-top: 3px !important;
         display: block;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }}
 
-    /* BOTÓN FLOTANTE CARRITO (FAB) */
+    /* BOTÓN FLOTANTE CARRITO (FAB PREMIUM) */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
-        bottom: 78px !important;
+        bottom: 82px !important;
         left: 20px !important;
         right: auto !important;
         z-index: 999998 !important;
@@ -324,28 +329,29 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
-        padding: 10px 24px !important;
+        padding: 12px 26px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 0.95rem !important;
-        box-shadow: 0 10px 25px rgba(255, 69, 0, 0.4) !important;
+        font-size: 1rem !important;
+        box-shadow: 0 12px 30px rgba(255, 69, 0, 0.45) !important;
         border: none !important;
-        min-height: 48px !important;
+        min-height: 50px !important;
+        letter-spacing: -0.3px;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
-        transform: scale(1.05) !important;
+        transform: scale(1.06) !important;
         background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
     }}
 
     .whatsapp-btn-disabled {{
         background-color: #e2e8f0 !important;
         color: #64748b !important;
-        padding: 14px;
-        border-radius: 14px;
+        padding: 15px;
+        border-radius: 16px;
         text-align: center;
         font-weight: 700;
         font-size: 0.9rem;
-        margin-top: 10px;
+        margin-top: 12px;
         display: block;
         width: 100%;
     }}
@@ -353,16 +359,16 @@ st.markdown(f"""
     .whatsapp-btn-active {{
         background: linear-gradient(135deg, #25D366 0%, #1EBE5D 100%) !important;
         color: #ffffff !important;
-        padding: 14px;
-        border-radius: 14px;
+        padding: 16px;
+        border-radius: 16px;
         text-align: center;
         font-weight: 800;
-        font-size: 1rem;
-        margin-top: 10px;
+        font-size: 1.05rem;
+        margin-top: 12px;
         display: block;
         width: 100%;
         text-decoration: none;
-        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
     }}
     .whatsapp-btn-active:hover {{
         transform: scale(1.02);
@@ -375,19 +381,20 @@ st.markdown(f"""
         font-size: 0.9rem !important;
     }}
 
+    /* BOTONES GENERALES ESTILO APP */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: {BTN_GENERAL} !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         font-weight: 700 !important;
-        box-shadow: 0 2px 6px rgba(254, 131, 48, 0.2) !important;
-        transition: all 0.2s ease-in-out !important;
+        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.25) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }}
     button:hover, .stButton > button:hover {{
         background-color: {BTN_GENERAL_HOVER} !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(254, 131, 48, 0.3) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(254, 131, 48, 0.35) !important;
         color: #ffffff !important;
     }}
     button p, .stButton > button p, button span {{
@@ -395,7 +402,7 @@ st.markdown(f"""
     }}
 
     .qty-number {{
-        font-size: 1.1rem !important;
+        font-size: 1.15rem !important;
         font-weight: 900 !important;
         text-align: center;
         color: #0f172a !important;
@@ -409,90 +416,93 @@ st.markdown(f"""
         line-height: 1;
     }}
 
-    /* TARJETAS DE PRODUCTO ESTILO APP DE DELIVERY */
+    /* TARJETAS DE PRODUCTO TIPO GOURMET/DELIVERY */
     .product-card {{
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
-        border-radius: 18px;
-        padding: 12px;
-        margin-bottom: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        border-radius: 20px;
+        padding: 14px;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.02);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
         position: relative;
-        transition: transform 0.2s ease;
+        transition: all 0.25s ease;
     }}
     .product-card:hover {{
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        transform: translateY(-4px);
+        box-shadow: 0 20px 30px -10px rgba(0,0,0,0.08);
+        border-color: #cbd5e1;
     }}
     .product-title {{
-        font-size: 0.95rem;
+        font-size: 1rem;
         font-weight: 800;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
         color: #0f172a !important;
+        letter-spacing: -0.3px;
     }}
     .product-desc {{
-        font-size: 0.75rem;
+        font-size: 0.78rem;
         color: #64748b !important;
-        margin-bottom: 6px;
-        line-height: 1.3;
+        margin-bottom: 8px;
+        line-height: 1.35;
     }}
     .product-price {{
-        font-size: 1.1rem !important;
+        font-size: 1.15rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
+        letter-spacing: -0.5px;
     }}
     .bestseller-badge {{
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 12px;
+        right: 12px;
         background: linear-gradient(135deg, #FF4500 0%, #ff6a33);
         color: white;
-        font-size: 0.62rem;
+        font-size: 0.65rem;
         font-weight: 800;
-        padding: 3px 8px;
+        padding: 4px 10px;
         border-radius: 20px;
-        box-shadow: 0 2px 6px rgba(255,69,0,0.3);
+        box-shadow: 0 4px 10px rgba(255,69,0,0.35);
         z-index: 10;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
     }}
 
     .promo-banner {{
         background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
         color: white;
-        padding: 12px 16px;
-        border-radius: 16px;
+        padding: 14px 18px;
+        border-radius: 18px;
         text-align: center;
         font-weight: 700;
-        font-size: 0.85rem;
-        margin-bottom: 14px;
-        box-shadow: 0 6px 15px rgba(254, 131, 48, 0.25);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(254, 131, 48, 0.25);
     }}
 
     .store-closed-banner {{
         background: linear-gradient(135deg, #ef4444 0%, #dc2626);
         color: white;
         padding: 16px;
-        border-radius: 16px;
+        border-radius: 18px;
         text-align: center;
         font-weight: 800;
         font-size: 1rem;
         margin-bottom: 20px;
-        box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
     }}
 
     @media (min-width: 768px) {{
         .desktop-banner-img {{
-            height: 220px !important;
+            height: 240px !important;
         }}
     }}
     @media (max-width: 767px) {{
         .desktop-banner-img {{
-            height: 150px !important;
+            height: 160px !important;
         }}
     }}
 </style>
@@ -519,7 +529,7 @@ total_items = sum(st.session_state.cart.values())
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
-    st.markdown(f"<h3 style='color: #0f172a !important; margin-bottom: 2px;'>{base_name}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color: #0f172a !important; margin-bottom: 4px; font-weight: 800;'>{base_name}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
     st.write("---")
     
@@ -534,10 +544,10 @@ def variants_modal_dialog(base_name, variants_list):
             
         col_v1, col_v2, col_v3 = st.columns([1, 2.2, 1.8])
         with col_v1:
-            st.image(v_img, width=45)
+            st.image(v_img, width=48)
         with col_v2:
-            st.markdown(f"<span style='color: #0f172a !important; font-weight: 800; font-size: 0.9rem;'>{v_name}</span>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #0f172a !important; font-weight: 800; font-size: 0.95rem;'>{v_name}</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             qty_val = st.session_state.cart.get(v_id, 0)
             sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1, 1])
@@ -551,7 +561,7 @@ def variants_modal_dialog(base_name, variants_list):
                 if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                     add_to_cart(v_id)
                     st.rerun()
-        st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 10px 0; border-color: #f1f5f9;'>", unsafe_allow_html=True)
     
     st.write("")
     if st.button(":material/check_circle: Listo", type="primary", use_container_width=True, key="close_modal_btn"):
@@ -567,8 +577,8 @@ if st.session_state.show_variants_modal:
 st.markdown(f"""
 <div class="sticky-header">
     <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="{LOGO_URL}" style="width: 44px; height: 44px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="{LOGO_URL}" style="width: 48px; height: 48px; object-fit: contain; background: transparent;" onerror="this.style.display='none'" />
             <div>
                 <h1 class="app-title">Mostacho Botanas</h1>
                 <span class="app-subtitle">Catálogo y pedidos en línea</span>
@@ -601,9 +611,6 @@ with col_nav3:
 
 st.write("")
 
-# ==========================================
-# VERIFICAR SI LA TIENDA ESTÁ ABIERTA O CERRADA
-# ==========================================
 store_is_open = st.session_state.store_config.get("store_open", True)
 
 # ==========================================
@@ -629,7 +636,7 @@ if st.session_state.nav_view == "catalogo":
         banner_to_show = DEFAULT_BANNER
 
     st.markdown(f"""
-    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 20px; padding: 6px; margin-bottom: 16px; box-shadow: 0 6px 15px rgba(0,0,0,0.03); text-align: center;">
+    <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 22px; padding: 8px; margin-bottom: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); text-align: center;">
         <img src="{banner_to_show}" class="desktop-banner-img" style="width: 100%; object-fit: cover; border-radius: 16px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
     </div>
     """, unsafe_allow_html=True)
@@ -667,10 +674,10 @@ if st.session_state.nav_view == "catalogo":
                     p_img = DEFAULT_PRODUCT_IMG
 
             st.markdown(f"""
-            <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 16px; padding: 10px; text-align: center; margin-bottom: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.02);">
-                <img src="{p_img}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 12px;" onerror="this.onerror=null;this.src='{DEFAULT_PRODUCT_IMG}';" />
-                <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #0f172a;">{pop_p.get('name', 'Producto')}</div>
-                <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1rem;">${float(pop_p.get('price', 0)):.2f} MXN</div>
+            <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 18px; padding: 12px; text-align: center; margin-bottom: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.03);">
+                <img src="{p_img}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 12px;" onerror="this.onerror=null;this.src='{DEFAULT_PRODUCT_IMG}';" />
+                <div style="font-weight: 800; font-size: 0.88rem; margin-top: 8px; color: #0f172a;">{pop_p.get('name', 'Producto')}</div>
+                <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 1.05rem; margin-top: 2px;">${float(pop_p.get('price', 0)):.2f} MXN</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -780,7 +787,7 @@ if st.session_state.nav_view == "catalogo":
                         except:
                             st.image(DEFAULT_PRODUCT_IMG, use_container_width=True)
                         
-                        st.markdown(f'<div class="product-title" style="margin-top: 8px;">{base_name}</div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="product-title" style="margin-top: 10px;">{base_name}</div>', unsafe_allow_html=True)
                         desc_text = str(representative.get("description", "")).strip()
                         if desc_text and desc_text.lower() != "nan":
                             st.markdown(f'<div class="product-desc">{desc_text}</div>', unsafe_allow_html=True)
@@ -882,11 +889,9 @@ elif st.session_state.nav_view == "carrito":
         st.write("---")
         st.subheader(":material/local_shipping: Datos de Entrega y Ubicación GPS")
         
-        # Campos con memoria guardada para comodidad del cliente
         customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
         
-        # Selector de Método de Pago y Cálculo de Cambio en Efectivo
         st.markdown("**Forma de pago:**")
         payment_method = st.selectbox("Selecciona cómo pagarás", ["Efectivo", "Transferencia bancaria", "Tarjeta al recibir"], label_visibility="collapsed")
         
@@ -899,7 +904,6 @@ elif st.session_state.nav_view == "carrito":
         customer_gps = st.text_input("Enlace o Coordenadas de Google Maps (Opcional)", value=st.session_state.saved_customer_gps, placeholder="Ej. https://maps.app.goo.gl/... o 18.456,-97.389")
         customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Tocar dos veces el timbre")
         
-        # Guardar en session_state automáticamente para futuras compras
         st.session_state.saved_customer_name = customer_name
         st.session_state.saved_customer_address = customer_address
         st.session_state.saved_customer_gps = customer_gps
