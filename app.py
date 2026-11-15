@@ -261,11 +261,12 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* FORZAR FONDO BLANCO Y TEXTO OSCURO EN TODOS LOS MODALES    */
+    /* MODALES: FONDO BLANCO, MÁXIMA CAPA (Z-INDEX) Y SCROLL LIBRE */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
-        background-color: rgba(0, 0, 0, 0.6) !important;
+        background-color: rgba(0, 0, 0, 0.65) !important;
+        z-index: 999999999 !important;
     }}
     
     div[data-baseweb="modal"] > div, div[role="dialog"] > div,
@@ -273,22 +274,25 @@ st.markdown(f"""
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 92vw !important;
-        max-width: 600px !important;
+        max-width: 580px !important;
         border-radius: 20px !important;
         padding: 24px !important;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        max-height: 85vh !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+        z-index: 1000000000 !important;
     }}
 
-    /* Asegurar que todos los textos e hijos dentro de CUALQUIER modal sean oscuros */
+    /* Asegurar texto oscuro y sin fondos oscuros internos en el modal */
     div[data-baseweb="modal"] *, div[role="dialog"] *, section[tabindex="-1"] * {{
         color: #1e293b !important;
     }}
 
+    /* Contenedor interno con scroll para que el botón de cerrar/listo nunca quede cortado */
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], 
     div[role="dialog"] div[data-testid="stVerticalBlock"] {{
-        max-height: 60vh !important;
+        max-height: 65vh !important;
         overflow-y: auto !important;
-        padding-right: 6px !important;
+        padding-right: 8px !important;
         background-color: #ffffff !important;
     }}
 
@@ -348,12 +352,13 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
+    /* BOTÓN FLOTANTE (FAB) DEL CARRITO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
         left: 20px !important;
         right: auto !important;
-        z-index: 99999999 !important;
+        z-index: 99999 !important;
         width: auto !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
@@ -545,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (FONDO BLANCO GARANTIZADO)
+# MODAL DE VARIANTES (FONDO BLANCO Y SCROLL INTERNO)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
