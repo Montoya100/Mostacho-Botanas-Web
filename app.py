@@ -413,7 +413,7 @@ st.markdown(f"""
     }}
 
     .whatsapp-btn-active {{
-        background: linear-gradient(135deg, {25D366} 0%, #1EBE5D 100%) !important;
+        background: linear-gradient(135deg, #25D366 0%, #1EBE5D 100%) !important;
         color: #ffffff !important;
         padding: 14px;
         border-radius: 14px;
