@@ -46,6 +46,9 @@ if "current_modal_base" not in st.session_state:
 if "current_modal_items" not in st.session_state:
     st.session_state.current_modal_items = []
 
+if "show_admin_modal" not in st.session_state:
+    st.session_state.show_admin_modal = False
+
 # Memoria para datos recurrentes del cliente
 if "saved_customer_name" not in st.session_state:
     st.session_state.saved_customer_name = ""
@@ -576,6 +579,187 @@ if st.session_state.show_variants_modal:
     variants_modal_dialog(st.session_state.current_modal_base, st.session_state.current_modal_items)
 
 # ==========================================
+# PANEL DE ADMINISTRACIÓN (DIÁLOGO SEGURO)
+# ==========================================
+@st.dialog("Panel de Administración y Configuración")
+def admin_modal():
+    if not st.session_state.admin_authenticated:
+        st.subheader("Acceso Restringido")
+        pass_input = st.text_input("Ingresa la contraseña de administrador", type="password", placeholder="Clave de 4 dígitos...")
+        if st.button("Ingresar"):
+            if pass_input == "7031":
+                st.session_state.admin_authenticated = True
+                st.rerun()
+            else:
+                st.error("Contraseña incorrecta.")
+    else:
+        st.success("¡Acceso concedido!")
+        
+        tab_prod, tab_pop, tab_sugg, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "💡 Sugerencia Carrito", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
+        
+        with tab_prod:
+            st.markdown("### Inventario de Productos")
+            st.info("💡 Para agrupar variantes (ej. Frituras con/sin chile), pon el mismo nombre base seguido de la variante entre paréntesis. Los productos se ordenan alfabéticamente en automático.")
+            
+            uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
+            if uploaded_excel is not None:
+                try:
+                    if uploaded_excel.name.endswith(".csv"):
+                        df_uploaded = pd.read_csv(uploaded_excel)
+                    else:
+                        df_uploaded = pd.read_excel(uploaded_excel)
+                    
+                    if "name" in df_uploaded.columns and "price" in df_uploaded.columns:
+                        new_loaded_list = []
+                        for idx, row in df_uploaded.iterrows():
+                            r_id = str(row.get("id", f"excel_{idx}"))
+                            r_desc = row.get("description", "")
+                            r_img = str(row.get("image", "")).strip()
+                            
+                            desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
+                            img_val = r_img if r_img != "" and r_img.lower() != "nan" and "placeholder" not in r_img else DEFAULT_PRODUCT_IMG
+                            
+                            new_loaded_list.append({
+                                "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
+                                "name": str(row.get("name", "Producto")),
+                                "category": str(row.get("category", "Individual")),
+                                "price": float(row.get("price", 0.0)),
+                                "description": desc_val,
+                                "image": img_val
+                            })
+                        new_loaded_list = sorted(new_loaded_list, key=lambda x: str(x.get("name", "")).lower())
+                        st.session_state.products = new_loaded_list
+                        save_products_to_file(new_loaded_list)
+                        st.success("¡Catálogo cargado y ordenado alfabéticamente desde el archivo!")
+                        st.rerun()
+                    else:
+                        st.error("El archivo debe contener al menos las columnas 'name' y 'price'.")
+                except Exception as e:
+                    st.error(f"Error al procesar el archivo: {e}")
+
+            st.write("---")
+            
+            current_sorted_products = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
+            df_current = pd.DataFrame(current_sorted_products)
+            
+            column_config = {
+                "id": None,
+                "category": st.column_config.SelectboxColumn(
+                    "Categoría",
+                    options=["Individual", "Para compartir"],
+                    required=True
+                )
+            }
+            
+            edited_df = st.data_editor(
+                df_current, 
+                num_rows="dynamic", 
+                key="editor_admin_table",
+                column_config=column_config,
+                hide_index=True,
+                use_container_width=True
+            )
+            
+            if st.button("Guardar Cambios de Productos"):
+                updated_list = []
+                for idx, row in edited_df.iterrows():
+                    raw_id = row.get("id")
+                    prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
+                    
+                    raw_img = str(row.get("image", "")).strip()
+                    prod_img = raw_img if raw_img != "" and raw_img.lower() != "nan" and "placeholder" not in raw_img else DEFAULT_PRODUCT_IMG
+                    
+                    raw_desc = row.get("description")
+                    prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
+                    
+                    updated_list.append({
+                        "id": prod_id,
+                        "name": str(row.get("name", "Nuevo producto")),
+                        "category": str(row.get("category", "Individual")),
+                        "price": float(row.get("price", 0.0)),
+                        "description": prod_desc,
+                        "image": prod_img
+                    })
+                    
+                updated_list = sorted(updated_list, key=lambda x: str(x.get("name", "")).lower())
+                st.session_state.products = updated_list
+                save_products_to_file(updated_list)
+                st.success("¡Productos guardados y ordenados alfabéticamente!")
+                st.rerun()
+
+        with tab_pop:
+            st.markdown("### Seleccionar productos que aparecerán en la sección 'Populares'")
+            current_pop_ids = [str(p.get("id")) for p in st.session_state.popular_items]
+            
+            selected_populares_new = []
+            for prod in st.session_state.products:
+                p_id = str(prod.get("id"))
+                p_name = str(prod.get("name"))
+                is_currently_pop = p_id in current_pop_ids
+                
+                if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
+                    selected_populares_new.append({
+                        "id": p_id,
+                        "name": p_name,
+                        "price": prod.get("price"),
+                        "image": prod.get("image", DEFAULT_PRODUCT_IMG)
+                    })
+            
+            if st.button("Guardar Populares"):
+                st.session_state.popular_items = selected_populares_new
+                save_populares_to_file(selected_populares_new)
+                st.success("¡Populares actualizados con éxito!")
+                st.rerun()
+
+        with tab_sugg:
+            st.markdown("### Producto sugerido para el carrito")
+            prod_options = {p.get("name"): p.get("id") for p in st.session_state.products}
+            current_sugg_id = st.session_state.cart_suggestion.get("id")
+            current_sugg_name = next((name for name, pid in prod_options.items() if str(pid) == str(current_sugg_id)), list(prod_options.keys())[0] if prod_options else "")
+            
+            selected_sugg_name = st.selectbox("Elige qué producto sugerir en el carrito", options=list(prod_options.keys()), index=list(prod_options.keys()).index(current_sugg_name) if current_sugg_name in prod_options else 0)
+            
+            if st.button("Guardar Sugerencia"):
+                chosen_id = prod_options.get(selected_sugg_name)
+                st.session_state.cart_suggestion = {"id": chosen_id}
+                save_suggestion_to_file(st.session_state.cart_suggestion)
+                st.success("¡Sugerencia guardada correctamente!")
+                st.rerun()
+
+        with tab_banner:
+            st.markdown("### Cambiar Imagen Rectangular del Banner")
+            st.caption("Tamaño recomendado: 1200 x 500 px. Actualiza el enlace de la imagen principal:")
+            new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
+            if st.button("Guardar Banner"):
+                if new_banner_url.strip():
+                    st.session_state.banner_url = new_banner_url.strip()
+                    save_banner_to_file(new_banner_url.strip())
+                    st.success("¡Banner actualizado con éxito!")
+                    st.rerun()
+
+        with tab_upload:
+            st.markdown("### Subir Imagen Directamente")
+            st.caption("Tamaño recomendado: Artículos (600x600 px)")
+            uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
+            if uploaded_file is not None:
+                file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
+                with open(file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                
+                st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
+                st.image(file_path, width=200)
+                local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
+                st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
+        
+        st.write("---")
+        if st.button("Cerrar Sesión"):
+            st.session_state.admin_authenticated = False
+            st.rerun()
+
+if st.session_state.show_admin_modal:
+    admin_modal()
+
+# ==========================================
 # 4. ENCABEZADO Y BÚSQUEDA
 # ==========================================
 col_title, col_cart_btn = st.columns([3, 1])
@@ -847,182 +1031,8 @@ elif st.session_state.nav_view == "carrito":
 st.write("---")
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-@st.dialog("Panel de Administración y Configuración")
-def admin_modal():
-    if not st.session_state.admin_authenticated:
-        st.subheader("Acceso Restringido")
-        pass_input = st.text_input("Ingresa la contraseña de administrador", type="password", placeholder="Clave de 4 dígitos...")
-        if st.button("Ingresar"):
-            if pass_input == "7031":
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error("Contraseña incorrecta.")
-    else:
-        st.success("¡Acceso concedido!")
-        
-        tab_prod, tab_pop, tab_sugg, tab_banner, tab_upload = st.tabs(["📦 Editar Productos", "⭐ Populares", "💡 Sugerencia Carrito", "🖼️ Imagen Banner", "📤 Subir Imágenes"])
-        
-        with tab_prod:
-            st.markdown("### Inventario de Productos")
-            st.info("💡 Para agrupar variantes (ej. Frituras con/sin chile), pon el mismo nombre base seguido de la variante entre paréntesis. Los productos se ordenan alfabéticamente en automático.")
-            
-            uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
-            if uploaded_excel is not None:
-                try:
-                    if uploaded_excel.name.endswith(".csv"):
-                        df_uploaded = pd.read_csv(uploaded_excel)
-                    else:
-                        df_uploaded = pd.read_excel(uploaded_excel)
-                    
-                    if "name" in df_uploaded.columns and "price" in df_uploaded.columns:
-                        new_loaded_list = []
-                        for idx, row in df_uploaded.iterrows():
-                            r_id = str(row.get("id", f"excel_{idx}"))
-                            r_desc = row.get("description", "")
-                            r_img = str(row.get("image", "")).strip()
-                            
-                            desc_val = str(r_desc).strip() if pd.notna(r_desc) and str(r_desc).strip() != "nan" else ""
-                            img_val = r_img if r_img != "" and r_img.lower() != "nan" and "placeholder" not in r_img else DEFAULT_PRODUCT_IMG
-                            
-                            new_loaded_list.append({
-                                "id": r_id if r_id.strip() != "" and r_id != "nan" else f"excel_{idx}",
-                                "name": str(row.get("name", "Producto")),
-                                "category": str(row.get("category", "Individual")),
-                                "price": float(row.get("price", 0.0)),
-                                "description": desc_val,
-                                "image": img_val
-                            })
-                        new_loaded_list = sorted(new_loaded_list, key=lambda x: str(x.get("name", "")).lower())
-                        st.session_state.products = new_loaded_list
-                        save_products_to_file(new_loaded_list)
-                        st.success("¡Catálogo cargado y ordenado alfabéticamente desde el archivo!")
-                        st.rerun()
-                    else:
-                        st.error("El archivo debe contener al menos las columnas 'name' y 'price'.")
-                except Exception as e:
-                    st.error(f"Error al procesar el archivo: {e}")
-
-            st.write("---")
-            
-            current_sorted_products = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
-            df_current = pd.DataFrame(current_sorted_products)
-            
-            column_config = {
-                "id": None,
-                "category": st.column_config.SelectboxColumn(
-                    "Categoría",
-                    options=["Individual", "Para compartir"],
-                    required=True
-                )
-            }
-            
-            edited_df = st.data_editor(
-                df_current, 
-                num_rows="dynamic", 
-                key="editor_admin_table",
-                column_config=column_config,
-                hide_index=True,
-                use_container_width=True
-            )
-            
-            if st.button("Guardar Cambios de Productos"):
-                updated_list = []
-                for idx, row in edited_df.iterrows():
-                    raw_id = row.get("id")
-                    prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
-                    
-                    raw_img = str(row.get("image", "")).strip()
-                    prod_img = raw_img if raw_img != "" and raw_img.lower() != "nan" and "placeholder" not in raw_img else DEFAULT_PRODUCT_IMG
-                    
-                    raw_desc = row.get("description")
-                    prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
-                    
-                    updated_list.append({
-                        "id": prod_id,
-                        "name": str(row.get("name", "Nuevo producto")),
-                        "category": str(row.get("category", "Individual")),
-                        "price": float(row.get("price", 0.0)),
-                        "description": prod_desc,
-                        "image": prod_img
-                    })
-                    
-                updated_list = sorted(updated_list, key=lambda x: str(x.get("name", "")).lower())
-                st.session_state.products = updated_list
-                save_products_to_file(updated_list)
-                st.success("¡Productos guardados y ordenados alfabéticamente!")
-                st.rerun()
-
-        with tab_pop:
-            st.markdown("### Seleccionar productos que aparecerán en la sección 'Populares'")
-            current_pop_ids = [str(p.get("id")) for p in st.session_state.popular_items]
-            
-            selected_populares_new = []
-            for prod in st.session_state.products:
-                p_id = str(prod.get("id"))
-                p_name = str(prod.get("name"))
-                is_currently_pop = p_id in current_pop_ids
-                
-                if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
-                    selected_populares_new.append({
-                        "id": p_id,
-                        "name": p_name,
-                        "price": prod.get("price"),
-                        "image": prod.get("image", DEFAULT_PRODUCT_IMG)
-                    })
-            
-            if st.button("Guardar Populares"):
-                st.session_state.popular_items = selected_populares_new
-                save_populares_to_file(selected_populares_new)
-                st.success("¡Populares actualizados con éxito!")
-                st.rerun()
-
-        with tab_sugg:
-            st.markdown("### Producto sugerido para el carrito")
-            prod_options = {p.get("name"): p.get("id") for p in st.session_state.products}
-            current_sugg_id = st.session_state.cart_suggestion.get("id")
-            current_sugg_name = next((name for name, pid in prod_options.items() if str(pid) == str(current_sugg_id)), list(prod_options.keys())[0] if prod_options else "")
-            
-            selected_sugg_name = st.selectbox("Elige qué producto sugerir en el carrito", options=list(prod_options.keys()), index=list(prod_options.keys()).index(current_sugg_name) if current_sugg_name in prod_options else 0)
-            
-            if st.button("Guardar Sugerencia"):
-                chosen_id = prod_options.get(selected_sugg_name)
-                st.session_state.cart_suggestion = {"id": chosen_id}
-                save_suggestion_to_file(st.session_state.cart_suggestion)
-                st.success("¡Sugerencia guardada correctamente!")
-                st.rerun()
-
-        with tab_banner:
-            st.markdown("### Cambiar Imagen Rectangular del Banner")
-            st.caption("Tamaño recomendado: 1200 x 500 px. Actualiza el enlace de la imagen principal:")
-            new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
-            if st.button("Guardar Banner"):
-                if new_banner_url.strip():
-                    st.session_state.banner_url = new_banner_url.strip()
-                    save_banner_to_file(new_banner_url.strip())
-                    st.success("¡Banner actualizado con éxito!")
-                    st.rerun()
-
-        with tab_upload:
-            st.markdown("### Subir Imagen Directamente")
-            st.caption("Tamaño recomendado: Artículos (600x600 px)")
-            uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
-            if uploaded_file is not None:
-                file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
-                with open(file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                
-                st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
-                st.image(file_path, width=200)
-                local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
-                st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
-        
-        st.write("---")
-        if st.button("Cerrar Sesión"):
-            st.session_state.admin_authenticated = False
-            st.rerun()
-
 col_foot1, col_foot_admin, col_foot2 = st.columns(3)
 with col_foot_admin:
     if st.button(":material/settings: Admin", use_container_width=True, key="admin_footer_btn"):
-        admin_modal()
+        st.session_state.show_admin_modal = True
+        st.rerun()
