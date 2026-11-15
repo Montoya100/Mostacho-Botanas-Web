@@ -261,7 +261,7 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* MODALES: ANCHO AMPLIADO A 900PX, FONDO BLANCO Y Z-INDEX     */
+    /* MODALES: ANCHO AMPLIO, FONDO BLANCO Y MÁXIMA CAPA (Z-INDEX) */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
@@ -274,9 +274,9 @@ st.markdown(f"""
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 95vw !important;
-        max-width: 900px !important;
+        max-width: 820px !important;
         border-radius: 20px !important;
-        padding: 28px !important;
+        padding: 24px !important;
         max-height: 85vh !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         z-index: 1000000000 !important;
@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES ADAPTABLE (MÓVIL / WEB)
+# MODAL DE VARIANTES CON DOS BOTONES (- y +)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -569,15 +569,20 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura limpia de 3 columnas para PC: [Imagen, Nombre/Precio y Botón de Incremento/Agregar]
-        col_v1, col_v2, col_v3 = st.columns([0.6, 3.0, 2.2])
+        # Estructura equilibrada de 4 columnas: [Imagen, Nombre/Precio, Controles de cantidad (- / número / +)]
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.8, 0.9, 0.9, 0.9])
         with col_v1:
-            st.image(v_img, width=45)
+            st.image(v_img, width=42)
         with col_v2:
-            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
         with col_v3:
-            btn_label = f"Agregar ({qty_in_cart})" if qty_in_cart > 0 else "Agregar +"
-            if st.button(btn_label, key=f"m_add_{v_id}_{idx}", use_container_width=True):
+            if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
+                remove_from_cart(v_id)
+                st.rerun()
+        with col_v4:
+            st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+        with col_v5:
+            if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
                 st.rerun()
         st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
@@ -1035,7 +1040,7 @@ elif st.session_state.nav_view == "admin":
             go_to_catalogo()
 
 # ==========================================
-# 7. PIE DE PÁGINA Y BOTÓN DE ADMIN
+# 7. PIE DE PÁGINY BOTÓN DE ADMIN
 # ==========================================
 st.write("---")
 st.markdown("<br><br>", unsafe_allow_html=True)
