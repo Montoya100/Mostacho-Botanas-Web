@@ -352,7 +352,7 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) ISLA FLOTANTE ELEVADA (Libera marca de agua de StreamYard) Y PROPORCIONADA */
+    /* BOTÓN FLOTANTE (FAB) ISLA FLOTANTE CON 15% MÁS DE ALTURA Y ELEVADA SOBRE STREAMYARD */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 45px !important;
@@ -368,14 +368,14 @@ st.markdown(f"""
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        padding: 8px 22px !important;
+        padding: 10px 24px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 0.9rem !important;
+        font-size: 0.95rem !important;
         box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        min-height: 40px !important;
-        height: 40px !important;
+        min-height: 46px !important;
+        height: 46px !important;
         line-height: 1 !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -413,7 +413,7 @@ st.markdown(f"""
     }}
 
     .whatsapp-btn-active {{
-        background: linear-gradient(135deg, #25D366 0%, #1EBE5D 100%) !important;
+        background: linear-gradient(135deg, {25D366} 0%, #1EBE5D 100%) !important;
         color: #ffffff !important;
         padding: 14px;
         border-radius: 14px;
@@ -580,8 +580,8 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura limpia y balanceada de 5 columnas para asegurar que los botones se muestren siempre
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.6, 1.1, 0.6, 1.1])
+        # Estructura infalible de 5 columnas con anchos generosos para web y móvil
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.4, 1.2, 0.6, 1.2])
         with col_v1:
             st.image(v_img, width=40)
         with col_v2:
