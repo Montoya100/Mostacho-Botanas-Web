@@ -565,7 +565,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON NUEVA FILA DEDICADA PARA LOS BOTONES
+# MODAL DE VARIANTES CON TARJETAS Y FILA INFERIOR DE CONTROLES
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -584,15 +584,20 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # FILA 1: Imagen, Nombre y Precio ocupando todo el ancho superior de forma limpia
-        col_img, col_info = st.columns([0.6, 3.4])
-        with col_img:
-            st.image(v_img, width=42)
-        with col_info:
-            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
+        # Tarjeta visual contenedora para cada variante para ordenar la información y los botones de forma impecable
+        st.markdown(f"""
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <img src="{v_img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 8px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
+                <div>
+                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;">{v_name}</span>
+                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;">${v_price:.2f} MXN</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         
-        # FILA 2: Controles de cantidad (- , número, +) en su propia fila dedicada con columnas espaciosas
-        c_space, c_minus, c_num, c_plus = st.columns([1.5, 1, 1, 1])
+        # Fila independiente y dedicada exclusiva para los botones de control de cantidad en la web y móvil
+        col_space, c_minus, c_num, c_plus = st.columns([1.5, 1, 1, 1])
         with c_minus:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
@@ -604,7 +609,7 @@ def variants_modal_dialog(base_name, variants_list):
                 add_to_cart(v_id)
                 st.rerun()
                 
-        st.markdown("<hr style='margin: 12px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     
     st.write("")
     if st.button("Listo / Ver Carrito", type="primary", use_container_width=True, key="close_modal_btn"):
