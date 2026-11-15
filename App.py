@@ -16,7 +16,7 @@ if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
 st.set_page_config(
-    page_title="Mostacho Botanas",
+    page_title="Julissa",
     page_icon=LOGO_URL,
     layout="wide",
     initial_sidebar_state="collapsed"
