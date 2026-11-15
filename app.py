@@ -352,35 +352,28 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) ISLA FLOTANTE CON 15% MÁS DE ALTURA Y ELEVADA SOBRE STREAMYARD */
+    /* BOTÓN FLOTANTE (FAB) ESTÁNDAR UBICADO A LA IZQUIERDA */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
-        bottom: 45px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
+        bottom: 24px !important;
+        left: 24px !important;
         right: auto !important;
+        transform: none !important;
         z-index: 99999 !important;
         width: max-content !important;
-        max-width: 90vw !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button,
     div[data-testid="stButton"]:has(button[kind="primary"]) > button * {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        padding: 10px 24px !important;
+        padding: 12px 24px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
         font-size: 0.95rem !important;
         box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        min-height: 46px !important;
-        height: 46px !important;
-        line-height: 1 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px !important;
+        min-height: 45px !important;
         white-space: nowrap !important;
     }}
 
@@ -580,8 +573,8 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura infalible de 5 columnas con anchos generosos para web y móvil
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.4, 1.2, 0.6, 1.2])
+        # Estructura robusta con columnas proporcionales garantizadas para web y móvil
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.4, 1.0, 0.6, 1.0])
         with col_v1:
             st.image(v_img, width=40)
         with col_v2:
