@@ -261,7 +261,7 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* MODALES: FONDO BLANCO, MÁXIMA CAPA (Z-INDEX) Y SCROLL LIBRE */
+    /* MODALES: FONDO BLANCO, MÁXIMA CAPA (Z-INDEX) Y ANCHO AMPLIO  */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
@@ -273,8 +273,8 @@ st.markdown(f"""
     section[tabindex="-1"] > div, div[data-testid="stModal"] > div {{
         background-color: #ffffff !important;
         color: #1e293b !important;
-        width: 92vw !important;
-        max-width: 580px !important;
+        width: 95vw !important;
+        max-width: 680px !important;
         border-radius: 20px !important;
         padding: 24px !important;
         max-height: 85vh !important;
@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (FONDO BLANCO Y SCROLL INTERNO)
+# MODAL DE VARIANTES (DISTRIBUCIÓN AMPLIA Y CLARA)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -567,7 +567,8 @@ def variants_modal_dialog(base_name, variants_list):
         if not v_img or v_img.lower() == "nan" or "placeholder" in v_img:
             v_img = DEFAULT_PRODUCT_IMG
             
-        col_v1, col_v2, col_v3 = st.columns([1, 2.2, 1.8])
+        # Distribución optimizada para que el nombre tenga espacio y los controles queden intactos
+        col_v1, col_v2, col_v3 = st.columns([0.8, 2.6, 2.0])
         with col_v1:
             st.image(v_img, width=45)
         with col_v2:
@@ -575,7 +576,7 @@ def variants_modal_dialog(base_name, variants_list):
             st.markdown(f"<span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span>", unsafe_allow_html=True)
         with col_v3:
             qty_val = st.session_state.cart.get(v_id, 0)
-            sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1, 1])
+            sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1.2, 1])
             with sub_cv1:
                 if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                     remove_from_cart(v_id)
