@@ -261,17 +261,18 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* MODALES: DISEÑO COMPACTO Y VERTICALMENTE OPTIMIZADO PARA MÓVIL */
+    /* MODALES: FONDO TOTALMENTE BLANCO Y LIMPIO (SIN RECUADROS NEGROS) */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
-        background-color: rgba(0, 0, 0, 0.65) !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
         z-index: 999999999 !important;
     }}
     
     div[data-baseweb="modal"] > div, div[role="dialog"] > div,
     section[tabindex="-1"] > div, div[data-testid="stModal"] > div {{
         background-color: #ffffff !important;
+        background: #ffffff !important;
         color: #1e293b !important;
         width: 90vw !important;
         max-width: 440px !important;
@@ -281,11 +282,19 @@ st.markdown(f"""
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         z-index: 1000000000 !important;
         margin: auto !important;
+        border: none !important;
     }}
 
-    /* Asegurar texto oscuro y sin fondos oscuros internos en el modal */
+    /* Forzar fondo blanco puro y texto oscuro en todos los elementos hijos del modal */
     div[data-baseweb="modal"] *, div[role="dialog"] *, section[tabindex="-1"] * {{
+        background-color: transparent !important;
         color: #1e293b !important;
+    }}
+
+    /* Mantener fondo blanco específico para tarjetas internas del modal */
+    div[data-baseweb="modal"] div[style*="background: #ffffff"], 
+    div[role="dialog"] div[style*="background: #ffffff"] {{
+        background-color: #ffffff !important;
     }}
 
     /* Contenedor interno con scroll optimizado y márgenes compactos */
@@ -566,11 +575,12 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES ULTRA COMPACTO PARA MÓVIL
+# MODAL DE VARIANTES CON TÍTULO EN NARANJA Y FONDO BLANCO PURO
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
-    st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 2px; text-align: center; font-size: 1.3rem;'>{base_name}</h3>", unsafe_allow_html=True)
+    # Título principal en color naranja (#FE8330)
+    st.markdown(f"<h3 style='color: {BTN_GENERAL} !important; margin-bottom: 2px; text-align: center; font-size: 1.3rem;'>{base_name}</h3>", unsafe_allow_html=True)
     st.markdown("<p style='color: #64748b !important; font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 8px;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
     st.markdown("<hr style='margin: 4px 0 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
@@ -585,7 +595,7 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Tarjeta con padding reducido para ahorrar espacio vertical exacto
+        # Tarjeta compacta con fondo blanco garantizado
         st.markdown(f"""
         <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 6px 10px; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
