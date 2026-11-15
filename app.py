@@ -46,6 +46,13 @@ if "current_modal_base" not in st.session_state:
 if "current_modal_items" not in st.session_state:
     st.session_state.current_modal_items = []
 
+# Memoria para datos recurrentes del cliente
+if "saved_customer_name" not in st.session_state:
+    st.session_state.saved_customer_name = ""
+
+if "saved_customer_address" not in st.session_state:
+    st.session_state.saved_customer_address = ""
+
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
@@ -344,7 +351,7 @@ st.markdown(f"""
         color: #ffffff !important;
         padding: 12px 24px !important;
         border-radius: 50px !important;
-        font-weight: 800 !important;
+        font-weight: 900 !important;
         font-size: 1rem !important;
         box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5) !important;
         border: none !important;
@@ -618,10 +625,10 @@ if st.session_state.nav_view == "catalogo":
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. SECCIÓN DE POPULARES (⭐ Populares con icono outline)
+    # 1. SECCIÓN DE POPULARES (Icono outline local_fire_department + etiqueta con flamita y texto)
     popular_ids = [str(p.get("id")) for p in st.session_state.popular_items]
     if popular_ids:
-        st.markdown("### <span class='material-symbols-outlined' style='font-size: 24px; color: #FE8330;'>star</span> Populares", unsafe_allow_html=True)
+        st.markdown("### <span class='material-symbols-outlined' style='font-size: 24px; color: #FE8330;'>local_fire_department</span> Populares", unsafe_allow_html=True)
         pop_list = [p for p in st.session_state.products if str(p.get("id")) in popular_ids]
         if pop_list:
             pop_cols = st.columns(min(len(pop_list), 3))
@@ -630,7 +637,7 @@ if st.session_state.nav_view == "catalogo":
                     pid = p.get("id")
                     st.markdown(f"""
                     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 14px; padding: 10px; text-align: center; margin-bottom: 10px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div class="popular-badge">⭐ Populares</div>
+                        <div class="popular-badge">🔥 Lo más pedido</div>
                         <img src="{p.get('image', DEFAULT_PRODUCT_IMG)}" style="width: 100%; height: 95px; object-fit: cover; border-radius: 8px; margin-top: 15px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
                         <div style="font-weight: 800; font-size: 0.85rem; margin-top: 6px; color: #1e293b;">{p.get('name')}</div>
                         <div style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;">${p.get('price'):.2f} MXN</div>
@@ -641,7 +648,7 @@ if st.session_state.nav_view == "catalogo":
                         st.rerun()
             st.write("---")
 
-    # 2. CATEGORÍAS (Movidas abajo de populares)
+    # 2. CATEGORÍAS (Ubicadas justo abajo de Populares)
     cats = ["Todo", "Individual", "Para compartir"]
     cat_cols = st.columns(len(cats))
     for i, c in enumerate(cats):
@@ -744,7 +751,7 @@ if st.session_state.nav_view == "catalogo":
                         st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
-        fab_label = f":material/shopping_cart: Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN"
+        fab_label = f":material/shopping_cart: **Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN**"
         st.button(
             fab_label,
             type="primary",
@@ -796,10 +803,16 @@ elif st.session_state.nav_view == "carrito":
                     st.rerun()
         
         st.subheader(":material/local_shipping: Datos de Entrega")
-        customer_name = st.text_input("Nombre del cliente (Obligatorio)", placeholder="Ej. Juan Pérez")
-        customer_address = st.text_area("Dirección / Referencias (Obligatorio)", placeholder="Calle, número, colonia...")
+        
+        # Campos de cliente autocompletados con la memoria guardada
+        customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
+        customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
         customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
         
+        # Guardar automáticamente en la sesión del cliente
+        st.session_state.saved_customer_name = customer_name
+        st.session_state.saved_customer_address = customer_address
+
         order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
         
         msg_header = f"NUEVO PEDIDO\nFecha: {order_date}\n\n"
