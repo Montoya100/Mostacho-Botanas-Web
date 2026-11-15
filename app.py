@@ -274,7 +274,7 @@ st.markdown(f"""
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 95vw !important;
-        max-width: 820px !important;
+        max-width: 860px !important;
         border-radius: 20px !important;
         padding: 24px !important;
         max-height: 85vh !important;
@@ -352,7 +352,7 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) DEL CARRITO */
+    /* BOTÓN FLOTANTE (FAB) DEL CARRITO: FORZAR TEXTO BLANCO SIEMPRE */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
@@ -361,9 +361,11 @@ st.markdown(f"""
         z-index: 99999 !important;
         width: auto !important;
     }}
-    div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
+    div[data-testid="stButton"]:has(button[kind="primary"]) > button,
+    div[data-testid="stButton"]:has(button[kind="primary"]) > button * {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
         padding: 12px 24px !important;
         border-radius: 50px !important;
         font-weight: 900 !important;
@@ -550,7 +552,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON DOS BOTONES (- y +)
+# MODAL DE VARIANTES CON ESPACIOS OPTIMIZADOS
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -569,12 +571,12 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura equilibrada de 4 columnas: [Imagen, Nombre/Precio, Controles de cantidad (- / número / +)]
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.8, 0.9, 0.9, 0.9])
+        # Distribución optimizada sin espacios muertos: [Imagen (0.6), Nombre y Precio (3.6), Menos (0.7), Cantidad (0.6), Más (0.7)]
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 3.6, 0.7, 0.6, 0.7])
         with col_v1:
             st.image(v_img, width=42)
         with col_v2:
-            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.88rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.9rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
         with col_v3:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
@@ -1040,7 +1042,7 @@ elif st.session_state.nav_view == "admin":
             go_to_catalogo()
 
 # ==========================================
-# 7. PIE DE PÁGINY BOTÓN DE ADMIN
+# 7. PIE DE PÁGINA Y BOTÓN DE ADMIN
 # ==========================================
 st.write("---")
 st.markdown("<br><br>", unsafe_allow_html=True)
