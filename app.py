@@ -352,35 +352,35 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) ISLA FLOTANTE COMPACTA Y PERFECTAMENTE CENTRADA */
+    /* BOTÓN FLOTANTE (FAB) ISLA FLOTANTE ELEVADA (Libera marca de agua de StreamYard) Y PROPORCIONADA */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
-        bottom: 18px !important;
+        bottom: 45px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         right: auto !important;
         z-index: 99999 !important;
         width: max-content !important;
-        max-width: 92vw !important;
+        max-width: 90vw !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button,
     div[data-testid="stButton"]:has(button[kind="primary"]) > button * {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        padding: 5px 18px !important;
+        padding: 8px 22px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 0.85rem !important;
-        box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4) !important;
+        font-size: 0.9rem !important;
+        box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        min-height: 32px !important;
-        height: 32px !important;
-        line-height: normal !important;
+        min-height: 40px !important;
+        height: 40px !important;
+        line-height: 1 !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 6px !important;
+        gap: 8px !important;
         white-space: nowrap !important;
     }}
 
@@ -561,7 +561,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON CONTROLES ROBUSTOS (AMBOS BOTONES)
+# MODAL DE VARIANTES CON CONTROLES ROBUSTOS (- y +)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -580,8 +580,8 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura limpia y con suficiente espacio para los botones en cualquier navegador
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.8, 1.1, 0.7, 1.1])
+        # Estructura limpia y balanceada de 5 columnas para asegurar que los botones se muestren siempre
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 2.6, 1.1, 0.6, 1.1])
         with col_v1:
             st.image(v_img, width=40)
         with col_v2:
