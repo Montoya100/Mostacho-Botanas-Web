@@ -352,27 +352,30 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) DEL CARRITO: FORZAR TEXTO BLANCO SIEMPRE */
+    /* BOTÓN FLOTANTE (FAB) ESTILO "ISLA FLOTANTE" (Elegante, ancho y no gigante) */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 24px !important;
-        left: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
         right: auto !important;
         z-index: 99999 !important;
-        width: auto !important;
+        width: max-content !important;
+        max-width: 90vw !important;
     }}
     div[data-testid="stButton"]:has(button[kind="primary"]) > button,
     div[data-testid="stButton"]:has(button[kind="primary"]) > button * {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        padding: 12px 24px !important;
+        padding: 10px 28px !important;
         border-radius: 50px !important;
-        font-weight: 900 !important;
-        font-size: 1rem !important;
-        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5) !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        min-height: 50px !important;
+        min-height: 44px !important;
+        white-space: nowrap !important;
     }}
 
     .popular-badge {{
@@ -552,7 +555,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON ESPACIOS OPTIMIZADOS
+# MODAL DE VARIANTES CON BOTONES DE CANTIDAD RESTAURADOS Y SIN CORTES
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -571,8 +574,8 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Distribución optimizada sin espacios muertos: [Imagen (0.6), Nombre y Precio (3.6), Menos (0.7), Cantidad (0.6), Más (0.7)]
-        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 3.6, 0.7, 0.6, 0.7])
+        # Proporciones exactas de columnas para alojar [Imagen (0.6), Nombre/Precio (3.2), Botón Menos (0.8), Número (0.6), Botón Más (0.8)]
+        col_v1, col_v2, col_v3, col_v4, col_v5 = st.columns([0.6, 3.2, 0.8, 0.6, 0.8])
         with col_v1:
             st.image(v_img, width=42)
         with col_v2:
@@ -582,7 +585,7 @@ def variants_modal_dialog(base_name, variants_list):
                 remove_from_cart(v_id)
                 st.rerun()
         with col_v4:
-            st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; text-align: center;'>{qty_in_cart}</div>", unsafe_allow_html=True)
         with col_v5:
             if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
@@ -774,7 +777,7 @@ if st.session_state.nav_view == "catalogo":
                         st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
-        fab_label = f":material/shopping_cart: **Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN**"
+        fab_label = f":material/shopping_cart: Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN"
         st.button(
             fab_label,
             type="primary",
