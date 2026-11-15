@@ -352,11 +352,11 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) COMPACTO, BIEN ALINEADO Y A LA IZQUIERDA */
+    /* BOTÓN FLOTANTE (FAB) CON ALTURA LIGERAMENTE MAYOR Y PERFECTAMENTE ALINEADO */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
-        bottom: 20px !important;
-        left: 20px !important;
+        bottom: 22px !important;
+        left: 22px !important;
         right: auto !important;
         transform: none !important;
         z-index: 99999 !important;
@@ -365,13 +365,13 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) > button {{
         background: linear-gradient(135deg, {BTN_CART_FAB} 0%, #ff6a33) !important;
         color: #ffffff !important;
-        padding: 8px 16px !important;
+        padding: 10px 18px !important;
         border-radius: 50px !important;
         font-weight: 800 !important;
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
         box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4) !important;
         border: none !important;
-        height: 38px !important;
+        height: 42px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -382,7 +382,7 @@ st.markdown(f"""
     div[data-testid="stButton"]:has(button[kind="primary"]) > button span {{
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
         font-weight: 800 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -565,7 +565,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON CONTROLES INFALIBLES
+# MODAL DE VARIANTES CON CONTROLES ROBUSTOS EN FILA
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -584,32 +584,27 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura en renglones HTML directos con botones de Streamlit integrados sin columnas anidadas frágiles
-        st.markdown(f"""
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e2e8f0;">
-            <div style="display: flex; align-items: center; gap: 10px; max-width: 55%;">
-                <img src="{v_img}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
-                <div>
-                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block; line-height: 1.2;">{v_name}</span>
-                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.85rem;">${v_price:.2f} MXN</span>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-        """, unsafe_allow_html=True)
-        
-        c_m, c_n, c_p = st.columns([1, 1, 1])
-        with c_m:
-            if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
-                remove_from_cart(v_id)
-                st.rerun()
-        with c_n:
-            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.1rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
-        with c_p:
-            if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
-                add_to_cart(v_id)
-                st.rerun()
-                
-        st.markdown("</div></div>", unsafe_allow_html=True)
+        # Estructura limpia de dos columnas: Info a la izquierda, y los controles en columna derecha garantizada
+        col_info, col_controls = st.columns([2.2, 1.8])
+        with col_info:
+            sub_c1, sub_c2 = st.columns([1, 2.5])
+            with sub_c1:
+                st.image(v_img, width=40)
+            with sub_c2:
+                st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.85rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
+        with col_controls:
+            btn_minus_col, num_col, btn_plus_col = st.columns([1, 1, 1])
+            with btn_minus_col:
+                if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
+                    remove_from_cart(v_id)
+                    st.rerun()
+            with num_col:
+                st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.1rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+            with btn_plus_col:
+                if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
+                    add_to_cart(v_id)
+                    st.rerun()
+        st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
     if st.button("Listo / Ver Carrito", type="primary", use_container_width=True, key="close_modal_btn"):
