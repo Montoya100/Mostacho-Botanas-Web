@@ -55,7 +55,7 @@ if "saved_customer_gps" not in st.session_state:
 WHATSAPP_PHONE = "522381174698"
 
 # ==========================================
-# LIGAS Y ARCHIVOS DE CONFIGURACIÓN
+# LIGAS Y ARCHIVOS DE CONFIGURACIÓN LOCAL
 # ==========================================
 DEFAULT_BANNER = "https://raw.githubusercontent.com/Mostacho100/Mostacho-Botanas-Web/main/banner.jpg"
 DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Mostacho100/Mostacho-Botanas-Web/main/image.jpg"
@@ -190,7 +190,7 @@ if "products" not in st.session_state:
 if "popular_items" not in st.session_state:
     st.session_state.popular_items = load_saved_populares()
 
-# PALETA DE DISEÑO REDISEÑADA Y FORZADA (BLANCO Y NARANJA)
+# PALETA DE DISEÑO LIMPIA Y CORREGIDA (BLANCO Y NARANJA)
 bg_color = "#f4f6f9"
 text_color = "#0f172a"
 sub_text_color = "#64748b"
@@ -203,12 +203,11 @@ BTN_CART_FAB = "#FF4500"
 BTN_CART_FAB_HOVER = "#d93800"
 
 st.markdown(f"""
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* ELIMINAR BARRAS NEGRAS, MENÚS Y FOOTERS DE STREAMLIT */
+    /* ELIMINAR BARRAS NEGRAS Y ELEMENTOS DE STREAMLIT */
     #MainMenu {{visibility: hidden !important; display: none !important;}}
     footer {{visibility: hidden !important; display: none !important;}}
     header {{visibility: hidden !important; display: none !important;}}
@@ -244,12 +243,6 @@ st.markdown(f"""
     div[data-baseweb="modal"] * {{
         color: #0f172a !important;
     }}
-    div[data-baseweb="modal"] div[data-testid="stVerticalBlock"] {{
-        max-height: 55vh !important;
-        overflow-y: scroll !important;
-        padding-right: 6px !important;
-        background-color: #ffffff !important;
-    }}
 
     .stApp {{
         background-color: {bg_color} !important;
@@ -267,25 +260,18 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    /* CAMPOS DE TEXTO E INPUTS ULTRA MODERNOS Y BLANCOS */
+    /* CAMPOS DE TEXTO E INPUTS LIMPIOS */
     input, textarea, select, 
     div[data-baseweb="input"], div[data-baseweb="base-input"], 
-    div[data-baseweb="textarea"], div[data-baseweb="select"],
-    [data-baseweb="input"] > div, [data-baseweb="base-input"] > div {{
+    div[data-baseweb="textarea"], div[data-baseweb="select"] {{
         background-color: #ffffff !important;
         color: #0f172a !important;
         -webkit-text-fill-color: #0f172a !important;
         border-color: #cbd5e1 !important;
         border-radius: 14px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }}
 
-    input::placeholder, textarea::placeholder {{
-        color: #94a3b8 !important;
-        -webkit-text-fill-color: #94a3b8 !important;
-    }}
-
-    /* ENCABEZADO SUPERIOR ELEGANTE */
+    /* ENCABEZADO SUPERIOR */
     .sticky-header {{
         position: sticky;
         top: 0;
@@ -315,7 +301,7 @@ st.markdown(f"""
         letter-spacing: 1px;
     }}
 
-    /* BOTÓN FLOTANTE CARRITO (FAB PREMIUM) */
+    /* BOTÓN FLOTANTE CARRITO (FAB) */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 82px !important;
@@ -334,11 +320,6 @@ st.markdown(f"""
         box-shadow: 0 12px 30px rgba(255, 69, 0, 0.45) !important;
         border: none !important;
         min-height: 50px !important;
-        letter-spacing: -0.3px;
-    }}
-    div[data-testid="stButton"]:has(button[kind="primary"]) > button:hover {{
-        transform: scale(1.06) !important;
-        background: linear-gradient(135deg, {BTN_CART_FAB_HOVER} 0%, {BTN_CART_FAB} 100%) !important;
     }}
 
     .whatsapp-btn-disabled {{
@@ -368,18 +349,8 @@ st.markdown(f"""
         text-decoration: none;
         box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
     }}
-    .whatsapp-btn-active:hover {{
-        transform: scale(1.02);
-        color: #ffffff !important;
-    }}
 
-    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {{
-        color: {text_color} !important;
-        font-weight: 700 !important;
-        font-size: 0.9rem !important;
-    }}
-
-    /* BOTONES GENERALES ESTILO APP */
+    /* BOTONES GENERALES (CORRECCIÓN DE RECUADROS BLANCOS Y ELEMENTOS ENCAPSULADOS) */
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: {BTN_GENERAL} !important;
         color: #ffffff !important;
@@ -387,16 +358,16 @@ st.markdown(f"""
         border-radius: 14px !important;
         font-weight: 700 !important;
         box-shadow: 0 4px 12px rgba(254, 131, 48, 0.25) !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: all 0.2s ease !important;
     }}
     button:hover, .stButton > button:hover {{
         background-color: {BTN_GENERAL_HOVER} !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px rgba(254, 131, 48, 0.35) !important;
         color: #ffffff !important;
     }}
-    button p, .stButton > button p, button span {{
+    button p, .stButton > button p, button span, div[data-testid="stButton"] button p {{
         color: #ffffff !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
     }}
 
     .qty-number {{
@@ -407,51 +378,35 @@ st.markdown(f"""
         margin-top: 6px;
     }}
 
-    .material-symbols-outlined {{
-        font-family: 'Material Symbols Outlined' !important;
-        font-size: 22px !important;
-        vertical-align: middle;
-        line-height: 1;
-    }}
-
-    /* TARJETAS DE PRODUCTO TIPO GOURMET/DELIVERY */
+    /* TARJETAS DE PRODUCTO */
     .product-card {{
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
         border-radius: 20px;
         padding: 14px;
         margin-bottom: 16px;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.02);
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
         position: relative;
-        transition: all 0.25s ease;
-    }}
-    .product-card:hover {{
-        transform: translateY(-4px);
-        box-shadow: 0 20px 30px -10px rgba(0,0,0,0.08);
-        border-color: #cbd5e1;
     }}
     .product-title {{
         font-size: 1rem;
         font-weight: 800;
         margin-bottom: 4px;
         color: #0f172a !important;
-        letter-spacing: -0.3px;
     }}
     .product-desc {{
         font-size: 0.78rem;
         color: #64748b !important;
         margin-bottom: 8px;
-        line-height: 1.35;
     }}
     .product-price {{
         font-size: 1.15rem !important;
         font-weight: 900 !important;
         color: {BTN_GENERAL} !important;
-        letter-spacing: -0.5px;
     }}
     .bestseller-badge {{
         position: absolute;
@@ -463,10 +418,8 @@ st.markdown(f"""
         font-weight: 800;
         padding: 4px 10px;
         border-radius: 20px;
-        box-shadow: 0 4px 10px rgba(255,69,0,0.35);
         z-index: 10;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
     }}
 
     .promo-banner {{
@@ -478,7 +431,6 @@ st.markdown(f"""
         font-weight: 700;
         font-size: 0.9rem;
         margin-bottom: 16px;
-        box-shadow: 0 8px 20px rgba(254, 131, 48, 0.25);
     }}
 
     .store-closed-banner {{
@@ -490,18 +442,6 @@ st.markdown(f"""
         font-weight: 800;
         font-size: 1rem;
         margin-bottom: 20px;
-        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
-    }}
-
-    @media (min-width: 768px) {{
-        .desktop-banner-img {{
-            height: 240px !important;
-        }}
-    }}
-    @media (max-width: 767px) {{
-        .desktop-banner-img {{
-            height: 160px !important;
-        }}
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -528,7 +468,7 @@ total_items = sum(st.session_state.cart.values())
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
     st.markdown(f"<h3 style='color: #0f172a !important; margin-bottom: 4px; font-weight: 800;'>{base_name}</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600;'>Escoge la presentación que deseas:</p>", unsafe_allow_html=True)
     st.write("---")
     
     for idx, var in enumerate(variants_list):
@@ -562,7 +502,7 @@ def variants_modal_dialog(base_name, variants_list):
         st.markdown("<hr style='margin: 10px 0; border-color: #f1f5f9;'>", unsafe_allow_html=True)
     
     st.write("")
-    if st.button(":material/check_circle: Listo", type="primary", use_container_width=True, key="close_modal_btn"):
+    if st.button("Listo", type="primary", use_container_width=True, key="close_modal_btn"):
         st.session_state.show_variants_modal = False
         st.rerun()
 
@@ -587,23 +527,23 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# NAVBAR INFERIOR TIPO APLICACIÓN (3 BOTONES)
+# NAVBAR INFERIOR LIMPIA (3 BOTONES)
 # ==========================================
 col_nav1, col_nav2, col_nav3 = st.columns(3)
 
 with col_nav1:
-    if st.button(":material/home: Inicio", use_container_width=True, key="nav_btn_home"):
+    if st.button("Inicio", use_container_width=True, key="nav_btn_home"):
         st.session_state.nav_view = "catalogo"
         st.rerun()
 
 with col_nav2:
-    cart_label = f":material/shopping_cart: Carrito ({total_items})" if total_items > 0 else ":material/shopping_cart: Carrito"
+    cart_label = f"Carrito ({total_items})" if total_items > 0 else "Carrito"
     if st.button(cart_label, use_container_width=True, key="nav_btn_cart"):
         st.session_state.nav_view = "carrito"
         st.rerun()
 
 with col_nav3:
-    if st.button(":material/settings: Config", use_container_width=True, key="nav_btn_admin"):
+    if st.button("Config", use_container_width=True, key="nav_btn_admin"):
         st.session_state.nav_view = "admin"
         st.rerun()
 
@@ -625,7 +565,7 @@ if st.session_state.nav_view == "catalogo":
     st.write("---")
     
     st.markdown(
-        f'<div class="promo-banner"><span class="material-symbols-outlined" style="vertical-align: -4px; margin-right: 6px;">local_shipping</span> ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
+        '<div class="promo-banner">📦 ¡Envíos locales y entregas directas en ruta! Pide fácil y rápido</div>', 
         unsafe_allow_html=True
     )
     
@@ -635,7 +575,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.markdown(f"""
     <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 22px; padding: 8px; margin-bottom: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); text-align: center;">
-        <img src="{banner_to_show}" class="desktop-banner-img" style="width: 100%; object-fit: cover; border-radius: 16px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
+        <img src="{banner_to_show}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 16px; display: block;" onerror="this.onerror=null;this.src='{DEFAULT_BANNER}';" />
     </div>
     """, unsafe_allow_html=True)
 
@@ -660,16 +600,10 @@ if st.session_state.nav_view == "catalogo":
             
             if matched_prod and matched_prod.get("image"):
                 cand_img = str(matched_prod.get("image")).strip()
-                if cand_img != "" and cand_img.lower() != "nan" and "placeholder" not in cand_img:
-                    p_img = cand_img
-                else:
-                    p_img = DEFAULT_PRODUCT_IMG
+                p_img = cand_img if cand_img != "" and cand_img.lower() != "nan" and "placeholder" not in cand_img else DEFAULT_PRODUCT_IMG
             else:
                 cand_pop = str(pop_p.get("image", "")).strip()
-                if cand_pop != "" and cand_pop.lower() != "nan" and "placeholder" not in cand_pop:
-                    p_img = cand_pop
-                else:
-                    p_img = DEFAULT_PRODUCT_IMG
+                p_img = cand_pop if cand_pop != "" and cand_pop.lower() != "nan" and "placeholder" not in cand_pop else DEFAULT_PRODUCT_IMG
 
             st.markdown(f"""
             <div style="background: {card_bg}; border: 1px solid {border_color}; border-radius: 18px; padding: 12px; text-align: center; margin-bottom: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.03);">
@@ -723,19 +657,9 @@ if st.session_state.nav_view == "catalogo":
         if st.session_state.selected_cat == "Todo":
             cat_filtered = current_products_list
         else:
-            cat_filtered = []
-            for p in current_products_list:
-                c_val = str(p.get("category", "Individual")).strip()
-                if c_val == st.session_state.selected_cat:
-                    cat_filtered.append(p)
+            cat_filtered = [p for p in current_products_list if str(p.get("category", "Individual")).strip() == st.session_state.selected_cat]
 
-        filtered_products = []
-        for p in cat_filtered:
-            if isinstance(p, dict):
-                p_name = str(p.get("name", "")).lower()
-                p_desc = str(p.get("description", "")).lower()
-                if search_query.lower() in p_name or search_query.lower() in p_desc:
-                    filtered_products.append(p)
+        filtered_products = [p for p in cat_filtered if search_query.lower() in str(p.get("name", "")).lower() or search_query.lower() in str(p.get("description", "")).lower()]
     except:
         filtered_products = []
 
@@ -758,8 +682,7 @@ if st.session_state.nav_view == "catalogo":
                 if not any(str(it.get("id")) == str(p.get("id")) for it in grouped_dict[name_raw]):
                     grouped_dict[name_raw].append(p)
 
-        group_items_list = list(grouped_dict.items())
-        group_items_list = sorted(group_items_list, key=lambda x: 0 if len(x[1]) > 1 else 1)
+        group_items_list = sorted(list(grouped_dict.items()), key=lambda x: 0 if len(x[1]) > 1 else 1)
         
         for i in range(0, len(group_items_list), 3):
             cols = st.columns(3)
@@ -827,12 +750,12 @@ if st.session_state.nav_view == "catalogo":
                         st.markdown('</div>', unsafe_allow_html=True)
 
     if total_items > 0:
-        if st.button(":material/shopping_cart: Ver Carrito (" + str(total_items) + ")", type="primary", key="native_floating_fab"):
+        if st.button(f"🛒 Ver Carrito ({total_items})", type="primary", key="native_floating_fab"):
             st.session_state.nav_view = "carrito"
             st.rerun()
 
 elif st.session_state.nav_view == "carrito":
-    st.markdown("### :material/shopping_cart: Carrito de Compras y Pedido")
+    st.markdown("### 🛒 Carrito de Compras y Pedido")
     st.caption(f"Artículos seleccionados: {total_items}")
     
     if not st.session_state.cart:
@@ -857,12 +780,12 @@ elif st.session_state.nav_view == "carrito":
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
                 with col_c2:
-                    if st.button(":material/delete: Quitar", key=f"del_cart_{item_id}", use_container_width=True):
+                    if st.button("Quitar", key=f"del_cart_{item_id}", use_container_width=True):
                         del st.session_state.cart[item_id]
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
+        st.markdown(f"### Total a Pagar: **${total_price:.2f} MXN**")
 
         # SUGERENCIA CRUZADA INTELIGENTE (CROSS-SELLING)
         cart_product_names = [str(p.get("name", "")).lower() for item_id, q in st.session_state.cart.items() for p in st.session_state.products if str(p.get("id")) == str(item_id)]
@@ -885,7 +808,7 @@ elif st.session_state.nav_view == "carrito":
                     st.rerun()
 
         st.write("---")
-        st.subheader(":material/local_shipping: Datos de Entrega y Ubicación GPS")
+        st.subheader("📍 Datos de Entrega y Ubicación GPS")
         
         customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
@@ -926,8 +849,7 @@ elif st.session_state.nav_view == "carrito":
             if customer_name.strip() and customer_address.strip():
                 st.markdown(
                     f'''<a href="{whatsapp_url}" target="_blank" class="whatsapp-btn-active">
-                        <span class="material-symbols-outlined" style="vertical-align: -5px; margin-right: 6px; font-size: 24px;">chat</span>
-                        Enviar pedido por WhatsApp
+                        💬 Enviar pedido por WhatsApp
                     </a>''',
                     unsafe_allow_html=True
                 )
@@ -943,7 +865,7 @@ elif st.session_state.nav_view == "carrito":
             )
 
 elif st.session_state.nav_view == "admin":
-    st.markdown("### :material/settings: Panel de Administración")
+    st.markdown("### ⚙️ Panel de Administración")
     
     if not st.session_state.admin_authenticated:
         st.subheader("Acceso Restringido")
