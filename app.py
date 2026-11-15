@@ -261,7 +261,7 @@ st.markdown(f"""
 
 <style>
     /* ========================================================== */
-    /* MODALES: CENTRADOS, ANCHO ÓPTIMO Y MÁRGENES INTERNOS SEGUROS */
+    /* MODALES: DISEÑO COMPACTO Y VERTICALMENTE OPTIMIZADO PARA MÓVIL */
     /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
@@ -273,11 +273,11 @@ st.markdown(f"""
     section[tabindex="-1"] > div, div[data-testid="stModal"] > div {{
         background-color: #ffffff !important;
         color: #1e293b !important;
-        width: 88vw !important;
-        max-width: 480px !important;
-        border-radius: 20px !important;
-        padding: 20px 16px !important;
-        max-height: 82vh !important;
+        width: 90vw !important;
+        max-width: 440px !important;
+        border-radius: 18px !important;
+        padding: 14px 12px !important;
+        max-height: 88vh !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
         z-index: 1000000000 !important;
         margin: auto !important;
@@ -288,12 +288,12 @@ st.markdown(f"""
         color: #1e293b !important;
     }}
 
-    /* Contenedor interno con scroll holgado para evitar que se corte nada */
+    /* Contenedor interno con scroll optimizado y márgenes compactos */
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], 
     div[role="dialog"] div[data-testid="stVerticalBlock"] {{
-        max-height: 60vh !important;
+        max-height: 68vh !important;
         overflow-y: auto !important;
-        padding: 0 4px !important;
+        padding: 0 2px !important;
         background-color: #ffffff !important;
     }}
 
@@ -454,11 +454,11 @@ st.markdown(f"""
     }}
 
     .qty-number {{
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
         font-weight: 900 !important;
         text-align: center;
         color: #1e293b !important;
-        margin-top: 6px;
+        margin-top: 4px;
     }}
 
     .material-symbols-outlined {{
@@ -566,13 +566,13 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CENTRADO Y COMPACTO
+# MODAL DE VARIANTES ULTRA COMPACTO PARA MÓVIL
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
-    st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 2px; text-align: center;'>{base_name}</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #64748b !important; font-size: 0.9rem; font-weight: 600; text-align: center;'>Escoge la figura y el sabor que desea:</p>", unsafe_allow_html=True)
-    st.write("---")
+    st.markdown(f"<h3 style='color: #1e293b !important; margin-bottom: 2px; text-align: center; font-size: 1.3rem;'>{base_name}</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #64748b !important; font-size: 0.85rem; font-weight: 600; text-align: center; margin-bottom: 8px;'>Escoge la figura y el sabor que deseas:</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 4px 0 10px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     for idx, var in enumerate(variants_list):
         v_id = str(var.get("id"))
@@ -585,26 +585,26 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Tarjeta compacta centrada con márgenes internos seguros para que nada se corte
+        # Tarjeta con padding reducido para ahorrar espacio vertical exacto
         st.markdown(f"""
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <img src="{v_img}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
+        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 6px 10px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <img src="{v_img}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px;" onerror="this.src='{DEFAULT_PRODUCT_IMG}';" />
                 <div style="flex-grow: 1;">
-                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.85rem; display: block; line-height: 1.2;">{v_name}</span>
-                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.85rem;">${v_price:.2f} MXN</span>
+                    <span style="color: #1e293b !important; font-weight: 800; font-size: 0.8rem; display: block; line-height: 1.1;">{v_name}</span>
+                    <span style="color: {BTN_GENERAL}; font-weight: 900; font-size: 0.8rem;">${v_price:.2f} MXN</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
-        # Columnas simétricas para los botones de control dentro de la tarjeta
+        # Botones de control compactos
         col_m, col_n, col_p = st.columns(3)
         with col_m:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
                 st.rerun()
         with col_n:
-            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1.1rem; padding-top: 6px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1rem; padding-top: 4px; color: #1e293b;'>{qty_in_cart}</div>", unsafe_allow_html=True)
         with col_p:
             if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
