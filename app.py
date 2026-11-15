@@ -260,11 +260,11 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FORZAR FONDO BLANCO Y TEXTO OSCURO EN MODALES */
-    div[data-baseweb="modal"] {{
+    /* FORZAR FONDO BLANCO ABSOLUTO Y TEXTO OSCURO EN TODOS LOS MODALES Y DIÁLOGOS */
+    div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"] {{
         background-color: rgba(0, 0, 0, 0.6) !important;
     }}
-    div[data-baseweb="modal"] > div {{
+    div[data-baseweb="modal"] > div, div[role="dialog"] > div {{
         background-color: #ffffff !important;
         color: #1e293b !important;
         width: 92vw !important;
@@ -272,16 +272,17 @@ st.markdown(f"""
         border-radius: 20px !important;
         padding: 20px !important;
     }}
-    div[data-baseweb="modal"] * {{
+    div[data-baseweb="modal"] *, div[role="dialog"] * {{
         color: #1e293b !important;
+        background-color: transparent !important;
     }}
-    div[data-baseweb="modal"] div[data-testid="stVerticalBlock"] {{
+    div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], div[role="dialog"] div[data-testid="stVerticalBlock"] {{
         max-height: 55vh !important;
         overflow-y: scroll !important;
         padding-right: 10px !important;
         background-color: #ffffff !important;
     }}
-    div[data-baseweb="modal"] button[aria-label="Close"] {{
+    div[data-baseweb="modal"] button[aria-label="Close"], div[role="dialog"] button[aria-label="Close"] {{
         display: none !important;
     }}
 
@@ -512,10 +513,12 @@ def go_to_cart():
     st.rerun()
 
 def go_to_catalogo():
+    st.session_state.show_variants_modal = False
     st.session_state.nav_view = "catalogo"
     st.rerun()
 
 def go_to_admin():
+    st.session_state.show_variants_modal = False
     st.session_state.nav_view = "admin"
     st.rerun()
 
@@ -531,7 +534,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES
+# MODAL DE VARIANTES (ASEGURADO Y BLANCO)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -574,7 +577,7 @@ def variants_modal_dialog(base_name, variants_list):
         st.session_state.show_variants_modal = False
         st.rerun()
 
-if st.session_state.show_variants_modal:
+if st.session_state.show_variants_modal and st.session_state.nav_view == "catalogo":
     variants_modal_dialog(st.session_state.current_modal_base, st.session_state.current_modal_items)
 
 # ==========================================
@@ -597,6 +600,7 @@ with col_cart_btn:
     st.write("")
     cart_btn_label = f"({total_items}) - ${total_cart_amount:.2f}" if total_items > 0 else ""
     if st.button(":material/shopping_cart: Carrito " + cart_btn_label, use_container_width=True, key="header_cart_btn"):
+        st.session_state.show_variants_modal = False
         if st.session_state.nav_view != "carrito":
             go_to_cart()
         else:
