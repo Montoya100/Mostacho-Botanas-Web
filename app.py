@@ -550,7 +550,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES (ROBUSTO Y CON BOTONES DE CANTIDAD)
+# MODAL DE VARIANTES ADAPTABLE (MÓVIL / WEB)
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -569,33 +569,21 @@ def variants_modal_dialog(base_name, variants_list):
             
         qty_in_cart = st.session_state.cart.get(v_id, 0)
         
-        # Estructura de 3 columnas amplias: [Imagen, Nombre/Precio, Controles de cantidad]
-        col_v1, col_v2, col_v3 = st.columns([0.6, 3.0, 2.6])
+        # Estructura limpia de 3 columnas para PC: [Imagen, Nombre/Precio y Botón de Incremento/Agregar]
+        col_v1, col_v2, col_v3 = st.columns([0.6, 3.0, 2.2])
         with col_v1:
             st.image(v_img, width=45)
         with col_v2:
             st.markdown(f"<div style='padding-top: 2px;'><span style='color: #1e293b !important; font-weight: 800; font-size: 0.9rem; display: block;'>{v_name}</span><span style='color: {BTN_GENERAL}; font-weight: 900; font-size: 0.95rem;'>${v_price:.2f} MXN</span></div>", unsafe_allow_html=True)
         with col_v3:
-            if qty_in_cart == 0:
-                if st.button("Agregar", key=f"m_add_{v_id}_{idx}", use_container_width=True):
-                    add_to_cart(v_id)
-                    st.rerun()
-            else:
-                sub_cv1, sub_cv2, sub_cv3 = st.columns([1, 1.2, 1])
-                with sub_cv1:
-                    if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
-                        remove_from_cart(v_id)
-                        st.rerun()
-                with sub_cv2:
-                    st.markdown(f"<div class='qty-number' style='color: #1e293b !important; margin-top: 6px; text-align: center;'>{qty_in_cart}</div>", unsafe_allow_html=True)
-                with sub_cv3:
-                    if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
-                        add_to_cart(v_id)
-                        st.rerun()
+            btn_label = f"Agregar ({qty_in_cart})" if qty_in_cart > 0 else "Agregar +"
+            if st.button(btn_label, key=f"m_add_{v_id}_{idx}", use_container_width=True):
+                add_to_cart(v_id)
+                st.rerun()
         st.markdown("<hr style='margin: 8px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
     
     st.write("")
-    if st.button("Listo", type="primary", use_container_width=True, key="close_modal_btn"):
+    if st.button("Listo / Ver Carrito", type="primary", use_container_width=True, key="close_modal_btn"):
         st.session_state.show_variants_modal = False
         st.rerun()
 
