@@ -474,6 +474,9 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
+    /* SE OCULTA EL FAB DEL CARRITO CUANDO ESTAMOS EN LA VISTA DE CARRITO */
+    {"" if st.session_state.nav_view == "catalogo" else 'div[data-testid="stButton"]:has(button[kind="primary"]) { display: none !important; }'}
+
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 22px !important;
@@ -1016,7 +1019,7 @@ elif st.session_state.nav_view == "carrito":
         is_form_valid = bool(st.session_state.customer_name.strip() and st.session_state.customer_address.strip())
 
         if is_form_valid:
-            # 1. EL FAB FLOTANTE INFERIOR SE CONVIERTE EN EL BOTÓN VERDE ANIMADO DE WHATSAPP
+            # 1. EL FAB FLOTANTE ANIMADO DE WHATSAPP
             whatsapp_fab_html = f"""
             <div id="dynamic_whatsapp_fab_wrapper">
                 <a href="{whatsapp_url}" target="_blank" class="whatsapp-fab-animated">
@@ -1033,7 +1036,7 @@ elif st.session_state.nav_view == "carrito":
                 st.session_state.order_sent = True
                 st.rerun()
         else:
-            # SI FALTAN DATOS EN LA PESTAÑA CARRITO, OCULTAMOS EL FAB DEL CARRITO Y MOSTRAMOS EL AVISO
+            # SI FALTAN DATOS EN LA PESTAÑA CARRITO, MOSTRAMOS EL AVISO (EL FAB DEL CARRITO YA ESTÁ OCULTO POR CSS)
             st.markdown(
                 '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón flotante de WhatsApp</div>',
                 unsafe_allow_html=True
