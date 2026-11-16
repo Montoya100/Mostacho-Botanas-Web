@@ -64,9 +64,6 @@ if "selected_cat" not in st.session_state:
 if "show_variants_modal" not in st.session_state:
     st.session_state.show_variants_modal = False
 
-if "show_success_modal" not in st.session_state:
-    st.session_state.show_success_modal = False
-
 if "current_modal_base" not in st.session_state:
     st.session_state.current_modal_base = ""
 
@@ -500,7 +497,7 @@ st.markdown(f"""
         padding: 0 !important;
     }}
 
-    /* BOTÓN WHATSAPP EN COLOR VERDE OFICIAL */
+    /* BOTÓN WHATSAPP EN COLOR VERDE OFICIAL CON APERTURA EN NUEVA PESTAÑA */
     div[data-testid="stLinkButton"] > a {{
         background-color: {BTN_WHATSAPP} !important;
         color: #ffffff !important;
@@ -698,33 +695,6 @@ def variants_modal_dialog(base_name, variants_list):
 
 if st.session_state.show_variants_modal and st.session_state.nav_view == "catalogo":
     variants_modal_dialog(st.session_state.current_modal_base, st.session_state.current_modal_items)
-
-# ==========================================
-# MODAL DE ÉXITO AL ENVIAR PEDIDO (AISLADO)
-# ==========================================
-@st.dialog("¡Pedido Realizado con Éxito!")
-def success_order_dialog():
-    st.markdown(f"""
-    <div style="text-align: center; padding: 10px;">
-        <span class="material-symbols-outlined" style="font-size: 56px; color: #25D366; margin-bottom: 8px;">check_circle</span>
-        <h3 style="color: {text_color}; font-size: 1.2rem; font-weight: 800; margin-bottom: 6px;">¡Tu pedido se ha generado correctamente!</h3>
-        <p style="color: {sub_text_color}; font-size: 0.9rem; margin-bottom: 16px;">Se ha abierto WhatsApp para enviar los detalles de tu compra. Al cerrar esta ventana, el sistema se reiniciará para un nuevo pedido.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("Entendido / Nuevo Pedido", type="primary", use_container_width=True):
-        st.session_state.cart = {}
-        st.session_state.trivia_answered = False
-        st.session_state.trivia_won = False
-        st.session_state.customer_name = ""
-        st.session_state.customer_address = ""
-        st.session_state.customer_notes = ""
-        st.session_state.show_success_modal = False
-        go_to_catalogo()
-
-# LLAMADA CONDICIONAL ESTRICTA DEL DIÁLOGO DE ÉXITO
-if st.session_state.get("show_success_modal", False):
-    success_order_dialog()
 
 # ==========================================
 # 4. ENCABEZADO Y BÚSQUEDA
@@ -964,7 +934,7 @@ elif st.session_state.nav_view == "carrito":
         
         st.subheader(":material/local_shipping: Datos de Entrega")
         
-        # Campos de texto vinculados de forma segura a session_state
+        # Campos de texto totalmente estables vinculados a session_state
         st.text_input("Nombre del cliente (Obligatorio)", key="customer_name", placeholder="Ej. Juan Pérez")
         st.text_area("Dirección / Referencias (Obligatorio)", key="customer_address", placeholder="Calle, número, colonia...")
         st.text_input("Notas adicionales (Opcional)", key="customer_notes", placeholder="Ej. Cambio de $500")
@@ -1049,10 +1019,33 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if st.session_state.customer_name.strip() and st.session_state.customer_address.strip():
-            # Botón de WhatsApp con enlace directo y activación estricta del pop-up al pulsar
-            if st.link_button(":material/chat: Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True):
-                st.session_state.show_success_modal = True
-                st.rerun()
+            # BOTÓN HTML PERSONALIZADO CON TARGET="_BLANK" PARA ABRIR EN NUEVA PESTAÑA
+            # Y REINICIO AUTOMÁTICO LIMPIO DE LOS DATOS Y CARRITO
+            whatsapp_html_button = f"""
+            <div style="margin-top: 10px;">
+                <a href="{whatsapp_url}" target="_blank" onclick="setTimeout(function(){{ window.location.reload(); }}, 1000);" style="
+                    background-color: {BTN_WHATSAPP};
+                    color: #ffffff;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    text-align: center;
+                    padding: 14px 20px;
+                    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    width: 100%;
+                    font-size: 1rem;
+                ">
+                    <span class="material-symbols-outlined" style="font-size: 22px; color: #ffffff;">chat</span>
+                    Enviar pedido por WhatsApp (Nueva Pestaña)
+                </a>
+            </div>
+            """
+            st.markdown(whatsapp_html_button, unsafe_allow_html=True)
+            st.success("¡Tu pedido está listo! Al hacer clic se abrirá WhatsApp en una pestaña nueva con el resumen detallado para enviar de inmediato.")
         else:
             st.markdown(
                 '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón de envío</div>',
