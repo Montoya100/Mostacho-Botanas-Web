@@ -674,7 +674,7 @@ def success_order_dialog():
     <div style="text-align: center; padding: 10px;">
         <span class="material-symbols-outlined" style="font-size: 56px; color: #25D366; margin-bottom: 8px;">check_circle</span>
         <h3 style="color: {text_color}; font-size: 1.2rem; font-weight: 800; margin-bottom: 6px;">¡Tu pedido se ha generado correctamente!</h3>
-        <p style="color: {sub_text_color}; font-size: 0.9rem; margin-bottom: 16px;">Se ha abierto WhatsApp para enviar los detalles de tu compra. El sistema se reiniciará para que puedas realizar un nuevo pedido cuando gustes.</p>
+        <p style="color: {sub_text_color}; font-size: 0.9rem; margin-bottom: 16px;">Se ha abierto WhatsApp para enviar los detalles de tu compra. Al cerrar esta ventana, el sistema se reiniciará para un nuevo pedido.</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -907,11 +907,12 @@ elif st.session_state.nav_view == "carrito":
                         
         st.write("---")
 
-        # --- TOTAL A PAGAR EN GRANDE EN EL CARRITO ---
+        # --- TOTAL A PAGAR CON ICONO OUTLINE ---
         st.markdown(f"""
         <div style="background: {card_bg}; border: 2px solid {BTN_GENERAL}; border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 16px;">
-            <span style="font-size: 0.95rem; font-weight: 700; color: {sub_text_color}; display: block;">TOTAL DEL PEDIDO:</span>
-            <span style="font-size: 1.6rem; font-weight: 900; color: {BTN_GENERAL};">${total_price:.2f} MXN</span>
+            <span class="material-symbols-outlined" style="font-size: 28px; color: {BTN_GENERAL}; vertical-align: middle; margin-right: 4px;">receipt_long</span>
+            <span style="font-size: 0.95rem; font-weight: 700; color: {sub_text_color}; display: inline-block;">TOTAL DEL PEDIDO:</span>
+            <span style="font-size: 1.6rem; font-weight: 900; color: {BTN_GENERAL}; display: block; margin-top: 4px;">${total_price:.2f} MXN</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1013,20 +1014,10 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if customer_name.strip() and customer_address.strip():
-            # Botón único con callback dedicado para evitar disparos accidentales
-            def handle_whatsapp_click():
+            # Único botón de WhatsApp que abre el enlace y activa el pop-up de éxito
+            if st.link_button("💬 Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary"):
                 st.session_state.show_success_modal = True
-
-            st.link_button("💬 Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary")
-            
-            if st.button("Confirmar que ya abrí WhatsApp y reiniciar pedido", use_container_width=True, key="confirm_sent_btn"):
-                st.session_state.cart = {}
-                st.session_state.trivia_answered = False
-                st.session_state.trivia_won = False
-                st.session_state.saved_customer_name = ""
-                st.session_state.saved_customer_address = ""
-                st.session_state.show_success_modal = False
-                go_to_catalogo()
+                st.rerun()
         else:
             st.markdown(
                 '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón de envío</div>',
