@@ -406,24 +406,8 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ANIMACIÓN DE PULSO / LATIDO Y TEXTO BLANCO PARA EL FAB DE WHATSAPP */
-    @keyframes whatsappPulse {{
-        0% {{
-            transform: scale(1);
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        }}
-        50% {{
-            transform: scale(1.03);
-            box-shadow: 0 6px 24px rgba(37, 211, 102, 0.75);
-        }}
-        100% {{
-            transform: scale(1);
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        }}
-    }}
-
-    .whatsapp-fab-animated {{
-        animation: whatsappPulse 2s infinite ease-in-out !important;
+    /* FAB VERDE DE WHATSAPP FIJO Y LIMPIO (SIN ANIMACIONES RASPANTES) */
+    .whatsapp-fab-clean {{
         background-color: {BTN_WHATSAPP} !important;
         color: #ffffff !important;
         padding: 12px 22px !important;
@@ -436,11 +420,11 @@ st.markdown(f"""
         justify-content: center !important;
         gap: 8px !important;
         height: 48px !important;
-        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.6) !important;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4) !important;
         white-space: nowrap !important;
     }}
 
-    .whatsapp-fab-animated *, .whatsapp-fab-animated span, .whatsapp-fab-animated p {{
+    .whatsapp-fab-clean *, .whatsapp-fab-clean span, .whatsapp-fab-clean p {{
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
         fill: #ffffff !important;
@@ -1012,24 +996,24 @@ elif st.session_state.nav_view == "carrito":
         is_form_valid = bool(st.session_state.customer_name.strip() and st.session_state.customer_address.strip())
 
         if is_form_valid:
-            # 1. EL FAB FLOTANTE INFERIOR SE CONVIERTE EN EL BOTÓN VERDE DE WHATSAPP CON ANIMACIÓN
+            # 1. EL FAB FLOTANTE INFERIOR SE CONVIERTE EN EL BOTÓN VERDE DE WHATSAPP
             whatsapp_fab_html = f"""
             <div style="position: fixed !important; bottom: 22px !important; left: 22px !important; z-index: 99999 !important;">
-                <a href="{whatsapp_url}" target="_blank" class="whatsapp-fab-animated">
-                    <span class="material-symbols-outlined" style="font-size: 22px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">chat</span>
+                <a href="{whatsapp_url}" target="_blank" onclick="window.parent.document.dispatchEvent(new CustomEvent('order_sent'));" class="whatsapp-fab-clean">
+                    <span class="material-symbols-outlined" style="font-size: 22px; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;">chat</span>
                     Enviar pedido por WhatsApp
                 </a>
             </div>
             """
             st.markdown(whatsapp_fab_html, unsafe_allow_html=True)
 
-            # 2. DONDE IBA WHATSAPP (ARRIBA), AHORA COLOCAMOS EL BOTÓN DE AGRADECIMIENTO / FINALIZAR COMPRA
+            # 2. DONDE IBAN LOS DATOS, AHORA COLOCAMOS EL BOTÓN DE AGRADECIMIENTO / FINALIZAR COMPRA
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Ya envié mi pedido, finalizar compra", type="primary", use_container_width=True):
                 st.session_state.order_sent = True
                 st.rerun()
         else:
-            # SI FALTAN DATOS, MANTENEMOS EL FAB NORMAL DE CARRITO Y AVISAMOS
+            # SI FALTAN DATOS, MANTENEMOS EL FAB NORMAL DEL CARRITO
             if total_items > 0:
                 fab_label = f":material/shopping_cart: Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN"
                 st.button(
