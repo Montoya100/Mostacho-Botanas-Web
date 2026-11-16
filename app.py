@@ -82,14 +82,14 @@ if "trivia_answered" not in st.session_state:
 if "trivia_won" not in st.session_state:
     st.session_state.trivia_won = False
 
-if "saved_customer_name" not in st.session_state:
-    st.session_state.saved_customer_name = ""
+if "customer_name" not in st.session_state:
+    st.session_state.customer_name = ""
 
-if "saved_customer_address" not in st.session_state:
-    st.session_state.saved_customer_address = ""
+if "customer_address" not in st.session_state:
+    st.session_state.customer_address = ""
 
-if "saved_customer_notes" not in st.session_state:
-    st.session_state.saved_customer_notes = ""
+if "customer_notes" not in st.session_state:
+    st.session_state.customer_notes = ""
 
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
@@ -336,6 +336,8 @@ BTN_GENERAL = "#FE8330"
 BTN_GENERAL_HOVER = "#e06c20"
 BTN_CART_FAB = "#FF4500"        
 BTN_CART_FAB_HOVER = "#d93800"
+BTN_WHATSAPP = "#25D366"        # Verde oficial WhatsApp
+BTN_WHATSAPP_HOVER = "#20ba5a"
 
 # ==========================================
 # CSS DINÁMICO SEGÚN TEMA SELECCIONADO
@@ -496,6 +498,36 @@ st.markdown(f"""
         font-weight: 800 !important;
         margin: 0 !important;
         padding: 0 !important;
+    }}
+
+    /* ESTILO ESPECÍFICO PARA BOTÓN WHATSAPP EN COLOR VERDE */
+    div[data-testid="stLinkButton"] > a {{
+        background-color: {BTN_WHATSAPP} !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        padding: 12px 20px !important;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3) !important;
+        border: none !important;
+        text-decoration: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        transition: all 0.2s ease-in-out !important;
+    }}
+    div[data-testid="stLinkButton"] > a:hover {{
+        background-color: {BTN_WHATSAPP_HOVER} !important;
+        transform: translateY(-2px) !important;
+        color: #ffffff !important;
+    }}
+    div[data-testid="stLinkButton"] > a p,
+    div[data-testid="stLinkButton"] > a span {{
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
     }}
 
     .popular-badge {{
@@ -685,9 +717,9 @@ def success_order_dialog():
         st.session_state.cart = {}
         st.session_state.trivia_answered = False
         st.session_state.trivia_won = False
-        st.session_state.saved_customer_name = ""
-        st.session_state.saved_customer_address = ""
-        st.session_state.saved_customer_notes = ""
+        st.session_state.customer_name = ""
+        st.session_state.customer_address = ""
+        st.session_state.customer_notes = ""
         st.session_state.show_success_modal = False
         go_to_catalogo()
 
@@ -932,13 +964,10 @@ elif st.session_state.nav_view == "carrito":
         
         st.subheader(":material/local_shipping: Datos de Entrega")
         
-        customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
-        customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
-        customer_notes = st.text_input("Notas adicionales (Opcional)", value=st.session_state.saved_customer_notes, placeholder="Ej. Cambio de $500")
-        
-        st.session_state.saved_customer_name = customer_name
-        st.session_state.saved_customer_address = customer_address
-        st.session_state.saved_customer_notes = customer_notes
+        # Campos de texto vinculados limpiamente con keys de session_state para evitar parpadeos
+        st.text_input("Nombre del cliente (Obligatorio)", key="customer_name", placeholder="Ej. Juan Pérez")
+        st.text_area("Dirección / Referencias (Obligatorio)", key="customer_address", placeholder="Calle, número, colonia...")
+        st.text_input("Notas adicionales (Opcional)", key="customer_notes", placeholder="Ej. Cambio de $500")
 
         # --- TRIVIA PRE-WHATSAPP ---
         st.markdown("---")
@@ -984,14 +1013,15 @@ elif st.session_state.nav_view == "carrito":
         now = datetime.now()
         order_date = now.strftime("%d/%m/%Y %H:%M")
         
-        # Código de verificación solo con mes y día (Ej. MOSTACHO-OK-1115)
+        # Código de verificación solo con mes y día
         date_tag = now.strftime("%m%d")
         verification_code = f"MOSTACHO-OK-{date_tag}"
 
         # --- CÁLCULO AUTOMÁTICO DE CAMBIO DESDE LAS NOTAS ---
         change_text = ""
-        if customer_notes.strip():
-            numbers_in_notes = re.findall(r'\d+(?:\.\d+)?', customer_notes)
+        current_notes_val = st.session_state.customer_notes
+        if current_notes_val.strip():
+            numbers_in_notes = re.findall(r'\d+(?:\.\d+)?', current_notes_val)
             if numbers_in_notes:
                 amounts = [float(n) for n in numbers_in_notes]
                 valid_cash = [amt for amt in amounts if amt >= total_price]
@@ -1003,9 +1033,9 @@ elif st.session_state.nav_view == "carrito":
         # --- ESTRUCTURA EXACTA DEL MENSAJE DE WHATSAPP ---
         msg_header = "NUEVO PEDIDO\n"
         msg_date = f"Fecha: {order_date}\n"
-        msg_customer = f"CLIENTE: {customer_name}\n"
-        msg_address = f"DIRECCIÓN: {customer_address}\n"
-        msg_notes = f"NOTAS: {customer_notes}\n" if customer_notes else ""
+        msg_customer = f"CLIENTE: {st.session_state.customer_name}\n"
+        msg_address = f"DIRECCIÓN: {st.session_state.customer_address}\n"
+        msg_notes = f"NOTAS: {current_notes_val}\n" if current_notes_val else ""
         msg_change = change_text
         
         msg_items_header = "\nDETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
@@ -1018,9 +1048,9 @@ elif st.session_state.nav_view == "carrito":
         whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
         
         st.write("")
-        if customer_name.strip() and customer_address.strip():
-            # Único botón de WhatsApp con icono outline y activación estricta del pop-up al pulsar
-            if st.link_button(":material/chat: Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary"):
+        if st.session_state.customer_name.strip() and st.session_state.customer_address.strip():
+            # Único botón de WhatsApp en verde con icono outline y activación estricta del pop-up al pulsar
+            if st.link_button(":material/chat: Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True):
                 st.session_state.show_success_modal = True
                 st.rerun()
         else:
