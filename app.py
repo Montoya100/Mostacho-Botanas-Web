@@ -51,7 +51,7 @@ def save_dark_mode_setting(enabled):
 if "auto_dark_mode" not in st.session_state:
     st.session_state.auto_dark_mode = load_dark_mode_setting()
 
-# 2. Inicializar Estado de manera robusta
+# 2. Inicializar Estado
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
@@ -491,13 +491,8 @@ st.markdown(f"""
         padding: 0 !important;
     }}
 
-    /* BOTÓN WHATSAPP EN COLOR VERDE OFICIAL Y ESTILO OUTLINE COMPATIBLE */
-    div.stButton > button[data-baseweb="button"]:has(span), 
-    div.stButton > button[kind="secondary"] {
-        /* Selector general de botones secundarios por si se requiere */
-    }
-    
-    .whatsapp-btn-container a, div[data-testid="stLinkButton"] > a {
+    /* BOTÓN WHATSAPP EN COLOR VERDE OFICIAL */
+    div[data-testid="stLinkButton"] > a {{
         background-color: {BTN_WHATSAPP} !important;
         color: #ffffff !important;
         border-radius: 12px !important;
@@ -512,18 +507,19 @@ st.markdown(f"""
         justify-content: center !important;
         gap: 8px !important;
         transition: all 0.2s ease-in-out !important;
-        width: 100% !important;
-    }
-    .whatsapp-btn-container a:hover, div[data-testid="stLinkButton"] > a:hover {
+    }}
+    div[data-testid="stLinkButton"] > a:hover {{
         background-color: {BTN_WHATSAPP_HOVER} !important;
         transform: translateY(-2px) !important;
         color: #ffffff !important;
-    }
-    .whatsapp-btn-container a *, div[data-testid="stLinkButton"] > a * {
+    }}
+    div[data-testid="stLinkButton"] > a p,
+    div[data-testid="stLinkButton"] > a span {{
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
         font-weight: 700 !important;
-    }
+        margin: 0 !important;
+    }}
 
     .popular-badge {{
         position: absolute;
@@ -568,7 +564,6 @@ st.markdown(f"""
         color: #ffffff !important;
     }}
 
-    /* CENTRADO PERFECTO DE CANTIDADES EN MÓVIL Y ESCRITORIO */
     .qty-number {{
         font-size: 1.1rem !important;
         font-weight: 900 !important;
@@ -959,7 +954,7 @@ elif st.session_state.nav_view == "carrito":
         
         st.subheader(":material/local_shipping: Datos de Entrega")
         
-        # Campos de texto vinculados de forma independiente a session_state
+        # Campos independientes vinculados a session_state
         if "customer_name" not in st.session_state:
             st.session_state.customer_name = ""
         if "customer_address" not in st.session_state:
@@ -1051,12 +1046,9 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if st.session_state.customer_name.strip() and st.session_state.customer_address.strip():
-            # Botón de WhatsApp en verde con icono outline mediante contenedor estilizado
-            st.markdown('<div class="whatsapp-btn-container">', unsafe_allow_html=True)
             if st.link_button(":material/chat: Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True):
                 st.session_state.show_success_modal = True
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
         else:
             st.markdown(
                 '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón de envío</div>',
