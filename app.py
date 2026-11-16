@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import urllib.parse
@@ -406,7 +407,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ANIMACIÓN DE PULSO / LATIDO PARA EL BOTÓN DE WHATSAPP */
+    /* ANIMACIÓN DE PULSO / LATIDO Y FORZADO DE TEXTO BLANCO */
     @keyframes whatsappPulse {{
         0% {{
             transform: scale(1);
@@ -424,6 +425,25 @@ st.markdown(f"""
 
     .whatsapp-animated-btn {{
         animation: whatsappPulse 2s infinite ease-in-out !important;
+        background-color: {BTN_WHATSAPP} !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+        font-weight: 800 !important;
+        text-align: center !important;
+        padding: 16px 20px !important;
+        text-decoration: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        font-size: 1.05rem !important;
+    }}
+
+    .whatsapp-animated-btn *, .whatsapp-animated-btn span, .whatsapp-animated-btn p {{
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+        fill: #ffffff !important;
     }}
 
     .block-container {{
@@ -988,25 +1008,11 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if st.session_state.customer_name.strip() and st.session_state.customer_address.strip():
-            # BOTÓN HTML CON ANIMACIÓN DE PULSO, LETRAS BLANCAS Y TEXTO SIMPLIFICADO
+            # BOTÓN HTML CON ANIMACIÓN, TEXTO SIMPLIFICADO Y FORZADO DE COLOR BLANCO EN LETRAS E ICONO
             whatsapp_link_html = f"""
             <div style="margin-top: 12px; margin-bottom: 12px;">
-                <a href="{whatsapp_url}" target="_blank" class="whatsapp-animated-btn" style="
-                    background-color: {BTN_WHATSAPP};
-                    color: #ffffff !important;
-                    border-radius: 12px;
-                    font-weight: 800;
-                    text-align: center;
-                    padding: 16px 20px;
-                    text-decoration: none;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 10px;
-                    width: 100%;
-                    font-size: 1.05rem;
-                ">
-                    <span class="material-symbols-outlined" style="font-size: 24px; color: #ffffff !important; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">chat</span>
+                <a href="{whatsapp_url}" target="_blank" class="whatsapp-animated-btn">
+                    <span class="material-symbols-outlined" style="font-size: 24px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">chat</span>
                     Enviar pedido por WhatsApp
                 </a>
             </div>
