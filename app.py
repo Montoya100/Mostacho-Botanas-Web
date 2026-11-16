@@ -406,7 +406,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ANIMACIÓN DE PULSO / LATIDO PARA EL FAB DE WHATSAPP */
+    /* ANIMACIÓN DE PULSO / LATIDO Y TEXTO BLANCO PARA EL FAB DE WHATSAPP */
     @keyframes whatsappPulse {{
         0% {{
             transform: scale(1);
@@ -1023,7 +1023,7 @@ elif st.session_state.nav_view == "carrito":
             """
             st.markdown(whatsapp_fab_html, unsafe_allow_html=True)
 
-            # 2. DONDE ESTABA WHATSAPP, AHORA COLOCAMOS EL BOTÓN DE AGRADECIMIENTO / FINALIZAR COMPRA
+            # 2. DONDE IBA WHATSAPP (ARRIBA), AHORA COLOCAMOS EL BOTÓN DE AGRADECIMIENTO / FINALIZAR COMPRA
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Ya envié mi pedido, finalizar compra", type="primary", use_container_width=True):
                 st.session_state.order_sent = True
