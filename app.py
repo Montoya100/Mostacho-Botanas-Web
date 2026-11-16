@@ -406,6 +406,26 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
+    /* ANIMACIÓN DE PULSO / LATIDO PARA EL BOTÓN DE WHATSAPP */
+    @keyframes whatsappPulse {{
+        0% {{
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }}
+        50% {{
+            transform: scale(1.02);
+            box-shadow: 0 6px 22px rgba(37, 211, 102, 0.7);
+        }}
+        100% {{
+            transform: scale(1);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }}
+    }}
+
+    .whatsapp-animated-btn {{
+        animation: whatsappPulse 2s infinite ease-in-out !important;
+    }}
+
     .block-container {{
         padding-top: 1.5rem !important;
         padding-bottom: 6rem !important;
@@ -968,33 +988,32 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if st.session_state.customer_name.strip() and st.session_state.customer_address.strip():
-            # ENLACE HTML PURO CON TARGET _BLANK PARA FORZAR NUEVA PESTAÑA DE FORMA INFALIBLE
+            # BOTÓN HTML CON ANIMACIÓN DE PULSO, LETRAS BLANCAS Y TEXTO SIMPLIFICADO
             whatsapp_link_html = f"""
             <div style="margin-top: 12px; margin-bottom: 12px;">
-                <a href="{whatsapp_url}" target="_blank" onclick="window.parent.document.dispatchEvent(new CustomEvent('order_sent'));" style="
+                <a href="{whatsapp_url}" target="_blank" class="whatsapp-animated-btn" style="
                     background-color: {BTN_WHATSAPP};
                     color: #ffffff !important;
                     border-radius: 12px;
-                    font-weight: 700;
+                    font-weight: 800;
                     text-align: center;
-                    padding: 14px 20px;
-                    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+                    padding: 16px 20px;
                     text-decoration: none;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 8px;
+                    gap: 10px;
                     width: 100%;
-                    font-size: 1rem;
+                    font-size: 1.05rem;
                 ">
-                    <span class="material-symbols-outlined" style="font-size: 22px; color: #ffffff !important;">chat</span>
-                    Enviar pedido por WhatsApp (Abrir Pestaña)
+                    <span class="material-symbols-outlined" style="font-size: 24px; color: #ffffff !important; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">chat</span>
+                    Enviar pedido por WhatsApp
                 </a>
             </div>
             """
             st.markdown(whatsapp_link_html, unsafe_allow_html=True)
             
-            # Botón de confirmación visual opcional para marcar como enviado y mostrar agradecimiento
+            # Botón de confirmación visual para marcar como enviado y mostrar agradecimiento
             if st.button("Ya envié mi pedido, finalizar compra", type="primary", use_container_width=True):
                 st.session_state.order_sent = True
                 st.rerun()
