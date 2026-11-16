@@ -5,6 +5,7 @@ import requests
 import json
 import os
 import random
+import hashlib
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -13,6 +14,7 @@ POPULAR_FILE = "populares_mostacho.json"
 BANNER_FILE = "banner_mostacho.json"
 SUGGESTION_FILE = "sugerencia_mostacho.json"
 THEME_FILE = "tema_mostacho.json"
+TRIVIA_FILE = "trivia_mostacho.json"
 UPLOAD_DIR = "uploaded_images"
 
 if not os.path.exists(UPLOAD_DIR):
@@ -27,7 +29,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# GESTIÓN DEL MODO OSCURO (INTERRUPTOR EN ADMIN)
+# GESTIÓN DE MODO OSCURO
 # ==========================================
 def load_dark_mode_setting():
     if os.path.exists(THEME_FILE):
@@ -71,14 +73,12 @@ if "current_modal_items" not in st.session_state:
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
-# Estados para la Trivia Pre-WhatsApp
 if "trivia_answered" not in st.session_state:
     st.session_state.trivia_answered = False
 
 if "trivia_won" not in st.session_state:
     st.session_state.trivia_won = False
 
-# Memoria para datos recurrentes del cliente
 if "saved_customer_name" not in st.session_state:
     st.session_state.saved_customer_name = ""
 
@@ -88,37 +88,51 @@ if "saved_customer_address" not in st.session_state:
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
-# Banco de preguntas para la Trivia Pre-WhatsApp
-TRIVIA_QUESTIONS = [
+# ==========================================
+# GESTIÓN DE TRIVIA CONFIGURABLE
+# ==========================================
+DEFAULT_TRIVIA = [
     {
         "pregunta": "¿Cuál es el ingrediente principal de un buen guacamole tradicional?",
-        "opciones": ["Aguacate", "Tomate verde", "Calabaza"],
-        "respuesta": "Aguacate",
+        "opciones": "Aguacate | Tomate verde | Calabaza",
+        "respuesta": "Aguacate"
     },
     {
         "pregunta": "¿En qué estado de la República Mexicana se encuentra Tehuacán y Cacaloapan?",
-        "opciones": ["Puebla", "Veracruz", "Oaxaca"],
-        "respuesta": "Puebla",
+        "opciones": "Puebla | Veracruz | Oaxaca",
+        "respuesta": "Puebla"
     },
     {
         "pregunta": "¿Qué tipo de saborizante natural predomina en las botanas picositas estilo mexicano?",
-        "opciones": ["Chile y limón", "Menta y chocolate", "Canela y azúcar"],
-        "respuesta": "Chile y limón",
-    },
-    {
-        "pregunta": "¿Qué civilización antigua de Mesoamérica valoraba el cacao como moneda?",
-        "opciones": ["Los Mayas y Aztecas", "Los Vikingos", "Los Egipcios"],
-        "respuesta": "Los Mayas y Aztecas",
-    },
-    {
-        "pregunta": "¿De qué planta se obtienen los pistaches?",
-        "opciones": ["De un árbol (alfóncigo)", "De una raíz subterránea", "De un cactus"],
-        "respuesta": "De un árbol (alfóncigo)",
+        "opciones": "Chile y limón | Menta y chocolate | Canela y azúcar",
+        "respuesta": "Chile y limón"
     }
 ]
 
+def load_saved_trivia():
+    if os.path.exists(TRIVIA_FILE):
+        try:
+            with open(TRIVIA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+        except:
+            pass
+    save_trivia_to_file(DEFAULT_TRIVIA)
+    return DEFAULT_TRIVIA
+
+def save_trivia_to_file(trivia_list):
+    try:
+        with open(TRIVIA_FILE, "w", encoding="utf-8") as f:
+            json.dump(trivia_list, f, ensure_ascii=False, indent=4)
+    except:
+        pass
+
+if "trivia_questions_db" not in st.session_state:
+    st.session_state.trivia_questions_db = load_saved_trivia()
+
 # ==========================================
-# LIGAS POR DEFECTO CON TU IMAGEN DE GITHUB
+# LIGAS Y ARCHIVOS DE RESPALDO
 # ==========================================
 DEFAULT_BANNER = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/banner.jpg"
 DEFAULT_PRODUCT_IMG = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/image.jpg"
@@ -318,7 +332,7 @@ BTN_CART_FAB = "#FF4500"
 BTN_CART_FAB_HOVER = "#d93800"
 
 # ==========================================
-# CSS MODO OSCURO OPCIONAL (SE ACTIVA/DESACTIVA DESDE ADMIN)
+# CSS MODO OSCURO / CLARO
 # ==========================================
 dark_mode_css = """
     @media (prefers-color-scheme: dark) {
@@ -355,9 +369,6 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* ========================================================== */
-    /* MODALES: FONDO TOTALMENTE BLANCO Y LIMPIO (SIN RECUADROS NEGROS) */
-    /* ========================================================== */
     div[data-baseweb="modal"], div[role="dialog"], section[tabindex="-1"], 
     div[data-testid="stModal"], div[data-modal-container="true"] {{
         background-color: rgba(0, 0, 0, 0.5) !important;
@@ -385,22 +396,12 @@ st.markdown(f"""
         color: #1e293b !important;
     }}
 
-    div[data-baseweb="modal"] div[style*="background: #ffffff"], 
-    div[role="dialog"] div[style*="background: #ffffff"] {{
-        background-color: #ffffff !important;
-    }}
-
     div[data-baseweb="modal"] div[data-testid="stVerticalBlock"], 
     div[role="dialog"] div[data-testid="stVerticalBlock"] {{
         max-height: 68vh !important;
         overflow-y: auto !important;
         padding: 0 2px !important;
         background-color: #ffffff !important;
-    }}
-
-    div[data-baseweb="modal"] button[aria-label="Close"], 
-    div[role="dialog"] button[aria-label="Close"] {{
-        display: none !important;
     }}
 
     .stApp {{
@@ -419,11 +420,6 @@ st.markdown(f"""
         color: {text_color} !important;
     }}
 
-    div[data-testid="stVerticalBlock"], div[data-testid="stHorizontalBlock"], div.element-container {{
-        background-color: transparent !important;
-        color: {text_color} !important;
-    }}
-
     .app-title {{
         font-size: 2rem !important;
         font-weight: 900 !important;
@@ -439,11 +435,9 @@ st.markdown(f"""
         display: block;
     }}
 
-    /* FORZAR ABSOLUTAMENTE TODOS LOS INPUTS, BARRAS DE BÚSQUEDA Y TEXTAREAS A BLANCO PURO EN MODO CLARO */
     input, textarea, select, 
     div[data-baseweb="input"], div[data-baseweb="base-input"], 
-    div[data-baseweb="textarea"], div[data-baseweb="select"],
-    [data-baseweb="input"] > div, [data-baseweb="base-input"] > div {{
+    div[data-baseweb="textarea"], div[data-baseweb="select"] {{
         background-color: #ffffff !important;
         color: #1e293b !important;
         -webkit-text-fill-color: #1e293b !important;
@@ -454,7 +448,6 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* BOTÓN FLOTANTE (FAB) MÁS "GORDITO" Y CÓMODO EN MÓVIL Y WEB */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 22px !important;
@@ -533,12 +526,6 @@ st.markdown(f"""
         box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
     }}
 
-    label p, .stTextInput label, .stTextArea label, [data-testid="stWidgetLabel"] p {{
-        color: {text_color} !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-    }}
-
     button, .stButton > button, div[data-testid="stButton"] > button {{
         background-color: {BTN_GENERAL} !important;
         color: #ffffff !important;
@@ -560,13 +547,6 @@ st.markdown(f"""
         text-align: center;
         color: #1e293b !important;
         margin-top: 4px;
-    }}
-
-    .material-symbols-outlined {{
-        font-family: 'Material Symbols Outlined' !important;
-        font-size: 20px !important;
-        vertical-align: middle;
-        line-height: 1;
     }}
 
     .product-card {{
@@ -638,13 +618,6 @@ st.markdown(f"""
         overflow: hidden;
     }}
 
-    @media (min-width: 768px) {{
-        .desktop-banner-img {{ height: 220px !important; width: 100% !important; object-fit: cover !important; border-radius: 12px; display: block; }}
-    }}
-    @media (max-width: 767px) {{
-        .desktop-banner-img {{ height: 160px !important; width: 100% !important; object-fit: cover !important; border-radius: 12px; display: block; }}
-    }}
-
     {dark_mode_css}
 </style>
 """, unsafe_allow_html=True)
@@ -685,7 +658,7 @@ total_cart_amount = sum(
 )
 
 # ==========================================
-# MODAL DE VARIANTES CON TÍTULO EN NARANJA Y FONDO BLANCO PURO
+# MODAL DE VARIANTES
 # ==========================================
 @st.dialog("Seleccionar Variante o Presentación")
 def variants_modal_dialog(base_name, variants_list):
@@ -788,7 +761,7 @@ if st.session_state.nav_view == "catalogo":
     </div>
     """, unsafe_allow_html=True)
 
-    # 1. SECCIÓN DE POPULARES
+    # POPULARES
     popular_ids = [str(p.get("id")) for p in st.session_state.popular_items]
     if popular_ids:
         st.markdown("### <span class='material-symbols-outlined' style='font-size: 24px; color: #FE8330;'>local_fire_department</span> Populares", unsafe_allow_html=True)
@@ -811,7 +784,7 @@ if st.session_state.nav_view == "catalogo":
                         st.rerun()
             st.write("---")
 
-    # 2. CATEGORÍAS
+    # CATEGORÍAS
     cats = ["Todo", "Individual", "Para compartir"]
     cat_cols = st.columns(len(cats))
     for i, c in enumerate(cats):
@@ -824,7 +797,7 @@ if st.session_state.nav_view == "catalogo":
 
     st.write("---")
 
-    # 3. LISTADO DE PRODUCTOS EN CUADRÍCULA DE 3 COLUMNAS
+    # LISTADO
     try:
         current_products_list = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
         
@@ -955,12 +928,12 @@ elif st.session_state.nav_view == "carrito":
         st.write("---")
         st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
 
-        # SUGERENCIA CONFIGURABLE EN EL CARRITO
+        # --- PRODUCTO GANCHO / SUGERENCIA DESDE EL PANEL ---
         sugg_id = st.session_state.cart_suggestion.get("id")
         if sugg_id:
             sugg_prod = next((p for p in st.session_state.products if str(p.get("id")) == str(sugg_id)), None)
             if sugg_prod and str(sugg_id) not in st.session_state.cart:
-                st.info(f"💡 **¿Se te olvida alguna botanita?** ¡Acompaña tu pedido con unos deliciosos **{sugg_prod.get('name')}** por solo **${sugg_prod.get('price'):.2f} MXN**!")
+                st.info(f"💡 **¿Te hace falta alguna botanita para acompañar?** ¡Acompaña tu pedido con unos deliciosos **{sugg_prod.get('name')}** por solo **${sugg_prod.get('price'):.2f} MXN**!")
                 if st.button(f"Agregar {sugg_prod.get('name')} al carrito", key="add_sugg_btn"):
                     add_to_cart(str(sugg_id))
                     st.rerun()
@@ -974,48 +947,62 @@ elif st.session_state.nav_view == "carrito":
         st.session_state.saved_customer_name = customer_name
         st.session_state.saved_customer_address = customer_address
 
-        # ==========================================
-        # NUEVA FUNCIÓN: TRIVIA PRE-WHATSAPP
-        # ==========================================
+        # --- TRIVIA PRE-WHATSAPP CON IDENTIFICADOR DE FECHA (MOSTACHO-OK-DDMM) ---
         st.markdown("---")
-        st.subheader("🧠 ¡Juega y gana un detalle sorpresa antes de enviar!")
+        st.subheader("🧠 ¡Juega y gana una botana sorpresa antes de enviar!")
 
         if not st.session_state.trivia_answered:
-            if "current_trivia" not in st.session_state:
-                st.session_state.current_trivia = random.choice(TRIVIA_QUESTIONS)
+            if "current_trivia_idx" not in st.session_state:
+                st.session_state.current_trivia_idx = random.randint(0, len(st.session_state.trivia_questions_db) - 1)
+            
+            if st.session_state.current_trivia_idx >= len(st.session_state.trivia_questions_db):
+                st.session_state.current_trivia_idx = 0
 
-            t_data = st.session_state.current_trivia
-            st.info(f"**Pregunta:** {t_data['pregunta']}")
+            t_data = st.session_state.trivia_questions_db[st.session_state.current_trivia_idx]
+            raw_options = str(t_data.get("opciones", "A | B | C"))
+            opciones_list = [o.strip() for o in raw_options.split("|") if o.strip()]
+
+            st.info(f"**Pregunta:** {t_data.get('pregunta')}")
             respuesta_usuario = st.radio(
                 "Elige tu respuesta:",
-                t_data["opciones"],
+                opciones_list,
                 key="trivia_selection"
             )
 
             if st.button("Comprobar respuesta", key="check_trivia_btn"):
                 st.session_state.trivia_answered = True
-                if respuesta_usuario == t_data["respuesta"]:
+                correct_ans = str(t_data.get("respuesta")).strip()
+                if str(respuesta_usuario).strip().lower() == correct_ans.lower():
                     st.session_state.trivia_won = True
                 st.rerun()
         else:
             if st.session_state.trivia_won:
-                st.success("🎉 ¡Correcto! Has ganado un descuento o botana sorpresa en tu pedido.")
+                st.success("🎉 ¡Correcto! Has ganado una botana sorpresa en tu pedido.")
             else:
                 st.warning("¡Casi la tienes! No te preocupes, tu pedido sigue en pie.")
 
             if st.button("Jugar otra pregunta", key="reset_trivia_btn"):
                 st.session_state.trivia_answered = False
                 st.session_state.trivia_won = False
-                if "current_trivia" in st.session_state:
-                    del st.session_state.current_trivia
+                if "current_trivia_idx" in st.session_state:
+                    del st.session_state.current_trivia_idx
                 st.rerun()
 
-        order_date = datetime.now().strftime("%d/%m/%Y %H:%M")
+        now = datetime.now()
+        order_date = now.strftime("%d/%m/%Y %H:%M")
         
+        # Identificador personalizado: MOSTACHO-OK- + MES y DÍA (Ej. MOSTACHO-OK-1115 para 15 de Noviembre)
+        date_tag = now.strftime("%m%d") # Mes y día en números (ej. 1115) o usa now.strftime("%b%d").upper() si prefieres letras (ej. NOV15)
+        rand_suffix = hashlib.md5(f"{customer_name}_{order_date}".encode()).hexdigest()[:4].upper()
+        verification_code = f"MOSTACHO-OK-{date_tag}-{rand_suffix}"
+
         msg_header = f"NUEVO PEDIDO\nFecha: {order_date}\n\n"
         msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
         msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
-        msg_trivia = "🎁 [¡Trivia Ganada! Aplica sorpresa/descuento]\n" if st.session_state.trivia_won else ""
+        
+        # Incluye el identificador claro con la fecha de hoy
+        msg_trivia = f"🎁 [PREMIO GANADO: Botana Sorpresa]\n🏷️ [{verification_code}]\n\n" if st.session_state.trivia_won else ""
+        
         msg_customer = f"CLIENTE: {customer_name}\n"
         msg_address = f"DIRECCION: {customer_address}\n"
         msg_notes = f"NOTAS: {customer_notes}\n" if customer_notes else ""
@@ -1057,19 +1044,18 @@ elif st.session_state.nav_view == "admin":
     else:
         st.success("¡Acceso concedido!")
         
-        tab_prod, tab_pop, tab_sugg, tab_banner, tab_upload, tab_theme = st.tabs([
-            "📦 Editar Productos", 
+        tab_prod, tab_pop, tab_sugg, tab_banner, tab_upload, tab_trivia, tab_theme = st.tabs([
+            "📦 Productos", 
             "⭐ Populares", 
             "💡 Sugerencia Carrito", 
-            "🖼️ Imagen Banner", 
-            "📤 Subir Imágenes",
-            "🌓 Modo Oscuro"
+            "🖼️ Banner", 
+            "📤 Subir",
+            "🧠 Trivia",
+            "🌓 Apariencia"
         ])
         
         with tab_prod:
             st.markdown("### Inventario de Productos")
-            st.info("💡 Para agrupar variantes (ej. Frituras con/sin chile), pon el mismo nombre base seguido de la variante entre paréntesis. Los productos se ordenan alfabéticamente en automático.")
-            
             uploaded_excel = st.file_uploader("Cargar catálogo desde Excel o CSV (.xlsx, .csv)", type=["xlsx", "csv"])
             if uploaded_excel is not None:
                 try:
@@ -1101,43 +1087,25 @@ elif st.session_state.nav_view == "admin":
                         save_products_to_file(new_loaded_list)
                         st.success("¡Catálogo cargado y ordenado alfabéticamente desde el archivo!")
                         st.rerun()
-                    else:
-                        st.error("El archivo debe contener al menos las columnas 'name' y 'price'.")
                 except Exception as e:
                     st.error(f"Error al procesar el archivo: {e}")
 
             st.write("---")
-            
             current_sorted_products = sorted(st.session_state.products, key=lambda x: str(x.get("name", "")).lower())
             df_current = pd.DataFrame(current_sorted_products)
-            
             column_config = {
                 "id": None,
-                "category": st.column_config.SelectboxColumn(
-                    "Categoría",
-                    options=["Individual", "Para compartir"],
-                    required=True
-                )
+                "category": st.column_config.SelectboxColumn("Categoría", options=["Individual", "Para compartir"], required=True)
             }
-            
-            edited_df = st.data_editor(
-                df_current, 
-                num_rows="dynamic", 
-                key="editor_admin_table",
-                column_config=column_config,
-                hide_index=True,
-                use_container_width=True
-            )
+            edited_df = st.data_editor(df_current, num_rows="dynamic", key="editor_admin_table", column_config=column_config, hide_index=True, use_container_width=True)
             
             if st.button("Guardar Cambios de Productos"):
                 updated_list = []
                 for idx, row in edited_df.iterrows():
                     raw_id = row.get("id")
                     prod_id = str(raw_id).strip() if pd.notna(raw_id) and str(raw_id).strip() != "" else f"prod_{int(datetime.now().timestamp())}_{idx}"
-                    
                     raw_img = str(row.get("image", "")).strip()
                     prod_img = raw_img if raw_img != "" and raw_img.lower() != "nan" and "placeholder" not in raw_img else DEFAULT_PRODUCT_IMG
-                    
                     raw_desc = row.get("description")
                     prod_desc = str(raw_desc).strip() if pd.notna(raw_desc) and str(raw_desc).strip() != "nan" else ""
                     
@@ -1149,23 +1117,20 @@ elif st.session_state.nav_view == "admin":
                         "description": prod_desc,
                         "image": prod_img
                     })
-                    
                 updated_list = sorted(updated_list, key=lambda x: str(x.get("name", "")).lower())
                 st.session_state.products = updated_list
                 save_products_to_file(updated_list)
-                st.success("¡Productos guardados y ordenados alfabéticamente!")
+                st.success("¡Productos guardados correctamente!")
                 st.rerun()
 
         with tab_pop:
-            st.markdown("### Seleccionar productos que aparecerán en la sección 'Populares'")
+            st.markdown("### Seleccionar productos Populares")
             current_pop_ids = [str(p.get("id")) for p in st.session_state.popular_items]
-            
             selected_populares_new = []
             for prod in st.session_state.products:
                 p_id = str(prod.get("id"))
                 p_name = str(prod.get("name"))
                 is_currently_pop = p_id in current_pop_ids
-                
                 if st.checkbox(f"{p_name} (${prod.get('price', 0)} MXN)", value=is_currently_pop, key=f"check_pop_{p_id}"):
                     selected_populares_new.append({
                         "id": p_id,
@@ -1173,7 +1138,6 @@ elif st.session_state.nav_view == "admin":
                         "price": prod.get("price"),
                         "image": prod.get("image", DEFAULT_PRODUCT_IMG)
                     })
-            
             if st.button("Guardar Populares"):
                 st.session_state.popular_items = selected_populares_new
                 save_populares_to_file(selected_populares_new)
@@ -1181,23 +1145,22 @@ elif st.session_state.nav_view == "admin":
                 st.rerun()
 
         with tab_sugg:
-            st.markdown("### Producto sugerido para el carrito")
+            st.markdown("### Producto Gancho Sugerido en el Carrito")
             prod_options = {p.get("name"): p.get("id") for p in st.session_state.products}
             current_sugg_id = st.session_state.cart_suggestion.get("id")
             current_sugg_name = next((name for name, pid in prod_options.items() if str(pid) == str(current_sugg_id)), list(prod_options.keys())[0] if prod_options else "")
             
-            selected_sugg_name = st.selectbox("Elige qué producto sugerir en el carrito", options=list(prod_options.keys()), index=list(prod_options.keys()).index(current_sugg_name) if current_sugg_name in prod_options else 0)
+            selected_sugg_name = st.selectbox("Producto sugerido", options=list(prod_options.keys()), index=list(prod_options.keys()).index(current_sugg_name) if current_sugg_name in prod_options else 0)
             
-            if st.button("Guardar Sugerencia"):
+            if st.button("Guardar Sugerencia de Carrito"):
                 chosen_id = prod_options.get(selected_sugg_name)
                 st.session_state.cart_suggestion = {"id": chosen_id}
                 save_suggestion_to_file(st.session_state.cart_suggestion)
-                st.success("¡Sugerencia guardada correctamente!")
+                st.success("¡Sugerencia gancho guardada correctamente!")
                 st.rerun()
 
         with tab_banner:
-            st.markdown("### Cambiar Imagen Rectangular del Banner")
-            st.caption("Tamaño recomendado: 1200 x 500 px. Actualiza el enlace de la imagen principal:")
+            st.markdown("### Imagen del Banner Principal")
             new_banner_url = st.text_input("URL de la imagen del banner", value=st.session_state.banner_url)
             if st.button("Guardar Banner"):
                 if new_banner_url.strip():
@@ -1207,27 +1170,54 @@ elif st.session_state.nav_view == "admin":
                     st.rerun()
 
         with tab_upload:
-            st.markdown("### Subir Imagen Directamente")
-            st.caption("Tamaño recomendado: Artículos (600x600 px)")
+            st.markdown("### Subir Imágenes al Servidor")
             uploaded_file = st.file_uploader("Elige una imagen", type=["png", "jpg", "jpeg", "webp"])
             if uploaded_file is not None:
                 file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
                 with open(file_path, "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                
                 st.success(f"¡Subida con éxito: `{uploaded_file.name}`!")
                 st.image(file_path, width=200)
                 local_url = f"/{UPLOAD_DIR}/{uploaded_file.name}"
-                st.text_input("Copia esta ruta para usarla en tu banner o productos:", value=local_url)
+                st.text_input("Copia esta ruta:", value=local_url)
+
+        with tab_trivia:
+            st.markdown("### Administrar Preguntas de la Trivia")
+            df_trivia = pd.DataFrame(st.session_state.trivia_questions_db)
+            edited_trivia_df = st.data_editor(
+                df_trivia,
+                num_rows="dynamic",
+                key="editor_trivia_table",
+                use_container_width=True
+            )
+            
+            if st.button("Guardar Preguntas de Trivia"):
+                updated_trivia_list = []
+                for _, row in edited_trivia_df.iterrows():
+                    p_text = str(row.get("pregunta", "")).strip()
+                    o_text = str(row.get("opciones", "")).strip()
+                    r_text = str(row.get("respuesta", "")).strip()
+                    if p_text and o_text and r_text:
+                        updated_trivia_list.append({
+                            "pregunta": p_text,
+                            "opciones": o_text,
+                            "respuesta": r_text
+                        })
+                if updated_trivia_list:
+                    st.session_state.trivia_questions_db = updated_trivia_list
+                    save_trivia_to_file(updated_trivia_list)
+                    st.success("¡Preguntas de trivia guardadas exitosamente!")
+                    st.rerun()
+                else:
+                    st.error("Debe haber al menos una pregunta válida.")
 
         with tab_theme:
-            st.markdown("### Control de Modo Oscuro Automático")
-            st.info("Si esta opción está activada, la app detectará si el celular del cliente está en Modo Oscuro y adaptará el fondo respetando los tonos naranjas. Si prefieres mantener siempre el fondo blanco clásico (Ctrl+Z), desactívalo aquí.")
+            st.markdown("### Control de Apariencia y Modo Oscuro")
             dark_toggle = st.toggle("Activar detección automática de Modo Oscuro", value=st.session_state.auto_dark_mode)
-            if st.button("Guardar Preferencia de Tema"):
+            if st.button("Guardar Configuración de Tema"):
                 st.session_state.auto_dark_mode = dark_toggle
                 save_dark_mode_setting(dark_toggle)
-                st.success("¡Preferencia de tema guardada!")
+                st.success("¡Preferencia guardada!")
                 st.rerun()
         
         st.write("---")
@@ -1236,7 +1226,7 @@ elif st.session_state.nav_view == "admin":
             go_to_catalogo()
 
 # ==========================================
-# 7. PIE DE PÁGINA Y BOTÓN DE ADMIN
+# 7. PIE DE PÁGINA
 # ==========================================
 st.write("---")
 st.markdown("<br><br>", unsafe_allow_html=True)
