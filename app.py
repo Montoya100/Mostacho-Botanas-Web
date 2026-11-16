@@ -88,6 +88,9 @@ if "saved_customer_name" not in st.session_state:
 if "saved_customer_address" not in st.session_state:
     st.session_state.saved_customer_address = ""
 
+if "saved_customer_notes" not in st.session_state:
+    st.session_state.saved_customer_notes = ""
+
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
 
@@ -684,6 +687,7 @@ def success_order_dialog():
         st.session_state.trivia_won = False
         st.session_state.saved_customer_name = ""
         st.session_state.saved_customer_address = ""
+        st.session_state.saved_customer_notes = ""
         st.session_state.show_success_modal = False
         go_to_catalogo()
 
@@ -930,10 +934,11 @@ elif st.session_state.nav_view == "carrito":
         
         customer_name = st.text_input("Nombre del cliente (Obligatorio)", value=st.session_state.saved_customer_name, placeholder="Ej. Juan Pérez")
         customer_address = st.text_area("Dirección / Referencias (Obligatorio)", value=st.session_state.saved_customer_address, placeholder="Calle, número, colonia...")
-        customer_notes = st.text_input("Notas adicionales (Opcional)", placeholder="Ej. Cambio de $500")
+        customer_notes = st.text_input("Notas adicionales (Opcional)", value=st.session_state.saved_customer_notes, placeholder="Ej. Cambio de $500")
         
         st.session_state.saved_customer_name = customer_name
         st.session_state.saved_customer_address = customer_address
+        st.session_state.saved_customer_notes = customer_notes
 
         # --- TRIVIA PRE-WHATSAPP ---
         st.markdown("---")
@@ -1014,8 +1019,8 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if customer_name.strip() and customer_address.strip():
-            # Único botón de WhatsApp que abre el enlace y activa el pop-up de éxito
-            if st.link_button("💬 Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary"):
+            # Único botón de WhatsApp con icono outline y activación estricta del pop-up al pulsar
+            if st.link_button(":material/chat: Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary"):
                 st.session_state.show_success_modal = True
                 st.rerun()
         else:
