@@ -511,7 +511,7 @@ st.markdown(f"""
     }}
 
     .whatsapp-btn-active {{
-        background: linear-gradient(135deg, {25D366} 0%, #1EBE5D 100%) !important;
+        background: linear-gradient(135deg, #25D366 0%, #1EBE5D 100%) !important;
         color: #ffffff !important;
         padding: 14px;
         border-radius: 14px;
@@ -926,7 +926,7 @@ elif st.session_state.nav_view == "carrito":
                         
         st.write("---")
 
-        # --- PRODUCTO GANCHO / SUGERENCIA DESDE EL PANEL (CORREGIDO Y VISIBLE) ---
+        # --- PRODUCTO GANCHO / SUGERENCIA DESDE EL PANEL ---
         sugg_id = st.session_state.cart_suggestion.get("id")
         if sugg_id:
             sugg_prod = next((p for p in st.session_state.products if str(p.get("id")) == str(sugg_id)), None)
@@ -989,12 +989,12 @@ elif st.session_state.nav_view == "carrito":
         now = datetime.now()
         order_date = now.strftime("%d/%m/%Y %H:%M")
         
-        # Código de verificación limpio solo con mes y día (Ej. MOSTACHO-OK-1115)
+        # Código de verificación solo con mes y día (Ej. MOSTACHO-OK-1115)
         date_tag = now.strftime("%m%d")
         verification_code = f"MOSTACHO-OK-{date_tag}"
 
         # --- ESTRUCTURA EXACTA DEL MENSAJE DE WHATSAPP ---
-        msg_header = f"NUEVO PEDIDO\n"
+        msg_header = "NUEVO PEDIDO\n"
         msg_date = f"Fecha: {order_date}\n"
         msg_customer = f"CLIENTE: {customer_name}\n"
         msg_address = f"DIRECCIÓN: {customer_address}\n"
