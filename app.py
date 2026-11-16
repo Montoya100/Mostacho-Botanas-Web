@@ -406,7 +406,7 @@ st.markdown(f"""
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 <style>
-    /* FAB VERDE DE WHATSAPP FIJO Y LIMPIO (SIN ANIMACIONES RASPANTES) */
+    /* FAB VERDE DE WHATSAPP FIJO Y LIMPIO */
     .whatsapp-fab-clean {{
         background-color: {BTN_WHATSAPP} !important;
         color: #ffffff !important;
@@ -999,7 +999,7 @@ elif st.session_state.nav_view == "carrito":
             # 1. EL FAB FLOTANTE INFERIOR SE CONVIERTE EN EL BOTÓN VERDE DE WHATSAPP
             whatsapp_fab_html = f"""
             <div style="position: fixed !important; bottom: 22px !important; left: 22px !important; z-index: 99999 !important;">
-                <a href="{whatsapp_url}" target="_blank" onclick="window.parent.document.dispatchEvent(new CustomEvent('order_sent'));" class="whatsapp-fab-clean">
+                <a href="{whatsapp_url}" target="_blank" class="whatsapp-fab-clean">
                     <span class="material-symbols-outlined" style="font-size: 22px; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;">chat</span>
                     Enviar pedido por WhatsApp
                 </a>
