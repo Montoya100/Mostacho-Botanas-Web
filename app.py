@@ -51,7 +51,7 @@ def save_dark_mode_setting(enabled):
 if "auto_dark_mode" not in st.session_state:
     st.session_state.auto_dark_mode = load_dark_mode_setting()
 
-# 2. Inicializar Estado
+# 2. Inicialización estricta de Estados
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
@@ -81,6 +81,15 @@ if "trivia_answered" not in st.session_state:
 
 if "trivia_won" not in st.session_state:
     st.session_state.trivia_won = False
+
+if "customer_name" not in st.session_state:
+    st.session_state.customer_name = ""
+
+if "customer_address" not in st.session_state:
+    st.session_state.customer_address = ""
+
+if "customer_notes" not in st.session_state:
+    st.session_state.customer_notes = ""
 
 LOYVERSE_TOKEN = "1a4ee083d81e4525a48503180767c22d"
 WHATSAPP_PHONE = "522381174698"
@@ -691,7 +700,7 @@ if st.session_state.show_variants_modal and st.session_state.nav_view == "catalo
     variants_modal_dialog(st.session_state.current_modal_base, st.session_state.current_modal_items)
 
 # ==========================================
-# MODAL DE ÉXITO AL ENVIAR PEDIDO
+# MODAL DE ÉXITO AL ENVIAR PEDIDO (AISLADO)
 # ==========================================
 @st.dialog("¡Pedido Realizado con Éxito!")
 def success_order_dialog():
@@ -713,6 +722,7 @@ def success_order_dialog():
         st.session_state.show_success_modal = False
         go_to_catalogo()
 
+# LLAMADA CONDICIONAL ESTRICTA DEL DIÁLOGO DE ÉXITO
 if st.session_state.get("show_success_modal", False):
     success_order_dialog()
 
@@ -954,14 +964,7 @@ elif st.session_state.nav_view == "carrito":
         
         st.subheader(":material/local_shipping: Datos de Entrega")
         
-        # Campos independientes vinculados a session_state
-        if "customer_name" not in st.session_state:
-            st.session_state.customer_name = ""
-        if "customer_address" not in st.session_state:
-            st.session_state.customer_address = ""
-        if "customer_notes" not in st.session_state:
-            st.session_state.customer_notes = ""
-
+        # Campos de texto vinculados de forma segura a session_state
         st.text_input("Nombre del cliente (Obligatorio)", key="customer_name", placeholder="Ej. Juan Pérez")
         st.text_area("Dirección / Referencias (Obligatorio)", key="customer_address", placeholder="Calle, número, colonia...")
         st.text_input("Notas adicionales (Opcional)", key="customer_notes", placeholder="Ej. Cambio de $500")
@@ -1046,6 +1049,7 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if st.session_state.customer_name.strip() and st.session_state.customer_address.strip():
+            # Botón de WhatsApp con enlace directo y activación estricta del pop-up al pulsar
             if st.link_button(":material/chat: Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True):
                 st.session_state.show_success_modal = True
                 st.rerun()
