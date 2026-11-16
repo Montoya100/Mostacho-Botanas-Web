@@ -538,6 +538,18 @@ st.markdown(f"""
         color: #ffffff !important;
     }}
 
+    /* CENTRADO PERFECTO DE CANTIDADES EN MÓVIL Y ESCRITORIO */
+    .qty-number {{
+        font-size: 1.1rem !important;
+        font-weight: 900 !important;
+        text-align: center !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        margin: 0 auto;
+    }}
+
     .promo-banner {{
         background: linear-gradient(135deg, {BTN_GENERAL} 0%, {BTN_CART_FAB} 100%);
         color: white;
@@ -631,13 +643,13 @@ def variants_modal_dialog(base_name, variants_list):
             </div>
         """, unsafe_allow_html=True)
         
-        col_m, col_n, col_p = st.columns(3)
+        col_m, col_n, col_p = st.columns([1, 1.2, 1], vertical_alignment="center")
         with col_m:
             if st.button("-", key=f"m_minus_{v_id}_{idx}", use_container_width=True):
                 remove_from_cart(v_id)
                 st.rerun()
         with col_n:
-            st.markdown(f"<div style='text-align: center; font-weight: 900; font-size: 1rem; padding-top: 4px; color: {text_color};'>{qty_in_cart}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='qty-number' style='color: {text_color};'>{qty_in_cart}</div>", unsafe_allow_html=True)
         with col_p:
             if st.button("+", key=f"m_plus_{v_id}_{idx}", use_container_width=True):
                 add_to_cart(v_id)
@@ -675,7 +687,7 @@ def success_order_dialog():
         st.session_state.show_success_modal = False
         go_to_catalogo()
 
-if st.session_state.show_success_modal:
+if st.session_state.get("show_success_modal", False):
     success_order_dialog()
 
 # ==========================================
@@ -841,7 +853,7 @@ if st.session_state.nav_view == "catalogo":
                                     add_to_cart(pid)
                                     st.rerun()
                             else:
-                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1])
+                                sub_c1, sub_c2, sub_c3 = st.columns([1, 1.2, 1], vertical_alignment="center")
                                 with sub_c1:
                                     if st.button("-", key=f"minus_{pid}", use_container_width=True):
                                         remove_from_cart(pid)
@@ -884,7 +896,7 @@ elif st.session_state.nav_view == "carrito":
                 total_price += subtotal
                 order_summary.append(f"- {qty}x {p.get('name')} - ${subtotal:.2f} MXN")
                 
-                col_c1, col_c2 = st.columns([3, 1])
+                col_c1, col_c2 = st.columns([3, 1], vertical_alignment="center")
                 with col_c1:
                     st.markdown(f"**{p.get('name')}**")
                     st.caption(f"{qty} x ${float(p.get('price', 0)):.2f} = ${subtotal:.2f}")
@@ -1001,10 +1013,20 @@ elif st.session_state.nav_view == "carrito":
         
         st.write("")
         if customer_name.strip() and customer_address.strip():
-            # Botón que abre WhatsApp y activa el pop-up de éxito
-            if st.link_button("💬 Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary"):
+            # Botón único con callback dedicado para evitar disparos accidentales
+            def handle_whatsapp_click():
                 st.session_state.show_success_modal = True
-                st.rerun()
+
+            st.link_button("💬 Enviar pedido por WhatsApp", url=whatsapp_url, use_container_width=True, type="primary")
+            
+            if st.button("Confirmar que ya abrí WhatsApp y reiniciar pedido", use_container_width=True, key="confirm_sent_btn"):
+                st.session_state.cart = {}
+                st.session_state.trivia_answered = False
+                st.session_state.trivia_won = False
+                st.session_state.saved_customer_name = ""
+                st.session_state.saved_customer_address = ""
+                st.session_state.show_success_modal = False
+                go_to_catalogo()
         else:
             st.markdown(
                 '<div class="whatsapp-btn-disabled">Completa Nombre y Dirección para activar el botón de envío</div>',
