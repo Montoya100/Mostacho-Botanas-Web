@@ -424,8 +424,26 @@ st.markdown(f"""
 
     .whatsapp-fab-animated {{
         animation: whatsappPulse 2s infinite ease-in-out !important;
-        background: {BTN_WHATSAPP} !important;
+        background-color: {BTN_WHATSAPP} !important;
         color: #ffffff !important;
+        padding: 12px 22px !important;
+        border-radius: 50px !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        text-decoration: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        height: 48px !important;
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.6) !important;
+        white-space: nowrap !important;
+    }}
+
+    .whatsapp-fab-animated *, .whatsapp-fab-animated span, .whatsapp-fab-animated p {{
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+        fill: #ffffff !important;
     }}
 
     .block-container {{
@@ -452,7 +470,6 @@ st.markdown(f"""
         -webkit-text-fill-color: #94a3b8 !important;
     }}
 
-    /* Estilo general para el FAB flotante */
     div[data-testid="stButton"]:has(button[kind="primary"]) {{
         position: fixed !important;
         bottom: 22px !important;
@@ -995,39 +1012,24 @@ elif st.session_state.nav_view == "carrito":
         is_form_valid = bool(st.session_state.customer_name.strip() and st.session_state.customer_address.strip())
 
         if is_form_valid:
-            # 1. EL FAB FLOTANTE INFERIOR SE CONVIERTE EN EL BOTÓN DE WHATSAPP CON ANIMACIÓN
+            # 1. EL FAB FLOTANTE INFERIOR SE CONVIERTE EN EL BOTÓN VERDE DE WHATSAPP CON ANIMACIÓN
             whatsapp_fab_html = f"""
             <div style="position: fixed !important; bottom: 22px !important; left: 22px !important; z-index: 99999 !important;">
-                <a href="{whatsapp_url}" target="_blank" class="whatsapp-fab-animated" style="
-                    background-color: {BTN_WHATSAPP} !important;
-                    color: #ffffff !important;
-                    padding: 12px 22px !important;
-                    border-radius: 50px !important;
-                    font-weight: 800 !important;
-                    font-size: 0.95rem !important;
-                    text-decoration: none !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    gap: 8px !important;
-                    height: 48px !important;
-                    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.6) !important;
-                    white-space: nowrap !important;
-                ">
-                    <span class="material-symbols-outlined" style="font-size: 22px; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">chat</span>
+                <a href="{whatsapp_url}" target="_blank" class="whatsapp-fab-animated">
+                    <span class="material-symbols-outlined" style="font-size: 22px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">chat</span>
                     Enviar pedido por WhatsApp
                 </a>
             </div>
             """
             st.markdown(whatsapp_fab_html, unsafe_allow_html=True)
 
-            # 2. DONDE ESTABA EL BOTÓN DE WHATSAPP, AHORA PONEMOS EL DE CERRAR PEDIDO / FINALIZAR COMPRA
+            # 2. DONDE ESTABA WHATSAPP, AHORA COLOCAMOS EL BOTÓN DE AGRADECIMIENTO / FINALIZAR COMPRA
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Ya envié mi pedido, finalizar compra", type="primary", use_container_width=True):
                 st.session_state.order_sent = True
                 st.rerun()
         else:
-            # SI FALTAN DATOS, MANTENEMOS EL FAB NORMAL DE CARRITO Y AVISAMOS EN EL ÁREA DE ENVÍO
+            # SI FALTAN DATOS, MANTENEMOS EL FAB NORMAL DE CARRITO Y AVISAMOS
             if total_items > 0:
                 fab_label = f":material/shopping_cart: Ver Carrito ({total_items}) - ${total_cart_amount:.2f} MXN"
                 st.button(
