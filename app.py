@@ -5,7 +5,6 @@ import requests
 import json
 import os
 import random
-import hashlib
 from datetime import datetime
 
 LOGO_URL = "https://raw.githubusercontent.com/Montoya100/Mostacho-Botanas-Web/main/logo.png"
@@ -512,7 +511,7 @@ st.markdown(f"""
     }}
 
     .whatsapp-btn-active {{
-        background: linear-gradient(135deg, #25D366 0%, #1EBE5D 100%) !important;
+        background: linear-gradient(135deg, {25D366} 0%, #1EBE5D 100%) !important;
         color: #ffffff !important;
         padding: 14px;
         border-radius: 14px;
@@ -926,9 +925,8 @@ elif st.session_state.nav_view == "carrito":
                         st.rerun()
                         
         st.write("---")
-        st.markdown(f"### :material/payments: Total a Pagar: **${total_price:.2f} MXN**")
 
-        # --- PRODUCTO GANCHO / SUGERENCIA DESDE EL PANEL ---
+        # --- PRODUCTO GANCHO / SUGERENCIA DESDE EL PANEL (CORREGIDO Y VISIBLE) ---
         sugg_id = st.session_state.cart_suggestion.get("id")
         if sugg_id:
             sugg_prod = next((p for p in st.session_state.products if str(p.get("id")) == str(sugg_id)), None)
@@ -947,7 +945,7 @@ elif st.session_state.nav_view == "carrito":
         st.session_state.saved_customer_name = customer_name
         st.session_state.saved_customer_address = customer_address
 
-        # --- TRIVIA PRE-WHATSAPP CON IDENTIFICADOR DE FECHA (MOSTACHO-OK-DDMM) ---
+        # --- TRIVIA PRE-WHATSAPP ---
         st.markdown("---")
         st.subheader("🧠 ¡Juega y gana una botana sorpresa antes de enviar!")
 
@@ -991,23 +989,23 @@ elif st.session_state.nav_view == "carrito":
         now = datetime.now()
         order_date = now.strftime("%d/%m/%Y %H:%M")
         
-        # Identificador personalizado: MOSTACHO-OK- + MES y DÍA (Ej. MOSTACHO-OK-1115 para 15 de Noviembre)
-        date_tag = now.strftime("%m%d") # Mes y día en números (ej. 1115) o usa now.strftime("%b%d").upper() si prefieres letras (ej. NOV15)
-        rand_suffix = hashlib.md5(f"{customer_name}_{order_date}".encode()).hexdigest()[:4].upper()
-        verification_code = f"MOSTACHO-OK-{date_tag}-{rand_suffix}"
+        # Código de verificación limpio solo con mes y día (Ej. MOSTACHO-OK-1115)
+        date_tag = now.strftime("%m%d")
+        verification_code = f"MOSTACHO-OK-{date_tag}"
 
-        msg_header = f"NUEVO PEDIDO\nFecha: {order_date}\n\n"
-        msg_items = "DETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
-        msg_total = f"TOTAL: ${total_price:.2f} MXN\n\n"
-        
-        # Incluye el identificador claro con la fecha de hoy
-        msg_trivia = f"🎁 [PREMIO GANADO: Botana Sorpresa]\n🏷️ [{verification_code}]\n\n" if st.session_state.trivia_won else ""
-        
+        # --- ESTRUCTURA EXACTA DEL MENSAJE DE WHATSAPP ---
+        msg_header = f"NUEVO PEDIDO\n"
+        msg_date = f"Fecha: {order_date}\n"
         msg_customer = f"CLIENTE: {customer_name}\n"
-        msg_address = f"DIRECCION: {customer_address}\n"
+        msg_address = f"DIRECCIÓN: {customer_address}\n"
         msg_notes = f"NOTAS: {customer_notes}\n" if customer_notes else ""
         
-        full_message = msg_header + msg_items + msg_total + msg_trivia + msg_customer + msg_address + msg_notes
+        msg_items_header = "\nDETALLE DE PRODUCTOS:\n" + "\n".join(order_summary) + "\n\n"
+        msg_total = f"TOTAL: *${total_price:.2f} MXN*\n"
+        
+        msg_trivia = f"\n🎁 PREMIO GANADO: Botana Sorpresa\n🏷️ {verification_code}" if st.session_state.trivia_won else ""
+
+        full_message = msg_header + msg_date + msg_customer + msg_address + msg_notes + msg_items_header + msg_total + msg_trivia
         encoded_message = urllib.parse.quote(full_message)
         whatsapp_url = f"https://wa.me/{WHATSAPP_PHONE}?text={encoded_message}"
         
